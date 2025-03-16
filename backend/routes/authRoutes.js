@@ -8,6 +8,7 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
     const { username, email, password, userType } = req.body;
 
+    // Validate input fields
     if (!username || !email || !password || !userType) {
         return res.status(400).json({ message: "All fields are required" });
     }
@@ -17,7 +18,7 @@ router.post("/register", async (req, res) => {
     }
 
     try {
-        // Check if email already exists
+        // Check if email already exists in the corresponding table based on userType
         const checkQuery =
             userType === "student"
                 ? `SELECT * FROM Student WHERE email = ?`
@@ -36,19 +37,27 @@ router.post("/register", async (req, res) => {
             // Hash the password
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Choose the table based on userType
+            // Insert the user into the correct table based on userType
             const insertQuery =
                 userType === "student"
                     ? `INSERT INTO Student (username, email, password) VALUES (?, ?, ?)`
                     : `INSERT INTO Professor (username, email, password) VALUES (?, ?, ?)`;
 
-            // Insert the user
             db.query(insertQuery, [username, email, hashedPassword], (err, result) => {
                 if (err) {
                     console.error("Error inserting user:", err);
                     return res.status(500).json({ message: "Error registering user", error: err });
                 }
-                return res.status(201).json({ message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} registered successfully!` });
+
+                // Create a unique user_id that is either a student_id or professor_id
+                const userId = `${userType}_${result.insertId}`;  // Prefix user_id with the userType and insertId
+
+                // Respond with success and include the user_id (student or professor)
+                return res.status(201).json({
+                    message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} registered successfully!`,
+                    user_id: userId,  // Return the user_id
+                    userType,  // Return the userType (either 'student' or 'professor')
+                });
             });
         });
     } catch (err) {
@@ -59,11 +68,13 @@ router.post("/register", async (req, res) => {
 
 
 
+
+// Login Route (Student or Professor)
 // Login Route (Student or Professor)
 router.post("/login", async (req, res) => {
     const { email, password, userType } = req.body;
 
-    // Validate input
+    // Validate input fields
     if (!email || !password || !userType) {
         return res.status(400).json({ message: "All fields are required" });
     }
@@ -73,11 +84,12 @@ router.post("/login", async (req, res) => {
     }
 
     try {
-        // Determine the table based on userType
+        // Dynamically choose the table based on userType (either Student or Professor)
         const table = userType === "student" ? "Student" : "Professor";
-        const query = `SELECT * FROM ${table} WHERE email = ?`;
+        const idField = userType === "student" ? "student_id" : "professor_id";  // Field to identify user in the table
 
-        // Query the database for user
+        // Query the respective table for the user by email
+        const query = `SELECT * FROM ${table} WHERE email = ?`;
         db.query(query, [email], async (err, results) => {
             if (err) {
                 console.error("Database error:", err);
@@ -96,19 +108,30 @@ router.post("/login", async (req, res) => {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
 
-            // Generate JWT Token
+            // Generate JWT token with the respective primary key (student_id or professor_id)
             const token = jwt.sign(
-                { userId: user.id, userType },
+                { id: user.student_id || user.professor_id, userType },
                 process.env.JWT_SECRET,
                 { expiresIn: "1h" }
             );
 
-            return res.status(200).json({ message: "Login successful", token });
+            // Return response with the token, both student_id and professor_id (depending on the userType)
+            const response = {
+                message: "Login successful",
+                token,
+                student_id: user.student_id || null, // Return student_id if user is a student
+                professor_id: user.professor_id || null, // Return professor_id if user is a professor
+                userType,
+            };
+
+            return res.status(200).json(response);
         });
     } catch (error) {
         console.error("Login error:", error);
         return res.status(500).json({ message: "Server error during login" });
     }
 });
+
+
 
 module.exports = router;

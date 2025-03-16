@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import './Register.css';
 
 const Register = () => {
-  const [username, setUsername] = useState(""); // For the username input field
-  const [email, setEmail] = useState(""); // For the email input field
-  const [password, setPassword] = useState(""); // For the password input field
-  const [userType, setUserType] = useState("student"); // Default user type is 'student'
-  
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("student"); // Default to 'student'
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -23,29 +22,32 @@ const Register = () => {
           username,
           email,
           password,
-          userType, // Sending the user type (student or professor) to the backend
+          userType,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert(`${userType.charAt(0).toUpperCase() + userType.slice(1)} registered successfully!`);
+        // Store the user_id (student_123 or professor_123) in localStorage
+        localStorage.setItem("user_id", data.user_id); // Store the combined user ID (student_123 or professor_123)
 
-        // After successful registration, redirect to login page or home page.
-        navigate("/login"); // Or you could navigate to the homepage directly.
+        // Optionally, log the user_id for debugging
+        console.log("Registered User ID:", data.user_id);
+
+        // Redirect to login or home page
+        navigate("/login");
       } else {
-        alert(data.message); // Show the error message returned from the backend
+        alert(data.message); // Show error message
       }
     } catch (error) {
       console.error("Error registering:", error);
-      alert("There was an error during registration. Please try again.");
     }
   };
 
   return (
     <div>
-      <h2>Register as a {userType.charAt(0).toUpperCase() + userType.slice(1)}</h2>
+      <h2>Register</h2>
       <form onSubmit={handleRegister}>
         <div>
           <label>Username: </label>

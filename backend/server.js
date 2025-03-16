@@ -12,7 +12,7 @@ app.use(cors());
 
 // Use the routes
 app.use("/api/auth", authRoutes); // Authentication routes (register, login)
-app.use("/api/users", userRoutes); // User routes (profile, etc.)
+app.use("/api/user", userRoutes); // User routes (profile, etc.)
 
 // Set up the server
 const PORT = process.env.PORT || 5000;

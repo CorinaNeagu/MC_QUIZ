@@ -1,26 +1,40 @@
 const express = require("express");
 const db = require("../db");
-const authenticateJWT = require("../middleware/authMiddleware"); // Import the authentication middleware
+const authenticateJWT = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Protected Route - Get User Profile
-router.get("/profile", authenticateJWT, (req, res) => {
-    const { userId, userType } = req.user;
+// User Profile route
+router.get('/profile', authenticateJWT, (req, res) => {
+    const { id, userType } = req.user;  // Extract from JWT payload
 
-    const query =
-        userType === "student"
-            ? `SELECT * FROM Student WHERE student_id = ?`
-            : `SELECT * FROM Professor WHERE professor_id = ?`;
+    console.log('Fetching profile for id:', id);
 
-    db.query(query, [userId], (err, result) => {
-        if (err || result.length === 0) {
-            return res.status(404).json({ message: "User not found" });
+    // Dynamically choose the table based on userType
+    const table = userType === "student" ? "Student" : "Professor";
+    const userKey = userType === "student" ? "student_id" : "professor_id";
+
+    // Query the respective table for the user by the ID (either student_id or professor_id)
+    const query = `SELECT username, email, created_at FROM ${table} WHERE ${userKey} = ?`;
+    db.query(query, [id], (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: err.message });
         }
 
-        return res.status(200).json(result[0]);
+        if (result.length === 0) {
+            console.log(`${userType} not found for ${userKey}:`, id);
+            return res.status(404).json({ error: `${userType.charAt(0).toUpperCase() + userType.slice(1)} not found` });
+        }
+
+        // Send the user data to frontend
+        res.json({
+            username: result[0].username,
+            email: result[0].email,
+            created_at: result[0].created_at, // Send the created_at field
+            userType, // Include userType in the response
+        });
     });
 });
-
-// Other routes can go here, such as updating user information, etc.
 
 module.exports = router;

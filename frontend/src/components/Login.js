@@ -10,7 +10,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -23,13 +23,19 @@ const Login = () => {
           userType,
         }),
       });
-
+  
       const data = await response.json();
-
+      console.log("Login response:", data); // Log the response to inspect it
+  
       if (response.ok) {
-        // Store the JWT token in localStorage
-        localStorage.setItem("token", data.token);
-
+        // Store the token and user_id in localStorage
+        localStorage.setItem("token", data.token); // Store the JWT token
+        localStorage.setItem("user_id", data.userType === "student" ? data.student_id : data.professor_id); // Store the correct user_id
+  
+        // Log the user type and user id
+        console.log("Authenticated User Type:", data.userType);
+        console.log("Authenticated User ID:", data.userType === "student" ? data.student_id : data.professor_id);
+  
         // Redirect to the homepage
         navigate("/home");
       } else {
@@ -39,7 +45,7 @@ const Login = () => {
       console.error("Error logging in:", error);
     }
   };
-
+  
   return (
     <div>
       <h2>Login</h2>
