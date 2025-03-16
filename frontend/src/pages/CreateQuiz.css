@@ -1,0 +1,131 @@
+/* Create Quiz Page */
+.create-quiz-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+  
+  form {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+  }
+  
+  input,
+  textarea {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+  }
+  
+  input:focus,
+  textarea:focus {
+    border-color: #007bff;
+  }
+  
+  textarea {
+    resize: vertical;
+    height: 100px;
+  }
+  
+  button {
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  button[type="button"] {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-top: 5px;
+  }
+  
+  button[type="button"]:hover {
+    background-color: #e2e2e2;
+  }
+  
+  .option {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .option input[type="text"] {
+    width: 100%;
+  }
+  
+  .option label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .option button {
+    align-self: flex-start;
+    padding: 5px 10px;
+    background-color: #ff4d4d;
+    color: #fff;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .option button:hover {
+    background-color: #d43f3f;
+  }
+  
+  p {
+    text-align: center;
+    color: #28a745;
+    font-weight: 600;
+    margin-top: 20px;
+  }
+  
+  p.error {
+    color: #dc3545;
+  }
+  

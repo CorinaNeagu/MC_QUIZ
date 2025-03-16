@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./UserProfile.css"; // Import custom CSS for styling
 
 const UserProfile = () => {
   const [userProfile, setUserProfile] = useState({
@@ -44,12 +45,26 @@ const UserProfile = () => {
   const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
 
   return (
-    <div>
-      <h3>User Profile</h3>
-      <p>Username: {userProfile.username}</p>
-      <p>Email: {userProfile.email}</p>
-      <p>Account Created At: {formattedDate}</p>
-      <p>User Type: {userProfile.userType}</p> {/* Display userType */}
+    <div className="user-profile-container">
+      <h2>User Profile</h2>
+      <div className="profile-card">
+        <div className="profile-item">
+          <strong>Username:</strong>
+          <span>{userProfile.username}</span>
+        </div>
+        <div className="profile-item">
+          <strong>Email:</strong>
+          <span>{userProfile.email}</span>
+        </div>
+        <div className="profile-item">
+          <strong>Account Created At:</strong>
+          <span>{formattedDate}</span>
+        </div>
+        <div className="profile-item">
+          <strong>User Type:</strong>
+          <span>{userProfile.userType}</span>
+        </div>
+      </div>
     </div>
   );
 };
