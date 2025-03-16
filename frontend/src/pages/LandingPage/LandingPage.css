@@ -1,0 +1,47 @@
+/* LandingPage.css */
+body {
+    background-image: url('/public/assets/background.jpg'); /* Use path relative to public folder */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .landing-page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    text-align: center;
+  }
+  
+  .landing-page-buttons {
+    margin-top: 30px; 
+  }
+  
+  /* Default button style */
+  .landing-page-buttons button {
+    background-color: #007bff; 
+    color: white;
+    font-size: 20px; 
+    padding: 16px 32px; 
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 15px; 
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .landing-page-buttons button:hover {
+    background-color: #ade2e6; 
+    transform: scale(1.1); 
+  }
+  
+  .landing-page-buttons button:focus {
+    outline: none; 
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.6); 
+  }
+  

@@ -1,0 +1,57 @@
+/* HomePage.css */
+.homepage-container {
+    text-align: center;
+    padding: 50px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .homepage-container h1 {
+    font-size: 3rem;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  .homepage-container button {
+    margin: 10px;
+    padding: 15px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff; 
+    color: white;
+  }
+  
+  .homepage-container button:hover {
+    background-color: #007bff;
+  }
+  
+  .homepage-container button:focus {
+    outline: none;
+  }
+  
+  .homepage-container button:active {
+    transform: scale(0.98);
+  }
+  
+  .student-content, .professor-content {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+  }
+  
+  .student-content h2, .professor-content h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+  
+  .student-content p, .professor-content p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
