@@ -6,6 +6,7 @@ import Login from "./components/Login";
 import HomePage from './pages/HomePage/HomePage';
 import UserProfile from "./pages/UserProfile/UserProfile";
 import CreateQuiz from "./pages/CreateQuiz";
+import CreateQuestion from "./pages/CreateQuestion";
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<UserProfile />} />  
         <Route path="/create-quiz" element={<CreateQuiz />} /> {/* Route for Create Quiz */} 
+        <Route path="/create-question/:quizId" element={<CreateQuestion />} />
+
       </Routes>
     </Router>
   );

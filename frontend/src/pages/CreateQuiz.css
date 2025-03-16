@@ -1,131 +1,154 @@
-/* Create Quiz Page */
 .create-quiz-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
-    padding: 40px 20px;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
     min-height: 100vh;
-    background-color: #f9f9f9;
   }
   
   h2 {
     font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 20px;
+    font-weight: bold;
     color: #333;
+    margin-bottom: 20px;
     text-align: center;
   }
   
-  form {
+  .create-quiz-form {
     background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 25px;
     width: 100%;
     max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
   }
   
+  /* Form Group */
   .form-group {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
   }
   
-  label {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #444;
-  }
-  
-  input,
-  textarea {
-    padding: 10px;
+  .form-group label {
     font-size: 1rem;
-    border: 1px solid #ccc;
+    color: #444;
+    flex: 1;
+    margin-right: 20px; /* Space between label and input */
+    text-align: left;
+  }
+  
+  input, select {
+    width: 65%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 2px solid #ccc;
     border-radius: 8px;
+    transition: 0.3s ease-in-out;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+  
+  input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
     outline: none;
   }
   
-  input:focus,
-  textarea:focus {
-    border-color: #007bff;
+  .toggle-group {
+    display: flex;
+    justify-content: space-between; /* Puts label on one side, checkbox on the other */
+    align-items: center;
+    margin-top: 15px;
   }
   
-  textarea {
-    resize: vertical;
-    height: 100px;
-  }
-  
-  button {
-    padding: 12px;
-    background-color: #007bff;
-    color: #fff;
+  .toggle-label {
     font-size: 1rem;
+    color: #444;
+    order: 1; /* Keeps label on the left */
+  }
+  
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 24px;
+    order: 2; /* Moves checkbox to the right */
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: #007bff;
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+  
+  
+  /* Submit Button */
+  .submit-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    margin-top: 25px;
+    transition: background 0.3s ease-in-out;
   }
   
-  button:hover {
+  .submit-button:hover {
     background-color: #0056b3;
   }
   
-  button[type="button"] {
-    background-color: #f0f0f0;
-    color: #333;
-    margin-top: 5px;
-  }
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    .create-quiz-container {
+      padding: 20px;
+    }
   
-  button[type="button"]:hover {
-    background-color: #e2e2e2;
-  }
+    .create-quiz-form {
+      padding: 20px;
+      max-width: 100%;
+    }
   
-  .option {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .option input[type="text"] {
-    width: 100%;
-  }
-  
-  .option label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.9rem;
-    color: #555;
-  }
-  
-  .option button {
-    align-self: flex-start;
-    padding: 5px 10px;
-    background-color: #ff4d4d;
-    color: #fff;
-    font-size: 0.9rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .option button:hover {
-    background-color: #d43f3f;
-  }
-  
-  p {
-    text-align: center;
-    color: #28a745;
-    font-weight: 600;
-    margin-top: 20px;
-  }
-  
-  p.error {
-    color: #dc3545;
+    input, select {
+      width: 100%;
+    }
   }
   

@@ -1,0 +1,118 @@
+.create-quiz-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  
+  .create-quiz-form {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 600px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+  }
+  
+  label {
+    font-size: 1rem;
+    color: #444;
+    margin-bottom: 8px;
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+  
+  input:focus, textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+  }
+  
+  button {
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  .multiple-choice-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .multiple-choice-label input[type="checkbox"] {
+    margin-left: 8px;
+    width: 20px;
+    height: 20px;
+    accent-color: #007bff; /* Modern way to change the checkbox color */
+  }
+  
+  .answer-container {
+    margin-bottom: 15px;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+    accent-color: #007bff; /* Apply color to checkboxes */
+  }
+  
+  .warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  .submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .submit-button:hover {
+    background-color: #0056b3;
+  }
+  

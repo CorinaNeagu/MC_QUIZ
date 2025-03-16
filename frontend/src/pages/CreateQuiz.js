@@ -1,133 +1,105 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreateQuiz.css"; // Add CSS for styling
+import axios from "axios";
+import "./CreateQuiz.css";
 
 const CreateQuiz = () => {
-  const [quizTitle, setQuizTitle] = useState("");
-  const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState([{ text: "", correct: false }]);
-  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [timeLimit, setTimeLimit] = useState("");
+  const [deductionPercentage, setDeductionPercentage] = useState("");
+  const [retakeAllowed, setRetakeAllowed] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [noQuestions, setNoQuestions] = useState("");
 
-  // Handle changes in form fields
-  const handleQuizTitleChange = (e) => setQuizTitle(e.target.value);
-  const handleQuestionChange = (e) => setQuestion(e.target.value);
-
-  const handleOptionChange = (index, e) => {
-    const newOptions = [...options];
-    newOptions[index].text = e.target.value;
-    setOptions(newOptions);
-  };
-
-  const handleCorrectChange = (index) => {
-    const newOptions = [...options];
-    newOptions[index].correct = !newOptions[index].correct;
-    setOptions(newOptions);
-  };
-
-  const addOption = () => {
-    setOptions([...options, { text: "", correct: false }]);
-  };
-
-  const removeOption = (index) => {
-    const newOptions = options.filter((_, i) => i !== index);
-    setOptions(newOptions);
-  };
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
 
-    if (!quizTitle || !question || options.some((option) => !option.text)) {
-      setMessage("Please fill out all fields.");
+    if (!token) {
+      alert("Please log in first.");
       return;
     }
 
-    const quizData = {
-      quizTitle,
-      question,
-      options,
+    const formData = {
+      title,
+      category,
+      timeLimit: parseInt(timeLimit),
+      deductionPercentage: parseFloat(deductionPercentage),
+      retakeAllowed: retakeAllowed ? 1 : 0,
+      isActive: isActive ? 1 : 0,
+      noQuestions: parseInt(noQuestions),
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/quizzes", {
-        method: "POST",
+      const response = await axios.post("http://localhost:5000/api/quizzes", formData, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify(quizData),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Quiz created successfully!");
-        navigate("/manage-quizzes"); // Redirect to quiz management page
-      } else {
-        setMessage(data.message || "Error creating quiz");
+      if (response.status === 200) {
+        alert("Quiz created successfully!");
+        const quizId = response.data.quizId;
+        navigate(`/create-question/${quizId}`);
       }
-    } catch (error) {
-      console.error("Error creating quiz:", error);
-      setMessage("An error occurred while creating the quiz.");
+    } catch (err) {
+      console.error("Error creating quiz:", err);
+      alert("There was an error creating the quiz.");
     }
   };
 
   return (
     <div className="create-quiz-container">
       <h2>Create a New Quiz</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="create-quiz-form">
+        
         <div className="form-group">
-          <label>Quiz Title</label>
-          <input
-            type="text"
-            value={quizTitle}
-            onChange={handleQuizTitleChange}
-            required
-          />
+          <label htmlFor="title">Quiz Title</label>
+          <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
         </div>
 
         <div className="form-group">
-          <label>Question</label>
-          <textarea
-            value={question}
-            onChange={handleQuestionChange}
-            required
-          />
+          <label htmlFor="category">Category</label>
+          <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required>
+            <option value="">Select a Category</option>
+            <option value="Cybernetics">Cybernetics</option>
+            <option value="Statistics">Statistics</option>
+            <option value="Informatics">Informatics</option>
+          </select>
         </div>
 
         <div className="form-group">
-          <label>Options</label>
-          {options.map((option, index) => (
-            <div key={index} className="option">
-              <input
-                type="text"
-                value={option.text}
-                onChange={(e) => handleOptionChange(index, e)}
-                required
-              />
-              <label>
-                <input
-                  type="checkbox"
-                  checked={option.correct}
-                  onChange={() => handleCorrectChange(index)}
-                />
-                Correct Answer
-              </label>
-              <button type="button" onClick={() => removeOption(index)}>
-                Remove Option
-              </button>
-            </div>
-          ))}
-          <button type="button" onClick={addOption}>
-            Add Option
-          </button>
+          <label htmlFor="timeLimit">Time Limit (minutes)</label>
+          <input type="number" id="timeLimit" value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} required />
         </div>
 
-        <button type="submit">Create Quiz</button>
+        <div className="form-group">
+          <label htmlFor="deductionPercentage">Deduction Percentage</label>
+          <input type="number" step="0.01" id="deductionPercentage" value={deductionPercentage} onChange={(e) => setDeductionPercentage(e.target.value)} required />
+        </div>
+
+        {/* Checkbox for Allow Retakes */}
+        <div className="form-group checkbox-container">
+          <label htmlFor="retakeAllowed">Allow Retakes</label>
+          <input type="checkbox" id="retakeAllowed" checked={retakeAllowed} onChange={() => setRetakeAllowed(!retakeAllowed)} />
+        </div>
+
+        {/* Checkbox for Activate Quiz */}
+        <div className="form-group checkbox-container">
+          <label htmlFor="isActive">Activate Quiz</label>
+          <input type="checkbox" id="isActive" checked={isActive} onChange={() => setIsActive(!isActive)} />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="noQuestions">Number of Questions</label>
+          <input type="number" id="noQuestions" value={noQuestions} onChange={(e) => setNoQuestions(e.target.value)} required />
+        </div>
+
+        <button type="submit" className="submit-button">Next</button>
       </form>
-
-      {message && <p>{message}</p>}
     </div>
   );
 };
