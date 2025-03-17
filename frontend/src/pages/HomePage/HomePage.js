@@ -4,9 +4,9 @@ import { jwtDecode } from "jwt-decode";import "./HomePage.css";
 import DropdownMenu from "../../components/DropdownMenu";
 
 const HomePage = () => {
-  const [userType, setUserType] = useState(null); // State to store user type
-  const navigate = useNavigate(); // Navigate for redirection
-  const [loading, setLoading] = useState(true); // Loading state to show a loader while processing
+  const [userType, setUserType] = useState(null); 
+  const navigate = useNavigate(); 
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -37,7 +37,7 @@ const HomePage = () => {
   }, [navigate]); // Dependency array includes navigate to ensure re-run on navigation
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading indicator while processing token
+    return <div>Loading...</div>; 
   }
 
   return (
@@ -58,10 +58,10 @@ const HomePage = () => {
           <p>Welcome, professor! Here you can manage quizzes, view your students' progress, and update your profile.</p>
           <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
           <button onClick={() => navigate("/profile")}>Go to Profile</button>
-          <button onClick={() => navigate("/create-quiz")}>Create Quiz</button> {/* New Button */}
+          <button onClick={() => navigate("/create-quiz")}>Create Quiz</button> 
         </div>
       ) : (
-        <div>Loading...</div> // Fallback if userType is not yet determined
+        <div>Loading...</div> 
       )}
     </div>
   );

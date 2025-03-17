@@ -6,7 +6,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("student"); // Default to 'student'
+  const [userType, setUserType] = useState("student"); 
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -32,7 +32,6 @@ const Register = () => {
         // Store the user_id (student_123 or professor_123) in localStorage
         localStorage.setItem("user_id", data.user_id); // Store the combined user ID (student_123 or professor_123)
 
-        // Optionally, log the user_id for debugging
         console.log("Registered User ID:", data.user_id);
 
         // Redirect to login or home page

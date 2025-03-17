@@ -36,7 +36,7 @@
     font-size: 1rem;
     color: #444;
     flex: 1;
-    margin-right: 20px; /* Space between label and input */
+    margin-right: 20px; 
     text-align: left;
   }
   
@@ -59,7 +59,7 @@
   
   .toggle-group {
     display: flex;
-    justify-content: space-between; /* Puts label on one side, checkbox on the other */
+    justify-content: space-between;
     align-items: center;
     margin-top: 15px;
   }
@@ -67,7 +67,7 @@
   .toggle-label {
     font-size: 1rem;
     color: #444;
-    order: 1; /* Keeps label on the left */
+    order: 1; 
   }
   
   .toggle-switch {
@@ -75,7 +75,7 @@
     display: inline-block;
     width: 45px;
     height: 24px;
-    order: 2; /* Moves checkbox to the right */
+    order: 2; 
   }
   
   .toggle-switch input {
@@ -117,7 +117,6 @@
   }
   
   
-  /* Submit Button */
   .submit-button {
     width: 100%;
     padding: 14px;

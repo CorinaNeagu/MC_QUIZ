@@ -5,7 +5,7 @@ import './Login.css';
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("student"); // Default to 'student'
+  const [userType, setUserType] = useState("student"); 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -25,12 +25,12 @@ const Login = () => {
       });
   
       const data = await response.json();
-      console.log("Login response:", data); // Log the response to inspect it
+      console.log("Login response:", data); 
   
       if (response.ok) {
         // Store the token and user_id in localStorage
         localStorage.setItem("token", data.token); // Store the JWT token
-        localStorage.setItem("user_id", data.userType === "student" ? data.student_id : data.professor_id); // Store the correct user_id
+        localStorage.setItem("user_id", data.userType === "student" ? data.student_id : data.professor_id); // Store the user_id
   
         // Log the user type and user id
         console.log("Authenticated User Type:", data.userType);
@@ -39,7 +39,7 @@ const Login = () => {
         // Redirect to the homepage
         navigate("/home");
       } else {
-        alert(data.message); // Show error message
+        alert(data.message); 
       }
     } catch (error) {
       console.error("Error logging in:", error);
