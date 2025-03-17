@@ -45,14 +45,14 @@ const CreateQuestion = () => {
   };
 
   const handleMultipleChoiceChange = () => {
-    setIsMultipleChoice(!isMultipleChoice);
-    if (!isMultipleChoice) {
-      // Reset multiple correct answers when switching to single choice
-      setAnswers((prevAnswers) =>
-        prevAnswers.map((answer, i) => ({ ...answer, isCorrect: i === 0 }))
-      );
-    }
+    setIsMultipleChoice((prev) => !prev);
+  
+    // Clear all correct answer checkboxes when switching modes
+    setAnswers((prevAnswers) =>
+      prevAnswers.map((answer) => ({ ...answer, isCorrect: false }))
+    );
   };
+  
 
   return (
     <div className="create-quiz-container">
