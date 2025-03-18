@@ -8,7 +8,7 @@ const CreateQuestion = () => {
   const location = useLocation();
 
   // Fetch noQuestions from the location state passed via navigate in CreateQuiz.js
-  const noQuestions = location?.state?.noQuestions ; 
+  const noQuestions = location?.state?.noQuestions;
 
   const [question, setQuestion] = useState(""); // State for the question content
   const [isMultipleChoice, setIsMultipleChoice] = useState(false); // Whether the question is multiple choice
@@ -16,6 +16,7 @@ const CreateQuestion = () => {
   const [questionsAdded, setQuestionsAdded] = useState(0); // Track how many questions are added
   const [questionList, setQuestionList] = useState([]); // List of added questions to display below the form
 
+  // Handle the form submission
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,10 +54,12 @@ const CreateQuestion = () => {
     setAnswers([{ answerContent: "", isCorrect: false }]); // Reset answers
   };
 
+  // Add a new answer input field
   const handleAddAnswer = () => {
     setAnswers([...answers, { answerContent: "", isCorrect: false }]);
   };
 
+  // Handle input change for answers
   const handleAnswerChange = (index, e) => {
     const { name, value } = e.target;
     setAnswers((prevAnswers) =>
@@ -64,6 +67,7 @@ const CreateQuestion = () => {
     );
   };
 
+  // Handle correct answer change
   const handleCorrectAnswerChange = (index) => {
     setAnswers((prevAnswers) =>
       prevAnswers.map((answer, i) =>
@@ -76,6 +80,7 @@ const CreateQuestion = () => {
     );
   };
 
+  // Toggle multiple choice
   const handleMultipleChoiceChange = () => {
     setIsMultipleChoice((prev) => !prev);
     setAnswers((prevAnswers) =>
@@ -83,6 +88,7 @@ const CreateQuestion = () => {
     );
   };
 
+  // Add a new question
   const handleAddNewQuestion = () => {
     if (questionsAdded < noQuestions) {
       // Prevent adding blank questions or answers
@@ -109,7 +115,8 @@ const CreateQuestion = () => {
     }
   };
 
-  const handlePreviewQuiz = async () => {
+  // Submit the quiz
+  const handleSubmitQuiz = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -129,13 +136,13 @@ const CreateQuestion = () => {
       });
 
       if (response.status === 200) {
-        alert("Questions saved successfully!");
-        // Navigate to quiz preview page or the next page
+        alert("Quiz submitted successfully!");
+        // Navigate to the next page after submission (could be a success page or quiz preview page)
         navigate("/quiz-preview");
       }
     } catch (err) {
-      console.error("Error saving questions:", err);
-      alert("There was an error saving the questions.");
+      console.error("Error submitting quiz:", err);
+      alert("There was an error submitting the quiz.");
     }
   };
 
@@ -196,7 +203,6 @@ const CreateQuestion = () => {
             Add Another Answer
           </button>
 
-          {/* Moved to the bottom of the form */}
           <button
             type="button"
             onClick={handleAddNewQuestion}
@@ -212,17 +218,17 @@ const CreateQuestion = () => {
             </div>
           )}
 
+          {/* Change the button from Preview Quiz to Submit Quiz */}
           <button
             type="button"
-            onClick={handlePreviewQuiz}
-            className="preview-quiz-button"
+            onClick={handleSubmitQuiz}
+            className="submit-quiz-button"
           >
-            Preview Quiz
+            Submit Quiz
           </button>
         </form>
       </div>
 
-      {/* Show added questions immediately after Add New Question is pressed */}
       <div className="added-questions">
         <h3>Questions Added:</h3>
         {questionList.map((questionData, index) => (
