@@ -1,136 +1,175 @@
+/* Make sure the root elements take full height of the viewport */
+html, body {
+  height: 100%; /* Ensures the body and html take the full viewport height */
+  margin: 0; /* Removes default margin */
+  padding: 0; /* Removes default padding */
+  overflow: hidden; /* Prevent body from scrolling, will scroll on inner content */
+}
+
+/* Main wrapper for the entire app or page */
 .create-quiz-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 20px;
-    min-height: 100vh;
-    box-sizing: border-box;
-  }
-  
-  .create-quiz-form-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    max-width: 600px;
-    margin-top: 20px;
-    overflow-y: auto; 
-    max-height: 80vh; 
-  }
-  
-  h2 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .create-quiz-form {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 100%;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-  }
-  
-  label {
-    font-size: 1rem;
-    color: #444;
-    margin-bottom: 8px;
-  }
-  
-  input, textarea {
-    width: 100%;
-    padding: 12px;
-    font-size: 1rem;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    transition: all 0.3s ease-in-out;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-  }
-  
-  input:focus, textarea:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    outline: none;
-  }
-  
-  button {
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  .multiple-choice-label {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .multiple-choice-label input[type="checkbox"] {
-    margin-left: 8px;
-    width: 20px;
-    height: 20px;
-    accent-color: #007bff; /* Modern way to change the checkbox color */
-  }
-  
-  .answer-container {
-    margin-bottom: 15px;
-  }
-  
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    margin-top: 8px;
-  }
-  
-  .checkbox-label input[type="checkbox"] {
-    margin-right: 8px;
-    width: 20px;
-    height: 20px;
-    accent-color: #007bff; /* Apply color to checkboxes */
-  }
-  
-  .warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 8px;
-    font-size: 1rem;
-  }
-  
-  .submit-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 20px;
-  }
-  
-  .submit-button:hover {
-    background-color: #0056b3;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full height of the viewport */
+  overflow: hidden; /* Hide overflow initially */
+}
+
+/* Wrapper for form to allow scrolling within the form section */
+.create-quiz-form-wrapper {
+  flex: 1; /* Takes the remaining space in the container */
+  overflow-y: auto; /* Allows scrolling inside the form when content overflows */
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  max-height: calc(100vh - 120px); /* Ensure the form area doesn't overflow the viewport */
+}
+
+/* Form styling */
+.create-quiz-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Label styling */
+.create-quiz-form label {
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+/* Textarea styling for the question content */
+.create-quiz-form textarea {
+  padding: 10px;
+  font-size: 1em;
+  resize: vertical; /* Allow vertical resizing */
+  min-height: 100px; /* Set a minimum height */
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+/* Answer input styling */
+.answer-container input {
+  padding: 8px;
+  font-size: 1em;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+/* Button styling */
+button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.add-new-question-button {
+  background-color: #2196F3; /* Blue */
+}
+
+.preview-quiz-button {
+  background-color: #FF9800; /* Orange */
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Checkbox label next to input fields */
+.checkbox-label {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.9em;
+}
+
+/* Message when the maximum number of questions is reached */
+.limit-reached-message {
+  color: red;
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* Styling for added questions */
+.added-questions {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #e1e1e1;
+  border-radius: 8px;
+  max-height: calc(100vh - 150px); /* Adjust height to fit within viewport */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+/* Add question styles */
+.added-questions h3 {
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+.added-question {
+  margin-bottom: 20px;
+}
+
+.added-question h4 {
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+.added-question ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.added-question li {
+  margin-bottom: 5px;
+}
+
+.added-question span {
+  font-weight: bold;
+  color: green;
+}
+
+/* Checkbox for multiple choice */
+.multiple-choice-label {
+  margin-top: 20px;
+}
+
+.multiple-choice-label input {
+  margin-right: 10px;
+}
+
+/* Root container adjustments to allow smooth scrolling */
+.create-quiz-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* Hide overflow here to manage it within inner containers */
+}
+
+/* Allow the page to scroll while keeping content fixed within the form */
+.create-quiz-form-wrapper {
+  flex-grow: 1; /* Take all the remaining space */
+  overflow-y: auto; /* Enable scrolling when necessary */
+  padding: 20px;
+}
+
+/* General container for the root of the page */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent the body from scrolling, we manage scroll on individual sections */
+}

@@ -1,24 +1,56 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 import "./CreateQuestion.css";
 
 const CreateQuestion = () => {
-  const [question, setQuestion] = useState("");
-  const [isMultipleChoice, setIsMultipleChoice] = useState(false);
-  const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }]);
-  const [warning, setWarning] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleQuestionSubmit = (e) => {
+  // Fetch noQuestions from the location state passed via navigate in CreateQuiz.js
+  const noQuestions = location?.state?.noQuestions ; 
+
+  const [question, setQuestion] = useState(""); // State for the question content
+  const [isMultipleChoice, setIsMultipleChoice] = useState(false); // Whether the question is multiple choice
+  const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }]); // Array of answers
+  const [questionsAdded, setQuestionsAdded] = useState(0); // Track how many questions are added
+  const [questionList, setQuestionList] = useState([]); // List of added questions to display below the form
+
+  const handleQuestionSubmit = async (e) => {
     e.preventDefault();
 
     const correctAnswersCount = answers.filter((answer) => answer.isCorrect).length;
 
-    if (!isMultipleChoice && correctAnswersCount !== 1) {
-      setWarning("You must select exactly one correct answer.");
+    // Prevent submitting if no question or answers are provided
+    if (!question || answers.some((answer) => !answer.answerContent)) {
+      alert("Please enter a valid question and answers.");
       return;
     }
 
-    setWarning("");
-    alert("Question added successfully!");
+    if (!isMultipleChoice && correctAnswersCount !== 1) {
+      alert("You must select exactly one correct answer.");
+      return;
+    }
+
+    if (questionsAdded < noQuestions) {
+      // Add the question and answers to the list
+      setQuestionList([
+        ...questionList,
+        {
+          questionContent: question,
+          answers: answers.map((answer) => answer.answerContent),
+        },
+      ]);
+
+      // Increment the question count
+      setQuestionsAdded(questionsAdded + 1);
+    } else {
+      alert(`You have reached the maximum number of ${noQuestions} questions.`);
+    }
+
+    // Clear the form after submitting
+    setQuestion(""); // Reset question
+    setAnswers([{ answerContent: "", isCorrect: false }]); // Reset answers
   };
 
   const handleAddAnswer = () => {
@@ -39,20 +71,73 @@ const CreateQuestion = () => {
           ? i === index
             ? { ...answer, isCorrect: !answer.isCorrect }
             : answer
-          : { ...answer, isCorrect: i === index } // Only one correct answer allowed
+          : { ...answer, isCorrect: i === index }
       )
     );
   };
 
   const handleMultipleChoiceChange = () => {
     setIsMultipleChoice((prev) => !prev);
-  
-    // Clear all correct answer checkboxes when switching modes
     setAnswers((prevAnswers) =>
       prevAnswers.map((answer) => ({ ...answer, isCorrect: false }))
     );
   };
-  
+
+  const handleAddNewQuestion = () => {
+    if (questionsAdded < noQuestions) {
+      // Prevent adding blank questions or answers
+      if (!question || answers.some((answer) => !answer.answerContent)) {
+        alert("Please enter a valid question and answers.");
+        return;
+      }
+
+      // Add the current question to the list immediately after clicking "Add New Question"
+      setQuestionList([
+        ...questionList,
+        {
+          questionContent: question,
+          answers: answers.map((answer) => answer.answerContent),
+        },
+      ]);
+      setQuestionsAdded(questionsAdded + 1); // Increment the question count
+
+      // Reset form fields for a new question
+      setQuestion(""); // Clear question
+      setAnswers([{ answerContent: "", isCorrect: false }]); // Clear answers
+    } else {
+      alert(`You have reached the maximum number of ${noQuestions} questions.`);
+    }
+  };
+
+  const handlePreviewQuiz = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Please log in first.");
+      return;
+    }
+
+    const formData = {
+      questionList, // Sending the question list to backend
+    };
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/quizzes/questions", formData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        alert("Questions saved successfully!");
+        // Navigate to quiz preview page or the next page
+        navigate("/quiz-preview");
+      }
+    } catch (err) {
+      console.error("Error saving questions:", err);
+      alert("There was an error saving the questions.");
+    }
+  };
 
   return (
     <div className="create-quiz-container">
@@ -103,16 +188,57 @@ const CreateQuestion = () => {
             </div>
           ))}
 
-          <button type="button" onClick={handleAddAnswer}>
+          <button 
+            type="button" 
+            onClick={handleAddAnswer}
+            disabled={questionsAdded >= noQuestions} // Disable button if max questions are added
+          >
             Add Another Answer
           </button>
 
-          {warning && <div className="warning">{warning}</div>}
+          {/* Moved to the bottom of the form */}
+          <button
+            type="button"
+            onClick={handleAddNewQuestion}
+            className="add-new-question-button"
+            disabled={questionsAdded >= noQuestions} // Disable button if max questions are added
+          >
+            Add New Question
+          </button>
 
-          <button type="submit" className="submit-button">
-            Submit Question
+          {questionsAdded >= noQuestions && (
+            <div className="limit-reached-message">
+              You have reached the maximum number of questions ({noQuestions}).
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handlePreviewQuiz}
+            className="preview-quiz-button"
+          >
+            Preview Quiz
           </button>
         </form>
+      </div>
+
+      {/* Show added questions immediately after Add New Question is pressed */}
+      <div className="added-questions">
+        <h3>Questions Added:</h3>
+        {questionList.map((questionData, index) => (
+          <div key={index} className="added-question">
+            <h4>Question {index + 1}:</h4>
+            <p>{questionData.questionContent}</p>
+            <ul>
+              {questionData.answers.map((answer, idx) => (
+                <li key={idx}>
+                  {answer}{" "}
+                  {answers[idx]?.isCorrect && <span style={{ color: 'green' }}>(Correct)</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );

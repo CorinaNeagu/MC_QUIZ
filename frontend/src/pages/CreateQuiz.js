@@ -17,40 +17,65 @@ const CreateQuiz = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
+  
     if (!token) {
       alert("Please log in first.");
       return;
     }
-
+  
+    // Validate input fields on the frontend before sending to backend
+    const validTimeLimit = parseInt(timeLimit, 10);
+    if (isNaN(validTimeLimit) || validTimeLimit <= 0) {
+      alert("Please provide a valid time limit greater than 0.");
+      return;
+    }
+  
+    const validDeductionPercentage = deductionPercentage === "" || isNaN(deductionPercentage)
+                                    ? 0 : parseFloat(deductionPercentage);
+    if (validDeductionPercentage < 0 || validDeductionPercentage > 100) {
+      alert("Deduction percentage must be between 0 and 100.");
+      return;
+    }
+  
+    const validNoQuestions = parseInt(noQuestions, 10);
+    if (isNaN(validNoQuestions) || validNoQuestions <= 0) {
+      alert("Number of questions must be greater than 0.");
+      return;
+    }
+  
     const formData = {
       title,
       category,
-      timeLimit: parseInt(timeLimit),
-      deductionPercentage: parseFloat(deductionPercentage),
+      timeLimit: validTimeLimit,
+      deductionPercentage: validDeductionPercentage,
       retakeAllowed: retakeAllowed ? 1 : 0,
       isActive: isActive ? 1 : 0,
-      noQuestions: parseInt(noQuestions),
+      noQuestions: validNoQuestions,
     };
-
+  
+    console.log("Form Data:", formData);
+  
     try {
       const response = await axios.post("http://localhost:5000/api/quizzes", formData, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },
       });
-
+  
       if (response.status === 200) {
         alert("Quiz created successfully!");
         const quizId = response.data.quizId;
-        navigate(`/create-question/${quizId}`);
-      }
+        navigate(`/create-question/${quizId}`, {
+          state: { noQuestions: validNoQuestions },
+        });      }
     } catch (err) {
       console.error("Error creating quiz:", err);
       alert("There was an error creating the quiz.");
     }
   };
-
+  
+  
+  
   return (
     <div className="create-quiz-container">
       <h2>Create a New Quiz</h2>
@@ -77,9 +102,23 @@ const CreateQuiz = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="deductionPercentage">Deduction Percentage</label>
-          <input type="number" step="0.01" id="deductionPercentage" value={deductionPercentage} onChange={(e) => setDeductionPercentage(e.target.value)} required />
-        </div>
+  <label htmlFor="deductionPercentage">Deduction Percentage</label>
+  <input
+    type="number"
+    step="0.01"
+    id="deductionPercentage"
+    value={deductionPercentage}
+    onChange={(e) => {
+      const value = e.target.value;
+      // Allow 0 or any number
+      if (value === "" || (value >= 0 && value <= 100)) {
+        setDeductionPercentage(value);
+      }
+    }}
+    required
+  />
+</div>
+
 
         {/* Checkbox for Allow Retakes */}
         <div className="form-group checkbox-container">
