@@ -163,7 +163,7 @@ router.post("/answers", async (req, res) => {
           [question_bank_id, 
             answer.answerContent, 
             answer.isCorrect ? 1 : 0, // Convert true/false to 1/0  
-            answer.score ?? 0, 
+            answer.score ? 1 : 0, 
           ],          
           (error, results) => {
             if (error) {

@@ -137,11 +137,17 @@ const CreateQuestion = () => {
         console.error(`Answer ${index + 1} is invalid:`, answer);
       }
     });
+
+    const formattedAnswers = answers.map((answer) => ({
+      answerContent: answer.answerContent,
+      isCorrect: answer.isCorrect,
+      score: answer.isCorrect ? 1 : 0, // Set score correctly
+    }));
   
     try {
       const response = await axios.post("http://localhost:5000/api/answers", {
         question_bank_id,
-        answers,
+        answers: formattedAnswers, // Send formatted answers
       });
       console.log("Answers saved successfully:", response.data);
     } catch (err) {
