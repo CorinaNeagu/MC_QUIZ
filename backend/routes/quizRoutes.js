@@ -128,41 +128,76 @@ router.post("/questions", (req, res) => {
 
         res.status(200).json({
           message: "Question successfully added to QuestionBank!",
-          questionBankId: results.insertId,
-        });
+          question_bank_id: results.insertId, 
+       });
       }
     );
   });
 });
 
-// Route to create answers for a specific question
-router.post('/answers', async (req, res) => {
+router.post("/answers", async (req, res) => {
   const { question_bank_id, answers } = req.body;
 
-  if (!question_bank_id || !Array.isArray(answers)) {
-    return res.status(400).json({ error: 'Invalid input data' });
+  // Log incoming request data
+  console.log("Received data for answers:", req.body);
+
+  if (!question_bank_id || !Array.isArray(answers) || answers.length === 0) {
+    return res.status(400).json({ error: "Invalid request. Question ID and answers are required." });
   }
 
-  try {
-    // Step 2: Save each answer in the AnswerBank table
-    const answerPromises = answers.map((answer) =>
-      db.query(
-        'INSERT INTO AnswerBank (question_bank_id, answer_content, is_correct, score) VALUES (?, ?, ?, ?)',
-        [question_bank_id, answer.answerContent, answer.isCorrect, answer.score]
-      )
-    );
+  // Begin transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error("Transaction error:", err);
+      return res.status(500).json({ error: "Failed to start transaction." });
+    }
 
-    // Wait for all the answers to be inserted
-    await Promise.all(answerPromises);
+    try {
+      // Insert each answer into the AnswerBank table
+      const insertPromises = answers.map((answer) => {
+        return new Promise((resolve, reject) => {
+          db.query(
+            `INSERT INTO AnswerBank (question_bank_id, answer_content, is_correct, score)
+             VALUES (?, ?, ?, ?)`,
+            [question_bank_id, answer.answerContent, answer.isCorrect, answer.score],
+            (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results);
+              }
+            }
+          );
+        });
+      });
 
-    res.status(200).json({ message: 'Answers created successfully' });
-  } catch (error) {
-    console.error('Error creating answers:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+      Promise.all(insertPromises)
+        .then((results) => {
+          // Log inserted answers
+          console.log("Inserted answers:", results);
+
+          // Commit the transaction
+          db.commit((commitError) => {
+            if (commitError) {
+              console.error("Commit error:", commitError);
+              return res.status(500).json({ error: "Error committing transaction." });
+            }
+            res.status(201).json({ message: "Answers saved successfully!" });
+          });
+        })
+        .catch((insertError) => {
+          // Rollback transaction on error
+          db.rollback(() => {
+            console.error("Error inserting answers:", insertError);
+            res.status(500).json({ error: "Database error while saving answers." });
+          });
+        });
+    } catch (error) {
+      console.error("Error processing answers:", error);
+      db.rollback(() => {
+        res.status(500).json({ error: "Database error while processing answers." });
+      });
+    }
+  });
 });
-
-
-
-
 module.exports = router;

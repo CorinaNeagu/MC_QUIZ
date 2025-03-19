@@ -7,6 +7,7 @@ const CreateQuestion = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Extract data from state passed via navigation
   const { professor_id, noQuestions, category } = location?.state;
 
   const [questionContent, setQuestionContent] = useState(""); 
@@ -20,12 +21,13 @@ const CreateQuestion = () => {
 
   useEffect(() => {
     // Log received state for debugging
-    console.log("Received state:", location.state);
+    console.log("Received location.state:", location.state);
 
     // Fetch categories from the backend
     const fetchCategories = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/categories");
+        console.log("Fetched categories:", response.data);
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -34,14 +36,14 @@ const CreateQuestion = () => {
     fetchCategories();
   }, [location.state]);
 
-  // Handle the form submission for each question
+  // Handle form submission for a single question
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
 
-    const correctAnswersCount = answers.filter((answer) => answer.isCorrect).length;
+    console.log("Submitting question:", questionContent);
+    console.log("Current answers:", answers);
 
-    // Log question state to check if it's updated correctly
-    console.log("Question content before submission:", questionContent);
+    const correctAnswersCount = answers.filter((answer) => answer.isCorrect).length;
 
     if (!questionContent || answers.some((answer) => !answer.answerContent)) {
       alert("Please enter a valid question and answers.");
@@ -62,17 +64,26 @@ const CreateQuestion = () => {
         },
       ]);
       setQuestionsAdded(questionsAdded + 1);
+
+      console.log(`Added question ${questionsAdded + 1}:`, {
+        questionContent,
+        answers: answers.map((answer) => ({
+          answerContent: answer.answerContent,
+          isCorrect: answer.isCorrect,
+        })),
+      });
     } else {
       alert(`You have reached the maximum number of ${noQuestions} questions.`);
     }
 
-    //setQuestionContent(""); 
+    // Reset answers for the next question
     setAnswers([{ answerContent: "", isCorrect: false }]);
   };
 
   // Add a new answer input field
   const handleAddAnswer = () => {
     setAnswers([...answers, { answerContent: "", isCorrect: false }]);
+    console.log("Added new answer field. Total answers:", answers.length + 1);
   };
 
   const handleAnswerChange = (index, e) => {
@@ -80,6 +91,7 @@ const CreateQuestion = () => {
     setAnswers((prevAnswers) =>
       prevAnswers.map((answer, i) => (i === index ? { ...answer, [name]: value } : answer))
     );
+    console.log(`Updated answer ${index + 1}:`, value);
   };
 
   const handleCorrectAnswerChange = (index) => {
@@ -92,6 +104,7 @@ const CreateQuestion = () => {
           : { ...answer, isCorrect: i === index }
       )
     );
+    console.log(`Updated correct answer at index ${index}`);
   };
 
   const handleMultipleChoiceChange = () => {
@@ -99,29 +112,54 @@ const CreateQuestion = () => {
     setAnswers((prevAnswers) =>
       prevAnswers.map((answer) => ({ ...answer, isCorrect: false }))
     );
+    console.log("Multiple choice mode changed to:", !isMultipleChoice);
   };
 
-  // When submitting the form, check if selectedCategory is valid
+  const handleSubmitAnswers = async (questionBankId, answers) => {
+    const token = localStorage.getItem("token");
+  
+    console.log("Submitting answers:", answers);
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/answers",
+        {
+          question_bank_id: questionBankId,
+          answers: answers.map(answer => ({
+            answerContent: answer.answerContent,
+            isCorrect: answer.isCorrect,
+            score: answer.isCorrect ? 1 : 0 // Assign score based on correctness
+          }))
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      console.log("Answers saved successfully:", response.data);
+      alert("Answers saved!");
+    } catch (err) {
+      console.error("Error saving answers:", err);
+      alert("There was an error saving the answers.");
+    }
+  };
+  
+
+  // Submit the full quiz with all questions
   const handleSubmitQuiz = async () => {
     const token = localStorage.getItem("token");
 
-    // Validate that a category is selected
     if (!selectedCategory) {
       alert("Please select a valid category.");
       return;
     }
 
-    // Log the values for debugging before submission
-    console.log("Submitting form with questionContent before submission:", questionContent);
-
     const formData = {
       professor_id: professorId,
       category: selectedCategory,
-      questionContent: questionContent,  // Directly use the state value
+      questionContent: questionContent,
       isMultipleChoice: isMultipleChoice,
     };
 
-    console.log("Submitting form with data:", formData);
+    console.log("Submitting quiz with data:", formData);
 
     try {
       const response = await axios.post("http://localhost:5000/api/questions", formData, {
@@ -129,7 +167,12 @@ const CreateQuestion = () => {
       });
 
       if (response.status === 200) {
+        console.log("Quiz submitted successfully:", response.data);
         alert("Question added successfully to Question Bank!");
+
+        const questionBankId = response.data.question_bank_id; 
+        await handleSubmitAnswers(questionBankId, answers);
+
       }
     } catch (err) {
       console.error("Error creating question:", err);
@@ -148,8 +191,8 @@ const CreateQuestion = () => {
             <label htmlFor="question">Question Content</label>
             <textarea
               id="question"
-              value={questionContent} // Using `questionContent` state
-              onChange={(e) => setQuestionContent(e.target.value)} // Update `questionContent` state
+              value={questionContent}
+              onChange={(e) => setQuestionContent(e.target.value)}
               required
               placeholder="Enter your question here"
             />
@@ -188,36 +231,17 @@ const CreateQuestion = () => {
             </div>
           ))}
 
-          <button 
-            type="button" 
-            onClick={handleAddAnswer}
-            disabled={questionsAdded >= noQuestions} 
-          >
-            Add Another Answer
-          </button>
+          <button type="button" onClick={handleAddAnswer}>Add Another Answer</button>
 
           <button
             type="button"
-            onClick={handleQuestionSubmit} // Handle question submission
-            className="add-new-question-button"
+            onClick={handleQuestionSubmit}
             disabled={questionsAdded >= noQuestions} 
           >
             Add New Question
           </button>
 
-          {questionsAdded >= noQuestions && (
-            <div className="limit-reached-message">
-              You have reached the maximum number of questions ({noQuestions}).
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSubmitQuiz}
-            className="submit-quiz-button"
-          >
-            Submit Quiz
-          </button>
+          <button type="button" onClick={handleSubmitQuiz}>Submit Quiz</button>
         </form>
       </div>
 
@@ -229,10 +253,7 @@ const CreateQuestion = () => {
             <p>{questionData.questionContent}</p>
             <ul>
               {questionData.answers.map((answer, idx) => (
-                <li key={idx}>
-                  {answer}{" "}
-                  {answers[idx]?.isCorrect && <span style={{ color: 'green' }}>(Correct)</span>}
-                </li>
+                <li key={idx}>{answer}</li>
               ))}
             </ul>
           </div>
