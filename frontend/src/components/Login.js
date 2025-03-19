@@ -30,6 +30,7 @@ const Login = () => {
       if (response.ok) {
         // Store the token and user_id in localStorage
         localStorage.setItem("token", data.token); // Store the JWT token
+        localStorage.setItem("userType", data.userType); // Store the userType ('student' or 'professor')
         localStorage.setItem("user_id", data.userType === "student" ? data.student_id : data.professor_id); // Store the user_id
   
         // Log the user type and user id

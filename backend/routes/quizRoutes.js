@@ -93,64 +93,49 @@ router.get('/categories', (req, res) => {
 
 
 // POST - Add a question to the QuestionBank table
-router.post('/quizzes/questions', authenticateJWT, (req, res) => {
-  const { questionContent, isMultipleChoice, quizId, answers } = req.body;
-  const professorId = req.user.id;
+// POST - Add a question to the QuestionBank table
+router.post("/questions", (req, res) => {
+  const { questionContent, isMultipleChoice, professor_id, category } = req.body;
 
-  // Validate the incoming data
-  if (!questionContent || !quizId || !answers || answers.length === 0) {
-      return res.status(400).json({ message: 'All fields are required' });
-  }
+  // Step 1: Get category_id from category_name
+  const getCategoryQuery = `SELECT category_id FROM Category WHERE category_name = ?`;
 
-  // Insert the question into QuestionBank table
-  const query = `INSERT INTO QuestionBank (professor_id, category_id, question_content, is_multiple_choice)
-                 VALUES (?, (SELECT category_id FROM Quiz WHERE quiz_id = ?), ?, ?)`;
+  db.query(getCategoryQuery, [category], (err, categoryResults) => {
+    if (err) {
+      console.error("Error fetching category ID:", err);
+      return res.status(500).json({ message: "Error fetching category ID" });
+    }
 
-  db.query(query, [professorId, quizId, questionContent, isMultipleChoice], (err, result) => {
-      if (err) {
+    if (categoryResults.length === 0) {
+      return res.status(400).json({ message: "Invalid category name" });
+    }
+
+    const category_id = categoryResults[0].category_id;
+
+    // Step 2: Insert the question into the QuestionBank table
+    const insertQuestionQuery = `
+      INSERT INTO QuestionBank (professor_id, category_id, question_content, is_multiple_choice)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(
+      insertQuestionQuery,
+      [professor_id, category_id, questionContent, isMultipleChoice],
+      (err, results) => {
+        if (err) {
           console.error("Error inserting question:", err);
-          return res.status(500).json({ message: "Error creating question" });
+          return res.status(500).json({ message: "Error inserting question" });
+        }
+
+        res.status(200).json({
+          message: "Question successfully added to QuestionBank!",
+          questionBankId: results.insertId,
+        });
       }
-
-      const questionId = result.insertId;
-
-      // Insert answers into the AnswerBank table
-      answers.forEach((answer) => {
-          const { answerContent, isCorrect } = answer;
-          const score = isCorrect ? 1 : 0; // Correct answers get a score of 1, incorrect get 0.
-
-          const answerQuery = `INSERT INTO AnswerBank (question_bank_id, answer_content, is_correct, score)
-                               VALUES (?, ?, ?, ?)`;
-
-          db.query(answerQuery, [questionId, answerContent, isCorrect, score], (err) => {
-              if (err) {
-                  console.error("Error inserting answer:", err);
-              }
-          });
-      });
-
-      res.status(200).json({ message: 'Question added successfully', questionId });
+    );
   });
 });
 
-router.post('/answers', authenticateJWT, (req, res) => {
-    const { question_bank_id, answerContent, isCorrect, score } = req.body;
 
-    if (!question_bank_id || !answerContent) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    const query = `INSERT INTO AnswerBank (question_bank_id, answer_content, is_correct, score)
-                   VALUES (?, ?, ?, ?)`;
-
-    db.query(query, [question_bank_id, answerContent, isCorrect, score], (err, result) => {
-      if (err) {
-        console.error("Error inserting answer:", err);
-        return res.status(500).json({ message: "Error saving answer" });
-      }
-
-      res.status(200).json({ message: 'Answer added successfully' });
-    });
-});
 
 module.exports = router;

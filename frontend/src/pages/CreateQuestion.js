@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./CreateQuestion.css";
@@ -7,23 +7,48 @@ const CreateQuestion = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fetch noQuestions from the location state passed via navigate in CreateQuiz.js
-  const noQuestions = location?.state?.noQuestions;
+  // Fetch professor_id and noQuestions from location state passed via navigate in CreateQuiz
+  const { professor_id, noQuestions, category } = location?.state;
 
   const [question, setQuestion] = useState(""); // State for the question content
   const [isMultipleChoice, setIsMultipleChoice] = useState(false); // Whether the question is multiple choice
   const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }]); // Array of answers
   const [questionsAdded, setQuestionsAdded] = useState(0); // Track how many questions are added
   const [questionList, setQuestionList] = useState([]); // List of added questions to display below the form
+  const [questionContent, setQuestionContent] = useState("")
 
-  // Handle the form submission
+  const [categories, setCategories] = useState([]); // State to store categories
+  const [selectedCategory, setSelectedCategory] = useState(category); // State for selected category
+
+
+  // Use professor_id from the location state if passed, or fall back to null
+  const [professorId, setProfessorId] = useState(professor_id); 
+
+  useEffect(() => {
+    // Log the received state for debugging
+    console.log("Received state:", location.state);
+
+    // Fetch categories from the backend
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/categories");
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, [location.state]); // Run this effect when location.state changes
+
+
+
+  // Handle the form submission for each question
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
 
     const correctAnswersCount = answers.filter((answer) => answer.isCorrect).length;
 
-    // Prevent submitting if no question or answers are provided
-    if (!question || answers.some((answer) => !answer.answerContent)) {
+    if (!questionContent || answers.some((answer) => !answer.answerContent)) {
       alert("Please enter a valid question and answers.");
       return;
     }
@@ -34,24 +59,20 @@ const CreateQuestion = () => {
     }
 
     if (questionsAdded < noQuestions) {
-      // Add the question and answers to the list
       setQuestionList([
         ...questionList,
         {
-          questionContent: question,
+          questionContent,
           answers: answers.map((answer) => answer.answerContent),
         },
       ]);
-
-      // Increment the question count
       setQuestionsAdded(questionsAdded + 1);
     } else {
       alert(`You have reached the maximum number of ${noQuestions} questions.`);
     }
 
-    // Clear the form after submitting
-    setQuestion(""); // Reset question
-    setAnswers([{ answerContent: "", isCorrect: false }]); // Reset answers
+    setQuestionContent(""); 
+    setAnswers([{ answerContent: "", isCorrect: false }]); 
   };
 
   // Add a new answer input field
@@ -59,7 +80,6 @@ const CreateQuestion = () => {
     setAnswers([...answers, { answerContent: "", isCorrect: false }]);
   };
 
-  // Handle input change for answers
   const handleAnswerChange = (index, e) => {
     const { name, value } = e.target;
     setAnswers((prevAnswers) =>
@@ -67,7 +87,6 @@ const CreateQuestion = () => {
     );
   };
 
-  // Handle correct answer change
   const handleCorrectAnswerChange = (index) => {
     setAnswers((prevAnswers) =>
       prevAnswers.map((answer, i) =>
@@ -80,7 +99,6 @@ const CreateQuestion = () => {
     );
   };
 
-  // Toggle multiple choice
   const handleMultipleChoiceChange = () => {
     setIsMultipleChoice((prev) => !prev);
     setAnswers((prevAnswers) =>
@@ -88,16 +106,13 @@ const CreateQuestion = () => {
     );
   };
 
-  // Add a new question
   const handleAddNewQuestion = () => {
     if (questionsAdded < noQuestions) {
-      // Prevent adding blank questions or answers
       if (!question || answers.some((answer) => !answer.answerContent)) {
         alert("Please enter a valid question and answers.");
         return;
       }
 
-      // Add the current question to the list immediately after clicking "Add New Question"
       setQuestionList([
         ...questionList,
         {
@@ -105,46 +120,51 @@ const CreateQuestion = () => {
           answers: answers.map((answer) => answer.answerContent),
         },
       ]);
-      setQuestionsAdded(questionsAdded + 1); // Increment the question count
+      setQuestionsAdded(questionsAdded + 1);
 
-      // Reset form fields for a new question
-      setQuestion(""); // Clear question
-      setAnswers([{ answerContent: "", isCorrect: false }]); // Clear answers
+      setQuestionContent(""); 
+      setAnswers([{ answerContent: "", isCorrect: false }]);
     } else {
       alert(`You have reached the maximum number of ${noQuestions} questions.`);
     }
   };
 
-  // Submit the quiz
+  // When submitting the form, check if selectedCategory is valid
   const handleSubmitQuiz = async () => {
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("Please log in first.");
+  
+    // Validate that a category is selected
+    if (!selectedCategory) {
+      alert("Please select a valid category.");
       return;
     }
 
+    console.log("Question content:", question);
+  
     const formData = {
-      questionList, // Sending the question list to backend
+      professor_id: professorId,
+      category: selectedCategory, // Send category_name as a string
+      questionContent,
+      isMultipleChoice: isMultipleChoice,
     };
-
+  
+    console.log("Submitting form with data:", formData);
+  
     try {
-      const response = await axios.post("http://localhost:5000/api/quizzes/questions", formData, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
+      const response = await axios.post("http://localhost:5000/api/questions", formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       if (response.status === 200) {
-        alert("Quiz submitted successfully!");
-        // Navigate to the next page after submission (could be a success page or quiz preview page)
-        navigate("/quiz-preview");
+        alert("Question added successfully to Question Bank!");
       }
     } catch (err) {
-      console.error("Error submitting quiz:", err);
-      alert("There was an error submitting the quiz.");
+      console.error("Error creating question:", err);
+      alert("There was an error adding the question.");
     }
   };
+  
+  
 
   return (
     <div className="create-quiz-container">
@@ -198,7 +218,7 @@ const CreateQuestion = () => {
           <button 
             type="button" 
             onClick={handleAddAnswer}
-            disabled={questionsAdded >= noQuestions} // Disable button if max questions are added
+            disabled={questionsAdded >= noQuestions} 
           >
             Add Another Answer
           </button>
@@ -207,7 +227,7 @@ const CreateQuestion = () => {
             type="button"
             onClick={handleAddNewQuestion}
             className="add-new-question-button"
-            disabled={questionsAdded >= noQuestions} // Disable button if max questions are added
+            disabled={questionsAdded >= noQuestions} 
           >
             Add New Question
           </button>
@@ -218,7 +238,6 @@ const CreateQuestion = () => {
             </div>
           )}
 
-          {/* Change the button from Preview Quiz to Submit Quiz */}
           <button
             type="button"
             onClick={handleSubmitQuiz}

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./CreateQuiz.css";
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
-  
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [timeLimit, setTimeLimit] = useState("");
@@ -13,36 +13,52 @@ const CreateQuiz = () => {
   const [retakeAllowed, setRetakeAllowed] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [noQuestions, setNoQuestions] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  const user_id = localStorage.getItem("user_id");  // Get the user_id (student or professor) from localStorage
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/categories");
+        console.log("Fetched Categories:", response.data); // Log the fetched categories
+        setCategories(response.data.categories); // Ensure categories are stored correctly in state
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-  
-    if (!token) {
+
+    if (!token || !user_id) {
       alert("Please log in first.");
       return;
     }
-  
-    // Validate input fields on the frontend before sending to backend
+
+    // Validate input fields
     const validTimeLimit = parseInt(timeLimit, 10);
     if (isNaN(validTimeLimit) || validTimeLimit <= 0) {
       alert("Please provide a valid time limit greater than 0.");
       return;
     }
-  
+
     const validDeductionPercentage = deductionPercentage === "" || isNaN(deductionPercentage)
                                     ? 0 : parseFloat(deductionPercentage);
     if (validDeductionPercentage < 0 || validDeductionPercentage > 100) {
       alert("Deduction percentage must be between 0 and 100.");
       return;
     }
-  
+
     const validNoQuestions = parseInt(noQuestions, 10);
     if (isNaN(validNoQuestions) || validNoQuestions <= 0) {
       alert("Number of questions must be greater than 0.");
       return;
     }
-  
+
     const formData = {
       title,
       category,
@@ -52,30 +68,33 @@ const CreateQuiz = () => {
       isActive: isActive ? 1 : 0,
       noQuestions: validNoQuestions,
     };
-  
+
     console.log("Form Data:", formData);
-  
+
     try {
       const response = await axios.post("http://localhost:5000/api/quizzes", formData, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },
       });
-  
+
       if (response.status === 200) {
         alert("Quiz created successfully!");
         const quizId = response.data.quizId;
         navigate(`/create-question/${quizId}`, {
-          state: { noQuestions: validNoQuestions },
-        });      }
+          state: {     
+            professor_id: user_id,  // Pass user_id to create question
+            noQuestions: validNoQuestions,     
+            category,  // Pass selected category
+          },
+        });
+      }
     } catch (err) {
       console.error("Error creating quiz:", err);
       alert("There was an error creating the quiz.");
     }
   };
-  
-  
-  
+
   return (
     <div className="create-quiz-container">
       <h2>Create a New Quiz</h2>
@@ -90,9 +109,15 @@ const CreateQuiz = () => {
           <label htmlFor="category">Category</label>
           <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required>
             <option value="">Select a Category</option>
-            <option value="Cybernetics">Cybernetics</option>
-            <option value="Statistics">Statistics</option>
-            <option value="Informatics">Informatics</option>
+            {categories.length > 0 ? (
+              categories.map((cat) => (
+                <option key={cat.category_id} value={cat.category_name}>
+                  {cat.category_name}
+                </option>
+              ))
+            ) : (
+              <option value="">Loading categories...</option>
+            )}
           </select>
         </div>
 
@@ -102,23 +127,21 @@ const CreateQuiz = () => {
         </div>
 
         <div className="form-group">
-  <label htmlFor="deductionPercentage">Deduction Percentage</label>
-  <input
-    type="number"
-    step="0.01"
-    id="deductionPercentage"
-    value={deductionPercentage}
-    onChange={(e) => {
-      const value = e.target.value;
-      // Allow 0 or any number
-      if (value === "" || (value >= 0 && value <= 100)) {
-        setDeductionPercentage(value);
-      }
-    }}
-    required
-  />
-</div>
-
+          <label htmlFor="deductionPercentage">Deduction Percentage</label>
+          <input
+            type="number"
+            step="0.01"
+            id="deductionPercentage"
+            value={deductionPercentage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || (value >= 0 && value <= 100)) {
+                setDeductionPercentage(value);
+              }
+            }}
+            required
+          />
+        </div>
 
         {/* Checkbox for Allow Retakes */}
         <div className="form-group checkbox-container">
