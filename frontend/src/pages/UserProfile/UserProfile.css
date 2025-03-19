@@ -1,86 +1,176 @@
+/* General Styles for the User Profile Page */
 .user-profile-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: 50px 20px;
-    min-height: 100vh;
-  }
-  
-  /* Heading (User Profile Title) */
-  h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: center;
-  }
-  
-  /* Profile Card */
-  .profile-card {
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Heading (User Profile Title) */
+.profile-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* User Profile Table */
+.profile-table {
+  width: 100%;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 250px;  /* Adjusted margin-top to give space for header */
+  margin-bottom: 40px;
+  padding: 20px;
+}
+
+.profile-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.profile-table th, .profile-table td {
+  padding: 15px;
+  text-align: left;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.profile-table th {
+  background-color: #3498db;
+  color: #fff;
+  font-weight: bold;
+}
+
+.profile-table td {
+  background-color: #f9f9f9;
+  font-weight: 500;
+}
+
+.profile-table tr:nth-child(even) td {
+  background-color: #f1f1f1;
+}
+
+.profile-table tr:hover td {
+  background-color: #e0f7fa;
+  cursor: pointer;
+}
+
+/* Section for displaying the professor's questions */
+.questions-list {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  padding: 40px;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  max-height: calc(100vh - 280px); /* Adjusted max-height to account for header/table */
+  overflow-y: auto; /* Ensures scrolling when content overflows */
+}
+
+/* Individual Question Item */
+.question-item {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Question Item Title */
+.question-item strong {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #444;
+}
+
+/* Question Text */
+.question-item p {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* Hover Effect for each Question */
+.question-item:hover {
+  background-color: #e0f7fa;
+  transform: translateY(-5px);
+  cursor: pointer;
+}
+
+/* Responsive Design for the Profile Table and Question Section */
+@media (max-width: 800px) {
+  .profile-table {
     width: 100%;
-    max-width: 700px;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-  
-  .profile-card:hover {
-    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.15);
-    transform: translateY(-5px);
-  }
-  
-  /* Profile Item (each section inside the card) */
-  .profile-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.2rem;
-    color: #555;
     padding: 10px;
-    border-radius: 8px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-top: 40px;  /* Adjusted for better spacing on smaller screens */
   }
-  
-  .profile-item strong {
-    font-weight: 700;
-    color: #444;
+
+  .profile-table th, .profile-table td {
+    padding: 12px;
+    font-size: 1rem;
   }
-  
-  .profile-item span {
-    color: #333;
-    font-weight: 500;
+
+  .questions-list {
+    padding: 25px;
+    max-width: 100%;
   }
-  
-  /* Hover Effect for each Profile Item */
-  .profile-item:hover {
-    background-color: #e0f7fa;
-    transform: translateX(5px);
-    cursor: pointer;
+
+  .question-item {
+    padding: 15px;
   }
-  
-  @media (max-width: 600px) {
-    .user-profile-container {
-      padding: 30px 15px;
-    }
-  
-    .profile-card {
-      width: 100%;
-      padding: 25px;
-    }
-  
-    h2 {
-      font-size: 1.8rem;
-    }
-  
-    .profile-item {
-      font-size: 1rem;
-    }
+
+  .question-item strong {
+    font-size: 1.1rem;
   }
-  
+
+  .question-item p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Adjusting layout further for smaller screens */
+  .user-profile-container {
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .profile-table {
+    margin-top: 30px;
+    padding: 15px;
+  }
+
+  .profile-table th, .profile-table td {
+    font-size: 1rem;
+  }
+
+  .questions-list {
+    padding: 20px;
+    margin-top: 30px;
+  }
+
+  .question-item {
+    padding: 12px;
+  }
+}

@@ -12,7 +12,7 @@ const CreateQuestion = () => {
 
   const [questionContent, setQuestionContent] = useState(""); 
   const [isMultipleChoice, setIsMultipleChoice] = useState(false);
-  const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }]);
+  const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }, { answerContent: "", isCorrect: false }]);
   const [questionsAdded, setQuestionsAdded] = useState(0);
   const [questionList, setQuestionList] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -82,12 +82,14 @@ const CreateQuestion = () => {
           isCorrect: answer.isCorrect,
         })),
       });
-    } else {
-      alert(`You have reached the maximum number of ${noQuestions} questions.`);
-    }
+    
   
-    // Reset answers for the next question after updating questionList
-    //setAnswers([{ answerContent: "", isCorrect: false }]);
+   // Clear the inputs after adding the question
+   //setQuestionContent("");  // Reset question content
+   //setAnswers([{ answerContent: "", isCorrect: false }]);  // Reset answers
+ } else {
+   alert(`You have reached the maximum number of ${noQuestions} questions.`);
+ }
   };
   
   // Add a new answer input field
@@ -193,7 +195,14 @@ const CreateQuestion = () => {
     }
   };
 
-  
+
+  // Handle removing a question
+  const handleRemoveQuestion = (index) => {
+    const newQuestionList = questionList.filter((_, i) => i !== index);
+    setQuestionList(newQuestionList);
+    setQuestionsAdded(questionsAdded - 1);
+    console.log(`Removed question at index ${index}`);
+  };
 
   return (
     <div className="create-quiz-container">
@@ -225,30 +234,30 @@ const CreateQuestion = () => {
   
             {answers.map((answer, index) => (
               <div key={index} className="answer-container">
-              <div className="answer-input-container">
-                <label htmlFor={`answer-${index}`} className="answer-label">Answer {index + 1}</label>
-                <textarea
-                  name="answerContent"
-                  id={`answer-${index}`}
-                  value={answer.answerContent}
-                  onChange={(e) => handleAnswerChange(index, e)}
-                  required
-                  placeholder={`Enter answer ${index + 1}`}
-                  className="answer-textarea" /* Changed to .answer-textarea */
-                />
-              </div>
-              <div className="checkbox-container">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={answer.isCorrect}
-                    onChange={() => handleCorrectAnswerChange(index)}
-                    className="checkbox-input"
+                <div className="answer-input-container">
+                  <label htmlFor={`answer-${index}`} className="answer-label">Answer {index + 1}</label>
+                  <textarea
+                    name="answerContent"
+                    id={`answer-${index}`}
+                    value={answer.answerContent}
+                    onChange={(e) => handleAnswerChange(index, e)}
+                    required
+                    placeholder={`Enter answer ${index + 1}`}
+                    className="answer-textarea"
                   />
-                  <span className="checkbox-text">Mark as Correct</span>
-                </label>
+                </div>
+                <div className="checkbox-container">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={answer.isCorrect}
+                      onChange={() => handleCorrectAnswerChange(index)}
+                      className="checkbox-input"
+                    />
+                    <span className="checkbox-text">Mark as Correct</span>
+                  </label>
+                </div>
               </div>
-            </div>
             ))}
   
             <button type="button" onClick={handleAddAnswer}>Add Another Answer</button>
@@ -272,19 +281,21 @@ const CreateQuestion = () => {
               <h4>Question {index + 1}:</h4>
               <p>{questionData.questionContent}</p>
               <ul>
-              {questionData.answers.map((answer, idx) => (
-  <li key={idx} style={{ color: answer.isCorrect ? 'green' : 'red' }}>
-    Answer: {answer.answerContent} - Correct: {answer.isCorrect ? "Yes" : "No"}
-  </li>
-))}
+                {questionData.answers.map((answer, idx) => (
+                  <li key={idx} style={{ color: answer.isCorrect ? 'green' : 'red' }}>
+                    Answer: {answer.answerContent} - Correct: {answer.isCorrect ? "Yes" : "No"}
+                  </li>
+                ))}
               </ul>
+              <div className="question-actions">
+                <button onClick={() => handleRemoveQuestion(index)}>Remove</button>
+              </div>
             </div>
           ))}
         </div>
       </div>
     </div>
   );
-  
 };
 
 export default CreateQuestion;

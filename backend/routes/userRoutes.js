@@ -37,4 +37,30 @@ router.get('/profile', authenticateJWT, (req, res) => {
     });
 });
 
+
+router.get('/professor/questions', authenticateJWT, (req, res) => {
+    const professorId = req.user.id; // Assuming the professor's ID is in the JWT
+  
+    console.log("Fetching questions for professorId:", professorId);
+  
+    const query = 'SELECT * FROM QuestionBank WHERE professor_id = ?';
+    
+    db.query(query, [professorId], (err, results) => {
+      if (err) {
+        console.error('Error fetching questions:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+  
+      console.log("Questions fetched:", results); // Log the fetched questions
+  
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'No questions found for this professor' });
+      }
+  
+      // Send the retrieved questions to the front end
+      res.status(200).json(results);
+    });
+  });
+  
+
 module.exports = router;
