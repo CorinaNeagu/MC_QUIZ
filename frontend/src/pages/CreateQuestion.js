@@ -20,6 +20,10 @@ const CreateQuestion = () => {
   const [professorId, setProfessorId] = useState(professor_id);
 
   useEffect(() => {
+    console.log("Updated answers:", answers);
+  }, [answers]);
+
+  useEffect(() => {
     // Log received state for debugging
     console.log("Received location.state:", location.state);
 
@@ -39,32 +43,38 @@ const CreateQuestion = () => {
   // Handle form submission for a single question
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
-
+  
     console.log("Submitting question:", questionContent);
     console.log("Current answers:", answers);
-
+  
     const correctAnswersCount = answers.filter((answer) => answer.isCorrect).length;
-
+  
     if (!questionContent || answers.some((answer) => !answer.answerContent)) {
       alert("Please enter a valid question and answers.");
       return;
     }
-
+  
     if (!isMultipleChoice && correctAnswersCount !== 1) {
       alert("You must select exactly one correct answer.");
       return;
     }
-
+  
+    // Add the question and answers to the question list
     if (questionsAdded < noQuestions) {
-      setQuestionList([
-        ...questionList,
+      // Add the question along with its answers (including whether the answer is correct)
+      setQuestionList((prevList) => [
+        ...prevList,
         {
           questionContent, 
-          answers: answers.map((answer) => answer.answerContent),
+          answers: answers.map((answer) => ({
+            answerContent: answer.answerContent,
+            isCorrect: answer.isCorrect, // Store the correct answer flag as well
+          })),
         },
       ]);
-      setQuestionsAdded(questionsAdded + 1);
-
+      
+      setQuestionsAdded((prevCount) => prevCount + 1);
+  
       console.log(`Added question ${questionsAdded + 1}:`, {
         questionContent,
         answers: answers.map((answer) => ({
@@ -75,11 +85,11 @@ const CreateQuestion = () => {
     } else {
       alert(`You have reached the maximum number of ${noQuestions} questions.`);
     }
-
-    // Reset answers for the next question
-    setAnswers([{ answerContent: "", isCorrect: false }]);
+  
+    // Reset answers for the next question after updating questionList
+    //setAnswers([{ answerContent: "", isCorrect: false }]);
   };
-
+  
   // Add a new answer input field
   const handleAddAnswer = () => {
     setAnswers([...answers, { answerContent: "", isCorrect: false }]);
@@ -89,10 +99,12 @@ const CreateQuestion = () => {
   const handleAnswerChange = (index, e) => {
     const { name, value } = e.target;
     setAnswers((prevAnswers) =>
-      prevAnswers.map((answer, i) => (i === index ? { ...answer, [name]: value } : answer))
+      prevAnswers.map((answer, i) =>
+        i === index ? { ...answer, [name]: value } : answer
+      )
     );
-    console.log(`Updated answer ${index + 1}:`, value);
   };
+  
 
   const handleCorrectAnswerChange = (index) => {
     setAnswers((prevAnswers) =>
@@ -115,30 +127,25 @@ const CreateQuestion = () => {
     console.log("Multiple choice mode changed to:", !isMultipleChoice);
   };
 
-  const handleSubmitAnswers = async (questionBankId, answers) => {
-    const token = localStorage.getItem("token");
-  
+  const handleSubmitAnswers = async (question_bank_id, answers) => {
+    // Log the answers array to make sure it's populated correctly
     console.log("Submitting answers:", answers);
   
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/answers",
-        {
-          question_bank_id: questionBankId,
-          answers: answers.map(answer => ({
-            answerContent: answer.answerContent,
-            isCorrect: answer.isCorrect,
-            score: answer.isCorrect ? 1 : 0 // Assign score based on correctness
-          }))
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    // Check if any answers are empty or invalid
+    answers.forEach((answer, index) => {
+      if (!answer.answerContent || answer.score === 0) {
+        console.error(`Answer ${index + 1} is invalid:`, answer);
+      }
+    });
   
+    try {
+      const response = await axios.post("http://localhost:5000/api/answers", {
+        question_bank_id,
+        answers,
+      });
       console.log("Answers saved successfully:", response.data);
-      alert("Answers saved!");
     } catch (err) {
-      console.error("Error saving answers:", err);
-      alert("There was an error saving the answers.");
+      console.error("Error submitting answers:", err);
     }
   };
   
@@ -246,19 +253,21 @@ const CreateQuestion = () => {
       </div>
 
       <div className="added-questions">
-        <h3>Questions Added:</h3>
-        {questionList.map((questionData, index) => (
-          <div key={index} className="added-question">
-            <h4>Question {index + 1}:</h4>
-            <p>{questionData.questionContent}</p>
-            <ul>
-              {questionData.answers.map((answer, idx) => (
-                <li key={idx}>{answer}</li>
-              ))}
-            </ul>
-          </div>
+  <h3>Questions Added:</h3>
+  {questionList.map((questionData, index) => (
+    <div key={index} className="added-question">
+      <h4>Question {index + 1}:</h4>
+      <p>{questionData.questionContent}</p>
+      <ul>
+        {questionData.answers.map((answer, idx) => (
+          <li key={idx}>
+            Answer: {answer.answerContent} - Correct: {answer.isCorrect ? "Yes" : "No"}
+          </li>
         ))}
-      </div>
+      </ul>
+    </div>
+  ))}
+</div>
     </div>
   );
 };
