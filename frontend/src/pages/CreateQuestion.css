@@ -6,36 +6,12 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* Container for the main layout */
 .create-quiz-container {
   display: flex;
-  flex-direction: row; /* Align children in a row */
+  flex-direction: column; /* Make the container stack vertically */
+  padding: 20px;
   height: 100vh; /* Full height of the viewport */
-  overflow: hidden; /* Prevent the container from overflowing */
-  padding: 20px;
-}
-
-/* Left section for added questions */
-.added-questions {
-  flex: 1; /* Left section takes up remaining space */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-right: 2px solid #ddd; /* Optional border to separate the sections */
-  box-sizing: border-box;
-  height: 100%; /* Ensure it fills the available height */
-  max-height: 100vh; /* Prevent it from overflowing */
-}
-
-/* Right section for the form */
-.create-quiz-form-wrapper {
-  flex: 1; /* Right section takes up remaining space */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-  padding: 20px;
-  background-color: #ffffff;
-  box-sizing: border-box;
-  height: 100%; /* Ensure it fills the available height */
-  max-height: 100vh; /* Prevent it from overflowing */
+  overflow: hidden; /* Prevent overflowing from the overall container */
 }
 
 /* Title styling */
@@ -43,92 +19,93 @@ h2 {
   text-align: center;
   font-size: 2em;
   margin-bottom: 20px;
+  position: sticky; /* Make the header sticky */
+  top: 0; /* Stick to the top */
+  padding: 10px 0; /* Add some padding for spacing */
+  z-index: 10; /* Ensure it's above other elements */
 }
 
-/* Form styling */
+/* Wrapper to hold the form and added questions side by side */
+.quiz-content-wrapper {
+  display: flex;
+  flex-direction: row; /* Align children (form and added questions) in a row */
+  justify-content: space-between; /* Space between form and added questions */
+  gap: 20px; /* Add some space between the two sections */
+  flex: 1;
+  overflow-y: hidden; /* Prevent the overall content from overflowing */
+}
+
+/* Right section for the form */
+.create-quiz-form-wrapper {
+  flex: 1; /* Allow it to take up available space */
+  max-width: 600px; /* Limit the width to prevent it from being too wide */
+  background-color: #ffffff;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  height: calc(100vh - 100px); /* Ensure it fills the remaining space below the header */
+}
+
+/* Left section for added questions */
+.added-questions {
+  flex: 1; /* Allow it to take up available space */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-left: 2px solid #ddd; /* Border to separate the sections */
+  box-sizing: border-box;
+  height: 100%; /* Ensure it fills the available height */
+  height: calc(100vh - 100px); /* Ensure it fills the remaining space below the header */
+}
+
+/* Form elements styling */
 .create-quiz-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 500px;
-  margin: 0 auto; /* Center the form */
 }
 
-/* Label styling */
 .create-quiz-form label {
   font-size: 1.1em;
   margin-bottom: 8px;
 }
 
-/* Textarea styling for the question content */
 .create-quiz-form textarea {
   padding: 10px;
   font-size: 1em;
+  resize: vertical;
+  min-height: 100px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.answer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.answer-textarea {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%; /* Make the textarea take up the full width */
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
   resize: vertical; /* Allow vertical resizing */
-  min-height: 100px; /* Set a minimum height */
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  width: 100%;
+  min-height: 80px; /* Set a minimum height */
 }
 
-/* Answer input styling */
-.answer-container input {
-  padding: 8px;
-  font-size: 1em;
-  margin-bottom: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  width: 100%;
-}
-
-/* Add Answer Button */
-button {
-  padding: 10px 20px;
-  font-size: 1em;
-  border: none;
-  cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
-  border-radius: 4px;
-  margin-top: 10px;
-  width: 100%;
-  transition: background-color 0.3s ease;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-/* Add Answer Button */
-.add-new-question-button {
-  background-color: #2196F3; /* Blue */
-}
-
-/* Preview Quiz Button */
-.preview-quiz-button {
-  background-color: #FF9800; /* Orange */
-}
-
-/* Checkbox label next to input fields */
-.checkbox-label {
-  display: inline-block;
-  margin-left: 10px;
-  font-size: 0.9em;
+.answer-textarea:focus {
+  outline: none;
+  border-color: #007bff; /* Blue border on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3); /* Blue glow on focus */
 }
 
 /* Styling for added questions */
-.added-questions h3 {
-  margin-bottom: 10px;
-  font-size: 1.3em;
-  color: #333;
-}
-
-/* Added question block */
 .added-question {
   margin-bottom: 20px;
 }
@@ -153,55 +130,75 @@ button:hover {
   color: green;
 }
 
-/* Limit reached message */
-.limit-reached-message {
-  color: red;
-  font-size: 1.1em;
-  font-weight: bold;
+/* Buttons styling */
+button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
   margin-top: 10px;
+  width: 100%;
+  transition: background-color 0.3s ease;
 }
 
-/* Multiple choice styling */
-.multiple-choice-label {
-  margin-top: 20px;
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
-.multiple-choice-label input {
-  margin-right: 10px;
+button:hover {
+  opacity: 0.9;
 }
 
-/* Question Answer Section */
-.answer-container {
-  margin-bottom: 15px;
-}
-
-/* Form Group Styling */
-.form-group {
+/* Checkbox styling */
+.checkbox-wrapper {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-/* Add Question Section */
-.added-questions {
-  overflow-y: auto;
-  max-height: 100vh; /* Ensure content doesn't overflow */
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #007bff;
 }
 
-/* Scroll Styling for added questions */
-.added-questions {
-  padding: 20px;
+.checkbox-label {
+  font-size: 1rem;
+  color: #444;
+  cursor: pointer;
+  font-weight: 500;
+  user-select: none;
+  transition: color 0.3s ease;
 }
 
-/* Custom Scrollbars */
-.added-questions::-webkit-scrollbar {
-  width: 10px;
+.checkbox-input:checked + .checkbox-label {
+  color: #007bff;
 }
 
-.added-questions::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 5px;
+.checkbox-label:hover {
+  color: #0056b3;
 }
 
-.added-questions::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+/* Additional Answer buttons */
+.add-new-question-button {
+  background-color: #007bff;
+}
+
+.preview-quiz-button {
+  background-color: #FF9800;
+}
+
+.correct-answer {
+  color: green;
+}
+
+/* Style for incorrect answers */
+.incorrect-answer {
+  color: red;
 }

@@ -45,39 +45,43 @@ const Register = () => {
   };
 
   return (
-    <div>
+    <div className="register-container">
       <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <div>
-          <label>Username: </label>
+      <form onSubmit={handleRegister} className="register-form">
+        <div className="form-group">
+          <label htmlFor="username">Username:</label>
           <input
+            id="username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
-        <div>
-          <label>Email: </label>
+        <div className="form-group">
+          <label htmlFor="email">Email:</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
-        <div>
-          <label>Password: </label>
+        <div className="form-group">
+          <label htmlFor="password">Password:</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        <div>
-          <label>User Type: </label>
+        <div className="form-group">
+          <label htmlFor="userType">User Type:</label>
           <select
+            id="userType"
             value={userType}
             onChange={(e) => setUserType(e.target.value)}
             required
@@ -86,12 +90,13 @@ const Register = () => {
             <option value="professor">Professor</option>
           </select>
         </div>
-        <div>
+        <div className="form-group">
           <button type="submit">Register</button>
         </div>
       </form>
     </div>
   );
+  
 };
 
 export default Register;

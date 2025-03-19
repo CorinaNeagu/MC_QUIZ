@@ -1,153 +1,201 @@
 .create-quiz-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  min-height: 100vh;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.create-quiz-form {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 25px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center; /* Vertically align the label and checkbox */
+  gap: 10px; /* Add space between the checkbox and label */
+  margin-bottom: 20px; /* Space from other form elements */
+}
+
+.checkbox-container {
+  display: flex;
+  justify-content: space-between; /* Space out the label and checkbox */
+  align-items: center; /* Align the checkbox and label horizontally */
+  gap: 10px; /* Space between checkbox and label */
+  margin-bottom: 20px; /* Space below the checkbox */
+  width: 100%; /* Ensure it takes the full width available */
+}
+
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #007bff; /* Blue color for the checkbox when checked */
+  border-radius: 4px; /* Slight rounding for the checkbox */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.checkbox-label {
+  font-size: 1rem;
+  color: #444;
+  cursor: pointer;
+  margin: 0; /* Remove default margin for the label */
+  font-weight: 500;
+  user-select: none; /* Prevent text selection */
+  transition: color 0.3s ease;
+
+}
+
+.checkbox-container input:checked + .checkbox-label {
+  color: #007bff; /* Change label color when checkbox is checked */
+}
+
+/* Optional: Add some hover effect for better UX */
+.checkbox-container input:hover {
+  transform: scale(1.1); /* Slightly enlarge the checkbox on hover */
+}
+
+.checkbox-container input:focus {
+  outline: 2px solid #007bff; /* Blue outline when the checkbox is focused */
+}
+
+/* Form Group */
+.form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-size: 1rem;
+  color: #444;
+  flex: 1;
+  margin-right: 20px; 
+  text-align: left;
+}
+
+input, select {
+  width: 65%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  transition: 0.3s ease-in-out;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+input:focus, select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  outline: none;
+}
+
+.toggle-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.toggle-label {
+  font-size: 1rem;
+  color: #444;
+  order: 1; 
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 24px;
+  order: 2; 
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #007bff;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+
+.submit-button {
+  width: 100%;
+  padding: 14px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: background 0.3s ease-in-out;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .create-quiz-container {
+    padding: 20px;
   }
-  
-  h2 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
+
   .create-quiz-form {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 25px;
-    width: 100%;
-    max-width: 600px;
+    padding: 20px;
+    max-width: 100%;
   }
-  
-  /* Form Group */
-  .form-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    font-size: 1rem;
-    color: #444;
-    flex: 1;
-    margin-right: 20px; 
-    text-align: left;
-  }
-  
+
   input, select {
-    width: 65%;
-    padding: 12px;
-    font-size: 1rem;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    transition: 0.3s ease-in-out;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-  }
-  
-  input:focus, select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
-    outline: none;
-  }
-  
-  .toggle-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
-  }
-  
-  .toggle-label {
-    font-size: 1rem;
-    color: #444;
-    order: 1; 
-  }
-  
-  .toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 45px;
-    height: 24px;
-    order: 2; 
-  }
-  
-  .toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  
-  .toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 34px;
-  }
-  
-  .toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-  }
-  
-  input:checked + .toggle-slider {
-    background-color: #007bff;
-  }
-  
-  input:checked + .toggle-slider:before {
-    transform: translateX(20px);
-  }
-  
-  
-  .submit-button {
     width: 100%;
-    padding: 14px;
-    background-color: #007bff;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 25px;
-    transition: background 0.3s ease-in-out;
   }
-  
-  .submit-button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 600px) {
-    .create-quiz-container {
-      padding: 20px;
-    }
-  
-    .create-quiz-form {
-      padding: 20px;
-      max-width: 100%;
-    }
-  
-    input, select {
-      width: 100%;
-    }
-  }
-  
+}

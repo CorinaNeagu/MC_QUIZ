@@ -198,84 +198,93 @@ const CreateQuestion = () => {
   return (
     <div className="create-quiz-container">
       <h2>Add Questions to Quiz</h2>
-      <div className="create-quiz-form-wrapper">
-        <form onSubmit={handleQuestionSubmit} className="create-quiz-form">
-          <div className="form-group">
-            <label htmlFor="question">Question Content</label>
-            <textarea
-              id="question"
-              value={questionContent}
-              onChange={(e) => setQuestionContent(e.target.value)}
-              required
-              placeholder="Enter your question here"
-            />
-          </div>
-
-          <div className="multiple-choice-label">
-            <label htmlFor="isMultipleChoice">Multiple Choice?</label>
-            <input
-              type="checkbox"
-              id="isMultipleChoice"
-              checked={isMultipleChoice}
-              onChange={handleMultipleChoiceChange}
-            />
-          </div>
-
-          {answers.map((answer, index) => (
-            <div key={index} className="answer-container">
-              <label htmlFor={`answer-${index}`}>Answer {index + 1}</label>
-              <input
-                type="text"
-                name="answerContent"
-                id={`answer-${index}`}
-                value={answer.answerContent}
-                onChange={(e) => handleAnswerChange(index, e)}
+      <div className="quiz-content-wrapper">
+        <div className="create-quiz-form-wrapper">
+          <form onSubmit={handleQuestionSubmit} className="create-quiz-form">
+            <div className="form-group">
+              <label htmlFor="question">Question Content</label>
+              <textarea
+                id="question"
+                value={questionContent}
+                onChange={(e) => setQuestionContent(e.target.value)}
                 required
-                placeholder={`Enter answer ${index + 1}`}
+                placeholder="Enter your question here"
               />
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={answer.isCorrect}
-                  onChange={() => handleCorrectAnswerChange(index)}
+            </div>
+  
+            <div className="checkbox-wrapper">
+              <input
+                type="checkbox"
+                id="isMultipleChoice"
+                checked={isMultipleChoice}
+                onChange={handleMultipleChoiceChange}
+                className="checkbox-input"
+              />
+              <label htmlFor="isMultipleChoice" className="checkbox-label">Multiple Choice?</label>
+            </div>
+  
+            {answers.map((answer, index) => (
+              <div key={index} className="answer-container">
+              <div className="answer-input-container">
+                <label htmlFor={`answer-${index}`} className="answer-label">Answer {index + 1}</label>
+                <textarea
+                  name="answerContent"
+                  id={`answer-${index}`}
+                  value={answer.answerContent}
+                  onChange={(e) => handleAnswerChange(index, e)}
+                  required
+                  placeholder={`Enter answer ${index + 1}`}
+                  className="answer-textarea" /* Changed to .answer-textarea */
                 />
-                Mark as Correct
-              </label>
+              </div>
+              <div className="checkbox-container">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={answer.isCorrect}
+                    onChange={() => handleCorrectAnswerChange(index)}
+                    className="checkbox-input"
+                  />
+                  <span className="checkbox-text">Mark as Correct</span>
+                </label>
+              </div>
+            </div>
+            ))}
+  
+            <button type="button" onClick={handleAddAnswer}>Add Another Answer</button>
+  
+            <button
+              type="button"
+              onClick={handleQuestionSubmit}
+              disabled={questionsAdded >= noQuestions} 
+            >
+              Add New Question
+            </button>
+  
+            <button type="button" onClick={handleSubmitQuiz}>Submit Quiz</button>
+          </form>
+        </div>
+  
+        <div className="added-questions">
+          <h3>Questions Added:</h3>
+          {questionList.map((questionData, index) => (
+            <div key={index} className="added-question">
+              <h4>Question {index + 1}:</h4>
+              <p>{questionData.questionContent}</p>
+              <ul>
+              {questionData.answers.map((answer, idx) => (
+  <li key={idx} style={{ color: answer.isCorrect ? 'green' : 'red' }}>
+    Answer: {answer.answerContent} - Correct: {answer.isCorrect ? "Yes" : "No"}
+  </li>
+))}
+              </ul>
             </div>
           ))}
-
-          <button type="button" onClick={handleAddAnswer}>Add Another Answer</button>
-
-          <button
-            type="button"
-            onClick={handleQuestionSubmit}
-            disabled={questionsAdded >= noQuestions} 
-          >
-            Add New Question
-          </button>
-
-          <button type="button" onClick={handleSubmitQuiz}>Submit Quiz</button>
-        </form>
+        </div>
       </div>
-
-      <div className="added-questions">
-  <h3>Questions Added:</h3>
-  {questionList.map((questionData, index) => (
-    <div key={index} className="added-question">
-      <h4>Question {index + 1}:</h4>
-      <p>{questionData.questionContent}</p>
-      <ul>
-        {questionData.answers.map((answer, idx) => (
-          <li key={idx}>
-            Answer: {answer.answerContent} - Correct: {answer.isCorrect ? "Yes" : "No"}
-          </li>
-        ))}
-      </ul>
-    </div>
-  ))}
-</div>
     </div>
   );
+  
 };
 
 export default CreateQuestion;

@@ -143,17 +143,31 @@ const CreateQuiz = () => {
           />
         </div>
 
-        {/* Checkbox for Allow Retakes */}
-        <div className="form-group checkbox-container">
-          <label htmlFor="retakeAllowed">Allow Retakes</label>
-          <input type="checkbox" id="retakeAllowed" checked={retakeAllowed} onChange={() => setRetakeAllowed(!retakeAllowed)} />
-        </div>
 
-        {/* Checkbox for Activate Quiz */}
-        <div className="form-group checkbox-container">
-          <label htmlFor="isActive">Activate Quiz</label>
-          <input type="checkbox" id="isActive" checked={isActive} onChange={() => setIsActive(!isActive)} />
-        </div>
+<div className="checkbox-wrapper">
+
+  <input
+    type="checkbox"
+    id="retakeAllowed"
+    checked={retakeAllowed}
+    onChange={() => setRetakeAllowed(!retakeAllowed)}
+    className="checkbox-input"
+  />
+
+<label htmlFor="retakeAllowed" className="checkbox-label">Allow Retakes</label>
+
+</div>
+
+<div className="checkbox-wrapper">
+  <input
+    type="checkbox"
+    id="isActive"
+    checked={isActive}
+    onChange={() => setIsActive(!isActive)}
+    className="checkbox-input"
+  />
+  <label htmlFor="isActive" className="checkbox-label">Activate Quiz</label>
+</div>
 
         <div className="form-group">
           <label htmlFor="noQuestions">Number of Questions</label>

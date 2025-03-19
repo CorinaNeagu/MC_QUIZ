@@ -48,30 +48,33 @@ const Login = () => {
   };
   
   return (
-    <div>
+    <div className="login-container">
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email: </label>
+      <form onSubmit={handleLogin} className="login-form">
+        <div className="form-group">
+          <label htmlFor="email">Email:</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
-        <div>
-          <label>Password: </label>
+        <div className="form-group">
+          <label htmlFor="password">Password:</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        <div>
-          <label>User Type: </label>
+        <div className="form-group">
+          <label htmlFor="userType">User Type:</label>
           <select
+            id="userType"
             value={userType}
             onChange={(e) => setUserType(e.target.value)}
             required
@@ -80,7 +83,7 @@ const Login = () => {
             <option value="professor">Professor</option>
           </select>
         </div>
-        <div>
+        <div className="form-group">
           <button type="submit">Login</button>
         </div>
       </form>
