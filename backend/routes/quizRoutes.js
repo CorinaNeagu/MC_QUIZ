@@ -93,7 +93,6 @@ router.get('/categories', (req, res) => {
 
 
 // POST - Add a question to the QuestionBank table
-// POST - Add a question to the QuestionBank table
 router.post("/questions", (req, res) => {
   const { questionContent, isMultipleChoice, professor_id, category } = req.body;
 
@@ -135,6 +134,34 @@ router.post("/questions", (req, res) => {
     );
   });
 });
+
+// Route to create answers for a specific question
+router.post('/answers', async (req, res) => {
+  const { question_bank_id, answers } = req.body;
+
+  if (!question_bank_id || !Array.isArray(answers)) {
+    return res.status(400).json({ error: 'Invalid input data' });
+  }
+
+  try {
+    // Step 2: Save each answer in the AnswerBank table
+    const answerPromises = answers.map((answer) =>
+      db.query(
+        'INSERT INTO AnswerBank (question_bank_id, answer_content, is_correct, score) VALUES (?, ?, ?, ?)',
+        [question_bank_id, answer.answerContent, answer.isCorrect, answer.score]
+      )
+    );
+
+    // Wait for all the answers to be inserted
+    await Promise.all(answerPromises);
+
+    res.status(200).json({ message: 'Answers created successfully' });
+  } catch (error) {
+    console.error('Error creating answers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 
 

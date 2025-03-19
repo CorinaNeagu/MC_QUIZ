@@ -7,25 +7,19 @@ const CreateQuestion = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fetch professor_id and noQuestions from location state passed via navigate in CreateQuiz
   const { professor_id, noQuestions, category } = location?.state;
 
-  const [question, setQuestion] = useState(""); // State for the question content
-  const [isMultipleChoice, setIsMultipleChoice] = useState(false); // Whether the question is multiple choice
-  const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }]); // Array of answers
-  const [questionsAdded, setQuestionsAdded] = useState(0); // Track how many questions are added
-  const [questionList, setQuestionList] = useState([]); // List of added questions to display below the form
-  const [questionContent, setQuestionContent] = useState("")
-
-  const [categories, setCategories] = useState([]); // State to store categories
-  const [selectedCategory, setSelectedCategory] = useState(category); // State for selected category
-
-
-  // Use professor_id from the location state if passed, or fall back to null
-  const [professorId, setProfessorId] = useState(professor_id); 
+  const [questionContent, setQuestionContent] = useState(""); 
+  const [isMultipleChoice, setIsMultipleChoice] = useState(false);
+  const [answers, setAnswers] = useState([{ answerContent: "", isCorrect: false }]);
+  const [questionsAdded, setQuestionsAdded] = useState(0);
+  const [questionList, setQuestionList] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(category);
+  const [professorId, setProfessorId] = useState(professor_id);
 
   useEffect(() => {
-    // Log the received state for debugging
+    // Log received state for debugging
     console.log("Received state:", location.state);
 
     // Fetch categories from the backend
@@ -38,15 +32,16 @@ const CreateQuestion = () => {
       }
     };
     fetchCategories();
-  }, [location.state]); // Run this effect when location.state changes
-
-
+  }, [location.state]);
 
   // Handle the form submission for each question
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
 
     const correctAnswersCount = answers.filter((answer) => answer.isCorrect).length;
+
+    // Log question state to check if it's updated correctly
+    console.log("Question content before submission:", questionContent);
 
     if (!questionContent || answers.some((answer) => !answer.answerContent)) {
       alert("Please enter a valid question and answers.");
@@ -62,7 +57,7 @@ const CreateQuestion = () => {
       setQuestionList([
         ...questionList,
         {
-          questionContent,
+          questionContent, 
           answers: answers.map((answer) => answer.answerContent),
         },
       ]);
@@ -71,8 +66,8 @@ const CreateQuestion = () => {
       alert(`You have reached the maximum number of ${noQuestions} questions.`);
     }
 
-    setQuestionContent(""); 
-    setAnswers([{ answerContent: "", isCorrect: false }]); 
+    //setQuestionContent(""); 
+    setAnswers([{ answerContent: "", isCorrect: false }]);
   };
 
   // Add a new answer input field
@@ -106,55 +101,33 @@ const CreateQuestion = () => {
     );
   };
 
-  const handleAddNewQuestion = () => {
-    if (questionsAdded < noQuestions) {
-      if (!question || answers.some((answer) => !answer.answerContent)) {
-        alert("Please enter a valid question and answers.");
-        return;
-      }
-
-      setQuestionList([
-        ...questionList,
-        {
-          questionContent: question,
-          answers: answers.map((answer) => answer.answerContent),
-        },
-      ]);
-      setQuestionsAdded(questionsAdded + 1);
-
-      setQuestionContent(""); 
-      setAnswers([{ answerContent: "", isCorrect: false }]);
-    } else {
-      alert(`You have reached the maximum number of ${noQuestions} questions.`);
-    }
-  };
-
   // When submitting the form, check if selectedCategory is valid
   const handleSubmitQuiz = async () => {
     const token = localStorage.getItem("token");
-  
+
     // Validate that a category is selected
     if (!selectedCategory) {
       alert("Please select a valid category.");
       return;
     }
 
-    console.log("Question content:", question);
-  
+    // Log the values for debugging before submission
+    console.log("Submitting form with questionContent before submission:", questionContent);
+
     const formData = {
       professor_id: professorId,
-      category: selectedCategory, // Send category_name as a string
-      questionContent,
+      category: selectedCategory,
+      questionContent: questionContent,  // Directly use the state value
       isMultipleChoice: isMultipleChoice,
     };
-  
+
     console.log("Submitting form with data:", formData);
-  
+
     try {
       const response = await axios.post("http://localhost:5000/api/questions", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       if (response.status === 200) {
         alert("Question added successfully to Question Bank!");
       }
@@ -163,7 +136,7 @@ const CreateQuestion = () => {
       alert("There was an error adding the question.");
     }
   };
-  
+
   
 
   return (
@@ -175,8 +148,8 @@ const CreateQuestion = () => {
             <label htmlFor="question">Question Content</label>
             <textarea
               id="question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+              value={questionContent} // Using `questionContent` state
+              onChange={(e) => setQuestionContent(e.target.value)} // Update `questionContent` state
               required
               placeholder="Enter your question here"
             />
@@ -225,7 +198,7 @@ const CreateQuestion = () => {
 
           <button
             type="button"
-            onClick={handleAddNewQuestion}
+            onClick={handleQuestionSubmit} // Handle question submission
             className="add-new-question-button"
             disabled={questionsAdded >= noQuestions} 
           >
