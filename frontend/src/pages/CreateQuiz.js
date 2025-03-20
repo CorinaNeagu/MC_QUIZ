@@ -85,7 +85,8 @@ const CreateQuiz = () => {
           state: {     
             professor_id: user_id,  // Pass user_id to create question
             noQuestions: validNoQuestions,     
-            category,  // Pass selected category
+            category, // Pass selected category
+            quizId, 
           },
         });
       }

@@ -1,0 +1,31 @@
+/* ScorePage.css */
+.score-page-container {
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .score-page-container h1 {
+    font-size: 3em;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .score-page-container p {
+    font-size: 2em;
+    color: #555;
+  }
+  
+  .score-page-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .score-page-container button:hover {
+    background-color: #0056b3;
+  }
+  

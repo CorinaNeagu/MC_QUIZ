@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes"); // Authentication-related routes (register, login)
 const userRoutes = require("./routes/userRoutes"); // User-related routes (profile, etc.)
 const quizRoutes = require("./routes/quizRoutes")
+const takeQuizRoutes = require("./routes/takeQuizRoutes");
 const app = express();
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(cors());
 app.use("/api/auth", authRoutes); // Authentication routes (register, login)
 app.use("/api/user", userRoutes); // User routes (profile, etc.)
 app.use("/api", quizRoutes);
+app.use("/api/takeQuiz", takeQuizRoutes);
 
 // Set up the server
 const PORT = process.env.PORT || 5000;

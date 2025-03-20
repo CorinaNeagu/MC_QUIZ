@@ -1,0 +1,156 @@
+/* Main container for the quiz */
+.quiz-container {
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Title of the quiz */
+  .quiz-container h2 {
+    font-size: 2em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Container for each question */
+  .question-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  /* Question text */
+  .question-container h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* Question description */
+  .question-container p {
+    font-size: 1.2em;
+    color: #555;
+    margin-bottom: 20px;
+  }
+  
+  /* Options container */
+  .options-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Each option styling */
+  .option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+  }
+  
+  /* Styling for radio buttons */
+  .option input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #007bff; /* Adds a nice blue accent color to radio buttons */
+  }
+  
+  /* Labels for the options */
+  .option label {
+    font-size: 1.1em;
+    color: #444;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  /* Hover effect for labels */
+  .option label:hover {
+    color: #007bff;
+  }
+  
+  /* Navigation buttons container */
+  .navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  /* Styling for Previous and Next buttons */
+  .navigation-buttons button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .navigation-buttons button:hover {
+    background-color: #0056b3;
+  }
+  
+  .navigation-buttons button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* Submit button section */
+  .submit-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  /* Submit button */
+  .submit-button button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-button button:hover {
+    background-color: #218838;
+  }
+  
+  /* Loading and No Questions Available message */
+  .loading, .no-questions {
+    text-align: center;
+    font-size: 1.5em;
+    color: #666;
+    margin-top: 20px;
+  }
+  
+  /* Apply a responsive design for smaller screens */
+  @media (max-width: 600px) {
+    .quiz-container {
+      width: 90%;
+      padding: 15px;
+    }
+  
+    .question-container {
+      padding: 15px;
+    }
+  
+    .navigation-buttons button {
+      padding: 8px 16px;
+      font-size: 0.9em;
+    }
+  
+    .submit-button button {
+      padding: 12px 25px;
+      font-size: 1.1em;
+    }
+  }
+  

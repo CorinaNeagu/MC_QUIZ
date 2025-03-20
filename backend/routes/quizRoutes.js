@@ -94,7 +94,12 @@ router.get('/categories', (req, res) => {
 
 // POST - Add a question to the QuestionBank table
 router.post("/questions", (req, res) => {
-  const { questionContent, isMultipleChoice, professor_id, category } = req.body;
+  const { questionContent, isMultipleChoice, professor_id, category, quizId } = req.body;
+
+    // Check if quizId is provided
+    if (!quizId) {
+      return res.status(400).json({ message: "Quiz ID is required" });
+    }
 
   // Step 1: Get category_id from category_name
   const getCategoryQuery = `SELECT category_id FROM Category WHERE category_name = ?`;
@@ -126,13 +131,32 @@ router.post("/questions", (req, res) => {
           return res.status(500).json({ message: "Error inserting question" });
         }
 
+        const questionBankId = results.insertId;
+
+        // Step 3: Insert into the QuizQuestions table to associate the question with the quiz
+        const insertQuizQuestionQuery = `
+          INSERT INTO QuizQuestions (quiz_id, question_bank_id)
+          VALUES (?, ?)
+        `;
+
+        db.query(
+          insertQuizQuestionQuery,
+          [quizId, questionBankId],
+          (err, quizQuestionResults) => {
+            if (err) {
+              console.error("Error inserting into QuizQuestions:", err);
+              return res.status(500).json({ message: "Error associating question with quiz" });
+            }
+
         res.status(200).json({
           message: "Question successfully added to QuestionBank!",
           question_bank_id: results.insertId, 
-       });
+        });
       }
     );
-  });
+  }
+);
+});
 });
 
 router.post("/answers", async (req, res) => {
@@ -188,11 +212,17 @@ router.post("/answers", async (req, res) => {
   }
 });
 
-//display all quizzes
-router.get('/display/quizzes', (req, res) => {
-  const query = 'SELECT * FROM Quiz'; // Query to get all quizzes
 
-  // Execute the query to fetch quizzes
+//GET all quizzes
+router.get('/display/quizzes', (req, res) => {
+  // SQL query to get quizzes with their categories
+  const query = `
+    SELECT q.quiz_id, q.title, q.category_id, c.category_name
+    FROM Quiz q
+    LEFT JOIN Category c ON q.category_id = c.category_id;
+  `;
+
+  // Execute the query to fetch quizzes and categories
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching quizzes:', err);
@@ -203,4 +233,7 @@ router.get('/display/quizzes', (req, res) => {
     res.json(results);
   });
 });
+
+
+
 module.exports = router;

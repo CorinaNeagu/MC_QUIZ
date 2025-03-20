@@ -7,6 +7,8 @@ import HomePage from './pages/HomePage/HomePage';
 import UserProfile from "./pages/UserProfile/UserProfile";
 import CreateQuiz from "./pages/CreateQuiz";
 import CreateQuestion from "./pages/CreateQuestion";
+import DisplayQuestion from "./pages/DisplayQuestion/DisplayQuestion";
+import ScorePage from "./pages/ScorePage/ScorePage";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/profile" element={<UserProfile />} />  
         <Route path="/create-quiz" element={<CreateQuiz />} /> {/* Route for Create Quiz */} 
         <Route path="/create-question/:quizId" element={<CreateQuestion />} />
+        <Route path="/quiz/:quizId" element={<DisplayQuestion />} />
+        <Route path="/score" element={<ScorePage />} />
 
       </Routes>
     </Router>

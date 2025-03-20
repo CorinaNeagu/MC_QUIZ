@@ -14,6 +14,7 @@ const HomePage = () => {
   const [filteredQuizzes, setFilteredQuizzes] = useState([]);
   const navigate = useNavigate();
 
+  // Fetch user type and ensure the token is valid
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -39,14 +40,14 @@ const HomePage = () => {
     }
   }, [navigate]);
 
-  // Fetch quizzes and categories
+  // Fetch quizzes and categories if user is a student
   useEffect(() => {
     if (userType === "student") {
       // Fetch quizzes from backend
       axios
         .get("http://localhost:5000/api/display/quizzes") // Adjust API endpoint as needed
         .then((response) => {
-          setQuizzes(response.data);
+          setQuizzes(response.data); // Set quizzes data
           setFilteredQuizzes(response.data); // Initially display all quizzes
         })
         .catch((error) => {
@@ -57,7 +58,7 @@ const HomePage = () => {
       axios
         .get("http://localhost:5000/api/categories") // Adjust API endpoint as needed
         .then((response) => {
-          setCategories(response.data.categories); // Access categories array here
+          setCategories(response.data.categories); // Assuming response data contains categories array
         })
         .catch((error) => {
           console.error("Error fetching categories:", error);
@@ -65,6 +66,7 @@ const HomePage = () => {
     }
   }, [userType]);
 
+  // Handle category filter change
   const handleCategoryChange = (e) => {
     const categoryId = e.target.value;
     setSelectedCategory(categoryId);
@@ -76,6 +78,7 @@ const HomePage = () => {
     setFilteredQuizzes(filtered);
   };
 
+  // Handle search bar change
   const handleSearchChange = (e) => {
     const query = e.target.value.toLowerCase();
 
@@ -85,13 +88,17 @@ const HomePage = () => {
     setFilteredQuizzes(filtered);
   };
 
+  // Redirect to quiz display page
+  const startQuiz = (quizId) => {
+    navigate(`/quiz/${quizId}`);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="homepage-container">
-      {/* Separate Header Section */}
       <div className="homepage-header">
         <h1>Welcome to Your Dashboard</h1>
         <DropdownMenu />
@@ -101,9 +108,7 @@ const HomePage = () => {
         <div className="student-content">
           <h3>Available Quizzes</h3>
 
-          {/* Search Bar and Category Filter on the same line */}
           <div className="filters-container">
-            {/* Search Bar with Magnifying Glass Icon */}
             <div className="search-bar-container">
               <input
                 type="text"
@@ -114,7 +119,6 @@ const HomePage = () => {
               <i className="fas fa-search search-icon"></i>
             </div>
 
-            {/* Category Filter */}
             <div className="category-filter">
               <select
                 onChange={handleCategoryChange}
@@ -131,7 +135,6 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Display Quizzes */}
           {filteredQuizzes.length === 0 ? (
             <p>No quizzes available at the moment.</p>
           ) : (
@@ -139,10 +142,10 @@ const HomePage = () => {
               {filteredQuizzes.map((quiz) => (
                 <div key={quiz.quiz_id} className="quiz-card">
                   <h4>{quiz.title}</h4>
-                  <p>Category: {quiz.category_id}</p>
+                  <p>Category: {quiz.category_name}</p>
                   <button
                     className="start-quiz-btn"
-                    onClick={() => navigate(`/quiz/${quiz.quiz_id}`)}
+                    onClick={() => startQuiz(quiz.quiz_id)} // Navigate to quiz page
                   >
                     Start Quiz
                   </button>
