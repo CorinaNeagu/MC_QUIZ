@@ -10,6 +10,7 @@ import CreateQuestion from "./pages/CreateQuestion";
 
 function App() {
   return (
+  
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />

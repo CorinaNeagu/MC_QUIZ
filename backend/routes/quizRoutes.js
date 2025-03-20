@@ -187,4 +187,20 @@ router.post("/answers", async (req, res) => {
     res.status(500).json({ error: "Database error while saving answers." });
   }
 });
+
+//display all quizzes
+router.get('/display/quizzes', (req, res) => {
+  const query = 'SELECT * FROM Quiz'; // Query to get all quizzes
+
+  // Execute the query to fetch quizzes
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching quizzes:', err);
+      return res.status(500).json({ error: 'Error fetching quizzes from the database' });
+    }
+    
+    // Respond with the list of quizzes
+    res.json(results);
+  });
+});
 module.exports = router;

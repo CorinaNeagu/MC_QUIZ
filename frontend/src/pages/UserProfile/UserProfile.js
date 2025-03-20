@@ -42,21 +42,23 @@ const UserProfile = () => {
         })
         .catch((error) => console.error("Error fetching profile:", error));
 
-      // Fetch questions added by the professor
-      axios
-        .get("http://localhost:5000/api/user/professor/questions", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          setQuestions(response.data); // Set the questions in state
-        })
-        .catch((error) => {
-          console.error("Error fetching professor's questions:", error);
-        });
+      // Fetch questions added by the professor only if user is a professor
+      if (userProfile.userType === "professor") {
+        axios
+          .get("http://localhost:5000/api/user/professor/questions", {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            setQuestions(response.data); // Set the questions in state
+          })
+          .catch((error) => {
+            console.error("Error fetching professor's questions:", error);
+          });
+      }
     }
-  }, [navigate]);
+  }, [navigate, userProfile.userType]);
 
   const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
 
@@ -64,7 +66,7 @@ const UserProfile = () => {
     <div className="user-profile-container">
       <div className="profile-header">
         <h2>User Profile</h2>
-      </div>      
+      </div>
       {/* User Details Table */}
       <div className="profile-table">
         <table>
@@ -95,21 +97,28 @@ const UserProfile = () => {
         </table>
       </div>
 
-      {/* Display professor's questions */}
-      <div className="questions-list">
-        <h3>My Questions</h3>
-        {questions.length === 0 ? (
-          <p>No questions found.</p>
-        ) : (
-          questions.map((question, index) => (
-            <div key={index} className="question-item">
-              <p><strong>Question:</strong> {question.question_content}</p>
-              <p><strong>Category:</strong> {question.category_id}</p>
-              <p><strong>Multiple Choice:</strong> {question.is_multiple_choice ? 'Yes' : 'No'}</p>
-            </div>
-          ))
-        )}
-      </div>
+      {/* Only display professor's questions if the user is a professor */}
+      {userProfile.userType === "professor" && (
+        <div className="questions-list">
+          <h3>My Questions</h3>
+          {questions.length === 0 ? (
+            <p>No questions found.</p>
+          ) : (
+            questions.map((question, index) => (
+              <div key={index} className="question-item">
+                <p><strong>Question:</strong> {question.question_content}</p>
+                <p><strong>Category:</strong> {question.category_id}</p>
+                <p><strong>Multiple Choice:</strong> {question.is_multiple_choice ? 'Yes' : 'No'}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Optionally, show a message for non-professor users */}
+      {userProfile.userType !== "professor" && userProfile.userType !== "" && (
+        <p>You are not authorized to view questions.</p>
+      )}
     </div>
   );
 };
