@@ -1,18 +1,18 @@
-// ScorePage.js
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import './ScorePage.css';
 
 const ScorePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Access the state passed from the DisplayQuestion component
-  const { score } = location.state || { score: 0 }; // Default score is 0 if not provided
+  // Access score and totalQuestions from state
+  const { score, totalQuestions } = location.state;
 
   return (
     <div className="score-page-container">
       <h1>Your Score</h1>
-      <p>You scored: {score} out of X points</p> {/* Replace X with the total score */}
+      <p>You scored: {score} out of {totalQuestions} points</p> {/* Dynamically show total questions */}
       <button onClick={() => navigate("/home")}>Back to Home</button>
     </div>
   );

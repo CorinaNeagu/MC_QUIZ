@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const DisplayQuestion = () => {
-  const { quizId } = useParams(); // Get the quizId from the URL params
+  const { quizId } = useParams();
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState([]);
@@ -11,24 +11,29 @@ const DisplayQuestion = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [attemptId, setAttemptId] = useState(null);
-  const [studentId, setStudentId] = useState(localStorage.getItem("user_id")); // Get studentId from localStorage
+  const [studentId, setStudentId] = useState(() => {
+    const storedId = localStorage.getItem("user_id");
+    const parsedId = parseInt(storedId, 10);
+    return isNaN(parsedId) ? 0 : parsedId; // Default to 0 if the value is not a valid integer
+  });
 
-  // Fetch the quiz questions and start quiz attempt
+  // Fetch quiz questions and start quiz attempt
   useEffect(() => {
     if (!quizId || !studentId) {
-      console.log("No quizId or studentId, redirecting to home.");
-      navigate("/home"); // Redirect if no quizId or studentId is found
+      console.error("No quizId or studentId, redirecting to home.");
+      navigate("/home");
       return;
     }
 
     const startQuizAttempt = async () => {
       try {
-        console.log("Starting quiz attempt...");
+        console.log("🔹 Starting quiz attempt for quiz:", quizId);
         const response = await axios.post(`http://localhost:5000/api/takeQuiz/quiz/${quizId}/start`, { studentId });
+
+        console.log("✅ Quiz attempt started. Attempt ID:", response.data.attemptId);
         setAttemptId(response.data.attemptId);
-        fetchQuestions();
       } catch (error) {
-        console.error("Error starting quiz attempt:", error);
+        console.error("❌ Error starting quiz attempt:", error);
         setLoading(false);
       }
     };
@@ -36,182 +41,186 @@ const DisplayQuestion = () => {
     startQuizAttempt();
   }, [quizId, studentId, navigate]);
 
-  // Fetch quiz questions
- const fetchQuestions = async () => {
-  try {
-    console.log("Fetching quiz questions...");
-    const response = await axios.get(`http://localhost:5000/api/takeQuiz/quizzes/${quizId}/questions`);
-    console.log("Fetched Questions:", response.data);
+  // Fetch questions after attemptId is set
+  useEffect(() => {
+    if (attemptId) {
+      console.log("🔹 Attempt ID set, fetching questions...");
+      fetchQuestions();
+    }
+  }, [attemptId]);
 
-    // Now fetch answers for each question
-    const questionsWithAnswers = await Promise.all(
-      response.data.map(async (question) => {
-        const answersResponse = await axios.get(`http://localhost:5000/api/takeQuiz/quiz/answers/${question.question_bank_id}`);
-        console.log(`Answers for question ${question.question_bank_id}:`, answersResponse.data);
+  // Fetch quiz questions and answers
+  const fetchQuestions = async () => {
+    try {
+      console.log("🔹 Fetching quiz questions...");
+      const questionsResponse = await axios.get(`http://localhost:5000/api/takeQuiz/quizzes/${quizId}/questions`);
+      console.log("✅ Questions fetched:", JSON.stringify(questionsResponse.data, null, 2));
 
-        return {
-          ...question, // Add the question data
-          options: answersResponse.data, // Add the options (answers) to the question
-        };
-      })
-    );
+      const questionsWithAnswers = await Promise.all(
+        questionsResponse.data.map(async (question) => {
+          try {
+            console.log(`🔹 Fetching answers for question ${question.question_bank_id}...`);
+            const answersResponse = await axios.get(`http://localhost:5000/api/takeQuiz/questions/${question.question_bank_id}/answers`);
+            console.log(`✅ Answers for question ${question.question_bank_id}:`, JSON.stringify(answersResponse.data, null, 2));
 
-    setQuestions(questionsWithAnswers); // Set the state with questions and their answers
-    setLoading(false);
-  } catch (error) {
-    console.error("Error fetching quiz questions:", error);
-    setLoading(false);
-  }
-};
+            return {
+              ...question,
+              options: answersResponse.data.length > 0 ? answersResponse.data : [],
+            };
+          } catch (error) {
+            console.error(`❌ Error fetching answers for question ${question.question_bank_id}:`, error);
+            return { ...question, options: [] };
+          }
+        })
+      );
 
+      setQuestions(questionsWithAnswers);
+      setLoading(false);
+    } catch (error) {
+      console.error("❌ Error fetching quiz questions:", error);
+      setLoading(false);
+    }
+  };
 
-  // Handle answer change for the current question
+  // Handle answer change
   const handleAnswerChange = (questionId, selectedOption) => {
-    console.log(`Selected option ${selectedOption} for question ${questionId}`);
-    setAnswers(prevAnswers => ({
-      ...prevAnswers,
-      [questionId]: selectedOption,
-    }));
-  };
-
-  // Navigate to the next question
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-    }
-  };
-
-  // Navigate to the previous question
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prevIndex => prevIndex - 1);
-    }
+    setAnswers((prevAnswers) => {
+      const updatedAnswers = { ...prevAnswers, [questionId]: selectedOption };
+      return updatedAnswers;
+    });
   };
 
   // Calculate the score based on selected answers
   const calculateScore = () => {
     return questions.reduce((score, question) => {
       const selectedAnswerId = answers[question.question_bank_id];
-      console.log(`Calculating score for question ${question.question_bank_id}. Selected Answer: ${selectedAnswerId}`);
 
-      if (!question.options || question.options.length === 0) {
-        console.log(`No options for question ${question.question_bank_id}`);
-        return score;
-      }
-
-      const correctAnswer = question.options.find(option => option.is_correct);
+      const correctAnswer = question.options.find((option) => option.is_correct);
       if (selectedAnswerId === correctAnswer?.answer_id) {
-        console.log(`Correct answer selected for question ${question.question_bank_id}. Adding score: ${correctAnswer.score}`);
         return score + correctAnswer.score;
       }
+
       return score;
     }, 0);
   };
 
-  // Handle quiz submission
-  const handleSubmitQuiz = async () => {
-    console.log("Submitting quiz...");
-    if (!attemptId) {
-      console.error("No attempt ID found");
-      return;
-    }
-  
-    const score = calculateScore();
-    console.log("Score to submit:", score);
-  
-    // Prepare the responses to be submitted
-    const responses = Object.entries(answers).map(([questionId, selectedOption]) => {
-      const question = questions.find(q => q.question_bank_id === questionId);
-      if (!question || !question.options || question.options.length === 0) {
-        console.error(`No options found for question ${questionId}`);
-        return null; // Skip this question if options are not available
-      }
-  
-      const selectedOptionObj = question.options.find(option => option.answer_id === selectedOption);
-      if (!selectedOptionObj) {
-        console.error(`Selected option not found for question ${questionId}`);
-        return null; // Skip this question if selected option is not found
-      }
-  
-      const isCorrect = selectedOptionObj.is_correct;
-      console.log(`Processing answer for questionId: ${questionId}, selectedOption: ${selectedOption}, isCorrect: ${isCorrect}`);
-  
+  // Submit responses separately
+  // Submit responses separately
+const submitResponses = async () => {
+  const responses = Object.entries(answers)
+    .map(([questionId, selectedOption]) => {
+      const questionBankId = parseInt(questionId, 10);
+      const selectedOptionId = parseInt(selectedOption, 10);
+
+      const question = questions.find((q) => q.question_bank_id === questionBankId);
+
+      if (!question) return null;
+
+      const selectedOptionObj = question.options.find((option) => option.answer_id === selectedOptionId);
+      if (!selectedOptionObj) return null;
+
+      console.log("quizId:", quizId);
+      console.log("attemptId:", attemptId);
+      console.log("studentId:", studentId); // Ensure you are sending this
+
       return {
-        student_id: studentId,
-        quiz_id: quizId,
-        question_bank_id: questionId,
-        answer_id: selectedOption,
+        student_id: studentId,  // Add student_id here
+        question_bank_id: questionBankId,
+        answer_id: selectedOptionId,
+        quiz_id: parseInt(quizId, 10),
         attempt_id: attemptId,
-        is_correct: isCorrect,
+        is_correct: selectedOptionObj.is_correct,
       };
-    }).filter(response => response !== null); // Remove null responses
+    })
+    .filter((response) => response !== null);
+
+  console.log("Responses to be submitted:", responses);  // Add this log
+
+  if (responses.length === 0) {
+    console.error("❌ No valid responses to submit.");
+    return null;  // If no responses, return null
+  }
+
+  return responses; // Return the responses
+};
+
+
   
-    console.log("Responses to submit:", responses);
-  
-    // If there are no valid responses, stop the submission
-    if (responses.length === 0) {
-      console.error("No valid responses to submit");
-      return;
-    }
-  
-    try {
-      await axios.post(`http://localhost:5000/api/takeQuiz/quiz/${quizId}/attempt/${attemptId}/response`, responses);
-      await axios.post(`http://localhost:5000/api/takeQuiz/quiz/${quizId}/attempt/${attemptId}/submit`, { studentId, score });
-      navigate(`/score/${attemptId}`); // Redirect to the score page
-    } catch (error) {
-      console.error("Error submitting quiz attempt:", error);
+
+  // Final quiz submit
+  // Final quiz submit
+const handleSubmitQuiz = async () => {
+  const score = calculateScore();
+
+  // Get the responses and ensure it's properly returned
+  const responses = await submitResponses();  // Make sure responses are obtained here
+
+  // If responses are null, don't proceed with the submission
+  if (!responses) {
+    console.error("❌ No responses to submit.");
+    return;
+  }
+
+  try {
+    await axios.post(`http://localhost:5000/api/takeQuiz/quiz/${quizId}/attempt/${attemptId}/submit`, {
+      studentId,
+      score,
+      responses,  // Pass the responses here
+    });
+    navigate(`/score/${attemptId}`, { state: { score, totalQuestions: questions.length } }); 
+   } catch (error) {
+    console.error("❌ Error submitting quiz:", error);
+  }
+};
+
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
     }
   };
 
-  // Loading state and empty questions state
-  if (loading) return <div>Loading questions...</div>;
+  // Handle previous question
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex - 1);
+    }
+  };
 
+  if (loading) return <div>Loading questions...</div>;
   if (questions.length === 0) return <div>No questions available for this quiz.</div>;
 
   const currentQuestion = questions[currentQuestionIndex];
-  console.log("Current question:", currentQuestion);
 
   return (
     <div className="quiz-container">
       <h2>Quiz</h2>
-      
-      <div className="question-container">
-        <h3>Question {currentQuestionIndex + 1}</h3>
-        <p>{currentQuestion.question_text}</p>
-        
-        <div className="options-container">
-          {currentQuestion.options && currentQuestion.options.length > 0 ? (
-            currentQuestion.options.map((option, index) => (
-              <div key={index} className="option">
-                <input
-                  type="radio"
-                  id={`option-${index}`}
-                  name={`question-${currentQuestion.question_bank_id}`}
-                  value={option.answer_id}
-                  checked={answers[currentQuestion.question_bank_id] === option.answer_id}
-                  onChange={() => handleAnswerChange(currentQuestion.question_bank_id, option.answer_id)}
-                />
-                <label htmlFor={`option-${index}`}>{option.answer_content}</label>
-              </div>
-            ))
-          ) : (
-            <p>No options available for this question.</p>
-          )}
-        </div>
+      <h3>Question {currentQuestionIndex + 1}</h3>
+      <p>{currentQuestion.question_text}</p>
 
-        <div className="navigation-buttons">
-          <button onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>
-            Previous
-          </button>
-          <button onClick={handleNextQuestion} disabled={currentQuestionIndex === questions.length - 1}>
-            Next
-          </button>
-        </div>
+      <div className="options-container">
+        {currentQuestion.options.length > 0 ? (
+          currentQuestion.options.map((option, index) => (
+            <div key={index} className="option">
+              <input
+                type="radio"
+                id={`option-${index}`}
+                name={`question-${currentQuestion.question_bank_id}`}
+                value={option.answer_id}
+                checked={answers[currentQuestion.question_bank_id] === option.answer_id}
+                onChange={() => handleAnswerChange(currentQuestion.question_bank_id, option.answer_id)}
+              />
+              <label htmlFor={`option-${index}`}>{option.answer_content}</label>
+            </div>
+          ))
+        ) : (
+          <p>⚠️ No options available.</p>
+        )}
       </div>
 
-      <div className="submit-button">
-        <button onClick={handleSubmitQuiz}>Submit Quiz</button>
-      </div>
+      <button onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>Previous</button>
+      <button onClick={handleNextQuestion} disabled={currentQuestionIndex === questions.length - 1}>Next</button>
+      <button onClick={handleSubmitQuiz}>Submit Quiz</button>
     </div>
   );
 };
