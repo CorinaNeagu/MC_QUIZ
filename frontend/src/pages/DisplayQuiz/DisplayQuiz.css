@@ -1,0 +1,79 @@
+/* Container for the whole quiz page */
+.display-quiz-container {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f4f7fb;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Title of the quiz */
+  .display-quiz-container h2 {
+    font-size: 2.2em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  
+  /* Displaying the quiz details */
+  .quiz-details p {
+    margin: 12px 0;
+    font-size: 18px;
+    color: #555;
+    line-height: 1.5;
+  }
+  
+  /* Style for the "Start Quiz" button container */
+  .start-quiz-button {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  /* Button style */
+  .start-quiz-button button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Hover effect for the "Start Quiz" button */
+  .start-quiz-button button:hover {
+    background-color: #87CEEB;
+    transform: scale(1.05);
+  }
+  
+  /* Focus effect for accessibility */
+  .start-quiz-button button:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(72, 199, 98, 0.8);
+  }
+  
+  /* For smaller screens, reduce the padding and font size */
+  @media (max-width: 768px) {
+    .display-quiz-container {
+      padding: 20px;
+    }
+  
+    .display-quiz-container h2 {
+      font-size: 1.8em;
+    }
+  
+    .quiz-details p {
+      font-size: 16px;
+    }
+  
+    .start-quiz-button button {
+      font-size: 16px;
+      padding: 12px 25px;
+    }
+  }
+  

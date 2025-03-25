@@ -2,6 +2,19 @@ const express = require('express');
 const db = require('../db');
 const authenticateJWT = require('../middleware/authMiddleware'); // Import the authentication middleware
 const router = express.Router();
+const jwt = require('jsonwebtoken'); 
+
+const queryAsync = (sql, params) => {
+  return new Promise((resolve, reject) => {
+    db.query(sql, params, (err, results) => {
+      if (err) {
+        reject(err); // Reject promise if error occurs
+      } else {
+        resolve(results); // Resolve promise with results if no error
+      }
+    });
+  });
+};
 
 router.get('/categories', (req, res) => {
     // SQL query to fetch all categories
@@ -17,203 +30,241 @@ router.get('/categories', (req, res) => {
     });
   });
 
+  // Quiz creation endpoint
+router.post('/quizzes', (req, res) => {
+  const {
+    title,
+    category,
+    timeLimit,
+    deductionPercentage,
+    retakeAllowed,
+    isActive,
+    noQuestions,
+  } = req.body;
 
-  // POST - Create a new quiz
-  router.post('/quizzes', authenticateJWT, (req, res) => {
-    // Extract the fields from the request body
-    const { title, category, timeLimit, deductionPercentage, retakeAllowed, isActive, noQuestions } = req.body;
-    const professorId = req.user.id; // Get the professor's ID from the JWT payload
-  
-    console.log("Received data:", req.body); // Log to confirm
-  
-    // Parse and convert values to the correct types
-    const timeLimitNum = parseInt(timeLimit, 10);
-    const deductionPercentageNum = parseFloat(deductionPercentage);
-    const noQuestionsNum = parseInt(noQuestions, 10);
-  
-    console.log("Parsed Data:", { timeLimitNum, deductionPercentageNum, noQuestionsNum });
-  
-    // Check if all required fields are provided
-    if (!title || !category || isNaN(timeLimitNum) || isNaN(deductionPercentageNum) || isNaN(noQuestionsNum)) {
-      console.log("Error: Missing required fields.");
-      return res.status(400).json({ message: 'All fields are required' });
+  const token = req.headers['authorization']?.split(' ')[1]; // Extract JWT token from the header
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
+  }
+
+  // Verify the token
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Unauthorized: Invalid token' });
     }
-  
-    // Validate timeLimit (Must be a positive number)
-    if (timeLimitNum <= 0 || isNaN(timeLimitNum)) {
-      return res.status(400).json({ message: 'Time limit must be a positive number' });
-    }
-  
-    // Validate deductionPercentage (Must be between 0 and 100)
-    if (deductionPercentageNum < 0 || deductionPercentageNum > 100 || isNaN(deductionPercentageNum)) {
-      return res.status(400).json({ message: 'Deduction percentage must be between 0 and 100' });
-    }
-  
-    // Validate noQuestions (Must be a positive number)
-    if (noQuestionsNum <= 0 || isNaN(noQuestionsNum)) {
-      return res.status(400).json({ message: 'Number of questions must be a positive number' });
-    }
-  
-    // Proceed to insert the data into the database
-    const query = `INSERT INTO Quiz (professor_id, title, category_id)
-                   SELECT ?, ?, category_id FROM Category WHERE category_name = ? LIMIT 1`;
-  
-    db.query(query, [professorId, title, category], (err, result) => {
-      if (err) {
-        console.error('Error inserting quiz:', err);
+
+    const professor_id = decoded.id; // Assuming 'id' is the professor's ID from the JWT payload
+
+    // Insert quiz data into the `Quiz` table
+    const insertQuizQuery = `
+      INSERT INTO Quiz (professor_id, title, category_id, created_at)
+      VALUES (?, ?, (SELECT category_id FROM Category WHERE category_name = ?), NOW())
+    `;
+    db.query(insertQuizQuery, [professor_id, title, category], (quizErr, quizResults) => {
+      if (quizErr) {
+        console.error('Error inserting quiz:', quizErr);
         return res.status(500).json({ message: 'Error creating quiz' });
       }
-  
-      const quizId = result.insertId;
-  
-      console.log('Inserting quiz settings:', {
-        quizId,
-        timeLimit: timeLimitNum,
-        deductionPercentage: deductionPercentageNum,
-        retakeAllowed,
-        isActive,
-        noQuestions: noQuestionsNum,
-      });
-  
-      const settingsQuery = `INSERT INTO QuizSettings (quiz_id, time_limit, deduction_percentage, retake_allowed, is_active, no_questions)
-                             VALUES (?, ?, ?, ?, ?, ?)`;
-  
-      db.query(settingsQuery, [quizId, timeLimitNum, deductionPercentageNum, retakeAllowed, isActive, noQuestionsNum], (err) => {
-        if (err) {
-          console.error('Error inserting quiz settings:', err);
-          return res.status(500).json({ message: 'Error saving quiz settings' });
+
+      const quiz_id = quizResults.insertId;
+
+      // Insert quiz settings into the `QuizSettings` table
+      const insertQuizSettingsQuery = `
+        INSERT INTO QuizSettings (quiz_id, time_limit, deduction_percentage, retake_allowed, is_active, no_questions)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+      db.query(
+        insertQuizSettingsQuery,
+        [quiz_id, timeLimit, deductionPercentage, retakeAllowed, isActive, noQuestions],
+        (settingsErr, settingsResults) => {
+          if (settingsErr) {
+            console.error('Error inserting quiz settings:', settingsErr);
+            return res.status(500).json({ message: 'Error creating quiz settings' });
+          }
+
+          // Return the created quiz ID in the response
+          return res.status(200).json({ message: 'Quiz created successfully', quizId: quiz_id });
         }
-  
-        res.status(200).json({ message: 'Quiz created successfully', quizId });
-      });
+      );
     });
   });
-  
-  
-
-
-// POST - Add a question to the QuestionBank table
-router.post("/questions", (req, res) => {
-  const { questionContent, isMultipleChoice, professor_id, category, quizId } = req.body;
-
-    // Check if quizId is provided
-    if (!quizId) {
-      return res.status(400).json({ message: "Quiz ID is required" });
-    }
-
-  // Step 1: Get category_id from category_name
-  const getCategoryQuery = `SELECT category_id FROM Category WHERE category_name = ?`;
-
-  db.query(getCategoryQuery, [category], (err, categoryResults) => {
-    if (err) {
-      console.error("Error fetching category ID:", err);
-      return res.status(500).json({ message: "Error fetching category ID" });
-    }
-
-    if (categoryResults.length === 0) {
-      return res.status(400).json({ message: "Invalid category name" });
-    }
-
-    const category_id = categoryResults[0].category_id;
-
-    // Step 2: Insert the question into the QuestionBank table
-    const insertQuestionQuery = `
-      INSERT INTO QuestionBank (professor_id, category_id, question_content, is_multiple_choice)
-      VALUES (?, ?, ?, ?)
-    `;
-
-    db.query(
-      insertQuestionQuery,
-      [professor_id, category_id, questionContent, isMultipleChoice],
-      (err, results) => {
-        if (err) {
-          console.error("Error inserting question:", err);
-          return res.status(500).json({ message: "Error inserting question" });
-        }
-
-        const questionBankId = results.insertId;
-
-        // Step 3: Insert into the QuizQuestions table to associate the question with the quiz
-        const insertQuizQuestionQuery = `
-          INSERT INTO QuizQuestions (quiz_id, question_bank_id)
-          VALUES (?, ?)
-        `;
-
-        db.query(
-          insertQuizQuestionQuery,
-          [quizId, questionBankId],
-          (err, quizQuestionResults) => {
-            if (err) {
-              console.error("Error inserting into QuizQuestions:", err);
-              return res.status(500).json({ message: "Error associating question with quiz" });
-            }
-
-        res.status(200).json({
-          message: "Question successfully added to QuestionBank!",
-          question_bank_id: results.insertId, 
-        });
-      }
-    );
-  }
-);
-});
 });
 
-router.post("/answers", async (req, res) => {
-  const { question_bank_id, answers } = req.body;
+router.post("/questions", async (req, res) => {
+  const { quizId, questionContent, isMultipleChoice } = req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
 
-  // Log incoming request data
-  console.log("Received data for answers:", req.body);
-
-  // Validate answer content before insertion
-  if (!question_bank_id || !Array.isArray(answers) || answers.length === 0) {
-    return res.status(400).json({ error: "Invalid request. Question ID and answers are required." });
-  }
-
-  // Filter out any empty answers
-  const validAnswers = answers.filter(answer => answer.answerContent.trim() !== "");
-
-  if (validAnswers.length === 0) {
-    return res.status(400).json({ error: "No valid answers provided." });
+  if (!token) {
+    return res.status(401).json({ message: "No token provided. Please log in." });
   }
 
   try {
-    // Insert answers into the database
-    const insertPromises = validAnswers.map((answer) => {
-      return new Promise((resolve, reject) => {
-        db.query(
-          `INSERT INTO AnswerBank (question_bank_id, answer_content, is_correct, score)
-           VALUES (?, ?, ?, ?)`,
-          [question_bank_id, 
-            answer.answerContent, 
-            answer.isCorrect ? 1 : 0, // Convert true/false to 1/0  
-            answer.score ? 1 : 0, 
-          ],          
-          (error, results) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          }
-        );
+    // Verify token to get the user_id (professor_id)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const professor_id = decoded.id;
+
+    // Validate required fields
+    if (!quizId || !questionContent) {
+      return res.status(400).json({ message: "Please provide all required fields." });
+    }
+
+    // Insert question into the Questions table
+    const questionQuery = `INSERT INTO Questions (quiz_id, question_content, is_multiple_choice) VALUES (?, ?, ?)`;
+    db.query(questionQuery, [quizId, questionContent, isMultipleChoice], (err, result) => {
+      if (err) {
+        console.error('Error creating question:', err);
+        return res.status(500).json({ message: 'Database error while creating question' });
+      }
+
+      const questionId = result.insertId; // Get the ID of the newly created question
+
+      return res.status(200).json({
+        message: "Question created successfully!",
+        questionId: questionId,
       });
     });
-
-    // Wait for all insert operations to complete
-    const results = await Promise.all(insertPromises);
-
-    console.log("Inserted answers:", results);
-
-    res.status(201).json({ message: "Answers saved successfully!", answers: results });
   } catch (err) {
-    console.error("Error inserting answers:", err);
-    res.status(500).json({ error: "Database error while saving answers." });
+    console.error('JWT error:', err);
+    return res.status(401).json({ message: 'Invalid or expired token. Please log in again.' });
+  }
+});
+
+// Create answer(s) for a question
+router.post("/answers", (req, res) => {
+  const { questionId, answerContent, isCorrect, score } = req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided. Please log in." });
+  }
+
+  try {
+    // Validate required fields
+    if (!questionId || !answerContent || score == null) {
+      return res.status(400).json({ message: "Please provide all required fields." });
+    }
+
+    const isCorrectValue = isCorrect ? true : false;  // ✅ Always `true` or `false`
+    // Insert answer into the Answers table
+    const answerQuery = `INSERT INTO Answers (question_id, answer_content, is_correct, score) VALUES (?, ?, ?, ?)`;
+    db.query(answerQuery, [questionId, answerContent, isCorrectValue, score], (err, result) => {
+      if (err) {
+        console.error('Error creating answer:', err);
+        return res.status(500).json({ message: 'Database error while creating answer' });
+      }
+
+      return res.status(200).json({ message: "Answer created successfully!" });
+    });
+  } catch (err) {
+    console.error('JWT error:', err);
+    return res.status(401).json({ message: 'Invalid or expired token. Please log in again.' });
+  }
+});
+
+// GET route to fetch all questions for a specific quiz
+router.get('/questions/:quizId', async (req, res) => {
+  const quizId = req.params.quizId;  // Extract quizId from URL parameters
+
+  // Validate quizId
+  if (!quizId) {
+    return res.status(400).json({ message: 'Quiz ID is required.' });
+  }
+
+  try {
+    // Query the database to get all questions for the specific quizId
+    const query = 'SELECT * FROM Questions WHERE quiz_id = ?';
+    
+    db.query(query, [quizId], (err, result) => {
+      if (err) {
+        console.error('Error fetching questions:', err);
+        return res.status(500).json({ message: 'Error fetching questions from database.' });
+      }
+
+      // Send back the questions as a response
+      return res.status(200).json({
+        message: 'Questions fetched successfully.',
+        questions: result,
+      });
+    });
+  } catch (err) {
+    console.error('Error:', err);
+    return res.status(500).json({ message: 'An error occurred while fetching questions.' });
+  }
+});
+
+router.get('/answers/:questionId', async (req, res) => {
+  const questionId = req.params.questionId;  // Extract questionId from URL parameters
+
+  // Validate questionId
+  if (!questionId) {
+    return res.status(400).json({ message: 'Question ID is required.' });
+  }
+
+  try {
+    // Query the database to get all answers for the specific questionId
+    const query = 'SELECT * FROM Answers WHERE question_id = ?';
+    
+    db.query(query, [questionId], (err, result) => {
+      if (err) {
+        console.error('Error fetching answers:', err);
+        return res.status(500).json({ message: 'Error fetching answers from database.' });
+      }
+
+      // Send back the answers as a response
+      return res.status(200).json({
+        message: 'Answers fetched successfully.',
+        answers: result, // Return the fetched answers
+      });
+    });
+  } catch (err) {
+    console.error('Error:', err);
+    return res.status(500).json({ message: 'An error occurred while fetching answers.' });
+  }
+});
+
+// Route to fetch quiz data (questions and answers)
+router.get('/quizPreview/:quizId', async (req, res) => {
+  const { quizId } = req.params;
+
+  try {
+    // Fetch the quiz questions from the database
+    const quizQuestions = await queryAsync(
+      'SELECT * FROM questions WHERE quiz_id = ?', 
+      [quizId]
+    );
+
+    if (quizQuestions.length === 0) {
+      return res.status(404).json({ message: 'No questions found for this quiz' });
+    }
+
+    // Fetch the answers for the fetched questions
+    const questionIds = quizQuestions.map((q) => q.question_id);
+    const answers = await queryAsync(
+      'SELECT * FROM answers WHERE question_id IN (?)', 
+      [questionIds]
+    );
+
+    // Organize the answers by question_id
+    const quizDetails = quizQuestions.map((question) => {
+      const questionAnswers = answers.filter(
+        (answer) => answer.question_id === question.question_id
+      );
+      return {
+        ...question,
+        answers: questionAnswers,
+      };
+    });
+
+    // Send the quiz details as response
+    res.json({ questions: quizDetails });
+  } catch (err) {
+    console.error('Error fetching quiz preview:', err);
+    res.status(500).json({ message: 'Error fetching quiz details' });
   }
 });
 
 
-//GET all quizzes
 router.get('/display/quizzes', (req, res) => {
   // SQL query to get quizzes with their categories
   const query = `
@@ -233,6 +284,8 @@ router.get('/display/quizzes', (req, res) => {
     res.json(results);
   });
 });
+
+
 
 
 

@@ -1,0 +1,215 @@
+/* General Reset */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  /* Container for the whole page */
+  .create-question-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    background-color: #ffffff;
+  }
+  
+  /* Wrapper for form and added questions side by side */
+  .quiz-content-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 30px;
+    flex: 1;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  
+  /* Right section for the form */
+  .create-question-form-wrapper {
+    flex: 1;
+    max-width: 600px;
+    background-color: #ffffff;
+    padding: 25px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    height: 100%;
+  }
+  
+  /* Left section for added questions */
+  .added-questions {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    border-radius: 12px;
+    box-sizing: border-box;
+    height: 100%;
+  }
+  
+  /* Form group styling */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .form-group input {
+    padding: 12px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    background-color: #f1f1f1;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    color: #333;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    background-color: #ffffff;
+  }
+  
+  /* Button Styling */
+  button {
+    padding: 12px 20px;
+    font-size: 1.1em;
+    border: none;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    margin-top: 20px;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-sizing: border-box;
+  }
+  
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+  
+  button:active {
+    transform: translateY(1px);
+  }
+  
+  /* Styling for added questions */
+  .added-question {
+    margin-bottom: 30px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .added-question h4 {
+    font-size: 1.3em;
+    margin-bottom: 12px;
+    color: #333;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .added-question ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .added-question li {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #444;
+  }
+  
+  /* Styling for Correct/Incorrect Answers */
+  .correct-answer {
+    color: green;
+  }
+  
+  .incorrect-answer {
+    color: red;
+  }
+  
+/* Styling for checkboxes */
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Increased space between checkbox and label */
+    margin-bottom: 20px;
+  }
+  
+  .checkbox-input {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: #007bff; /* Customize checkbox color */
+    transition: transform 0.2s ease, background-color 0.3s ease;
+  }
+  
+  .checkbox-label {
+    font-size: 1.1rem;
+    color: #444;
+    cursor: pointer;
+    font-weight: 500;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+  
+  .checkbox-input:checked {
+    background-color: #007bff; /* Checkbox background color when checked */
+    border-color: #007bff; /* Border color when checked */
+  }
+  
+  .checkbox-input:checked + .checkbox-label {
+    color: #007bff; /* Change label color when checkbox is checked */
+  }
+  
+  .checkbox-input:hover {
+    transform: scale(1.1); /* Slightly increase the size of the checkbox when hovered */
+  }
+  
+  .checkbox-label:hover {
+    color: #0056b3; /* Darker blue for hover effect on label */
+  }
+  
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .quiz-content-wrapper {
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .create-question-form-wrapper, .added-questions {
+      width: 100%;
+    }
+  
+    h2 {
+      font-size: 2em;
+    }
+  }
+  

@@ -37,30 +37,39 @@ router.get('/profile', authenticateJWT, (req, res) => {
     });
 });
 
-
+// Route to fetch the professor's questions
+// Route to fetch professor's questions and category name
 router.get('/professor/questions', authenticateJWT, (req, res) => {
-    const professorId = req.user.id; // Assuming the professor's ID is in the JWT
+    const { id, userType } = req.user; // Extract from JWT payload
   
-    console.log("Fetching questions for professorId:", professorId);
+    if (userType !== 'professor') {
+      return res.status(403).json({ error: 'You are not authorized to view questions.' });
+    }
   
-    const query = 'SELECT * FROM QuestionBank WHERE professor_id = ?';
-    
-    db.query(query, [professorId], (err, results) => {
+    console.log('Fetching questions for professor id:', id);
+  
+    // Query to fetch quiz questions along with the category name
+    const query = `
+      SELECT q.question_id, q.question_content, q.is_multiple_choice, c.category_name
+      FROM questions q
+      JOIN quiz qu ON q.quiz_id = qu.quiz_id
+      JOIN category c ON qu.category_id = c.category_id
+      WHERE qu.professor_id = ?
+    `;
+  
+    db.query(query, [id], (err, result) => {
       if (err) {
-        console.error('Error fetching questions:', err);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("Error fetching questions:", err);
+        return res.status(500).json({ error: "Error fetching questions" });
       }
   
-      console.log("Questions fetched:", results); // Log the fetched questions
-  
-      if (results.length === 0) {
-        return res.status(404).json({ error: 'No questions found for this professor' });
-      }
-  
-      // Send the retrieved questions to the front end
-      res.status(200).json(results);
+      // Send the fetched questions with the category name
+      res.json(result);
     });
   });
   
+
+
+
 
 module.exports = router;

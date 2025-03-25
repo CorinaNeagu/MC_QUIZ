@@ -1,0 +1,139 @@
+/* General Styles for the Quiz Preview Page */
+.quiz-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+    background-color: #f4f6f9;
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+  
+  /* Quiz Title */
+  .quiz-preview-container h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  /* List of Quiz Questions */
+  .quiz-preview-container ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 1000px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  /* Individual Question Item */
+  .quiz-preview-container li {
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .quiz-preview-container h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* Answer List Styling */
+  .quiz-preview-container .answer-list {
+    padding-left: 20px;
+    list-style-type: none; /* Remove bullets */
+  }
+  
+  .quiz-preview-container ul li li {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  /* Answer Status */
+  .quiz-preview-container .correct::before {
+    content: "✔️"; /* Add a check mark before correct answers */
+    color: #28a745;
+    margin-right: 8px;
+  }
+  
+  .quiz-preview-container .incorrect::before {
+    content: "❌"; /* Add a cross mark before incorrect answers */
+    color: #dc3545;
+  }
+  
+  /* No Answers Text */
+  .quiz-preview-container p {
+    font-size: 1.2rem;
+    color: #888;
+    font-style: italic;
+  }
+  
+  /* Error Message */
+  .quiz-preview-container .error {
+    color: #dc3545;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 20px;
+  }
+  
+  /* Responsive Design for Smaller Screens */
+  @media (max-width: 800px) {
+    .quiz-preview-container h2 {
+      font-size: 2rem;
+    }
+  
+    .quiz-preview-container ul {
+      padding: 15px;
+    }
+  
+    .quiz-preview-container li {
+      padding: 12px;
+    }
+  
+    .quiz-preview-container h3 {
+      font-size: 1.6rem;
+    }
+  
+    .quiz-preview-container ul li li {
+      font-size: 1rem;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .quiz-preview-container {
+      padding: 15px;
+    }
+  
+    .quiz-preview-container h2 {
+      font-size: 1.8rem;
+    }
+  
+    .quiz-preview-container ul {
+      padding: 10px;
+    }
+  
+    .quiz-preview-container li {
+      padding: 10px;
+    }
+  
+    .quiz-preview-container h3 {
+      font-size: 1.4rem;
+    }
+  
+    .quiz-preview-container ul li li {
+      font-size: 0.95rem;
+    }
+  }
+  

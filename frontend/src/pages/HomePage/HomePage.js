@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import "./HomePage.css";
-import DropdownMenu from "../../components/DropdownMenu";
+import "./HomePage.css";  
+import Sidebar from "../../components/Sidebar/Sidebar";
 
 const HomePage = () => {
   const [userType, setUserType] = useState(null);
@@ -14,7 +14,6 @@ const HomePage = () => {
   const [filteredQuizzes, setFilteredQuizzes] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch user type and ensure the token is valid
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -43,12 +42,11 @@ const HomePage = () => {
   // Fetch quizzes and categories if user is a student
   useEffect(() => {
     if (userType === "student") {
-      // Fetch quizzes from backend
       axios
-        .get("http://localhost:5000/api/display/quizzes") // Adjust API endpoint as needed
+        .get("http://localhost:5000/api/display/quizzes")
         .then((response) => {
-          setQuizzes(response.data); // Set quizzes data
-          setFilteredQuizzes(response.data); // Initially display all quizzes
+          setQuizzes(response.data);
+          setFilteredQuizzes(response.data);
         })
         .catch((error) => {
           console.error("Error fetching quizzes:", error);
@@ -56,9 +54,9 @@ const HomePage = () => {
 
       // Fetch categories for the dropdown filter
       axios
-        .get("http://localhost:5000/api/categories") // Adjust API endpoint as needed
+        .get("http://localhost:5000/api/categories")
         .then((response) => {
-          setCategories(response.data.categories); // Assuming response data contains categories array
+          setCategories(response.data.categories);
         })
         .catch((error) => {
           console.error("Error fetching categories:", error);
@@ -71,7 +69,6 @@ const HomePage = () => {
     const categoryId = e.target.value;
     setSelectedCategory(categoryId);
 
-    // Filter quizzes based on the selected category
     const filtered = quizzes.filter((quiz) =>
       categoryId ? quiz.category_id === parseInt(categoryId) : true
     );
@@ -101,7 +98,7 @@ const HomePage = () => {
     <div className="homepage-container">
       <div className="homepage-header">
         <h1>Welcome to Your Dashboard</h1>
-        <DropdownMenu />
+        <Sidebar />
       </div>
 
       {userType === "student" ? (
@@ -145,7 +142,7 @@ const HomePage = () => {
                   <p>Category: {quiz.category_name}</p>
                   <button
                     className="start-quiz-btn"
-                    onClick={() => startQuiz(quiz.quiz_id)} // Navigate to quiz page
+                    onClick={() => startQuiz(quiz.quiz_id)}
                   >
                     Start Quiz
                   </button>

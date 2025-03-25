@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './DropdownMenu.css';
+import './Sidebar.css';
 
-const DropdownMenu = () => {
+const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
@@ -32,4 +32,4 @@ const DropdownMenu = () => {
   );
 };
 
-export default DropdownMenu;
+export default Sidebar;

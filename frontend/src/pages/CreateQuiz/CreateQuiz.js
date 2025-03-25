@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./CreateQuiz.css";
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
@@ -15,14 +14,16 @@ const CreateQuiz = () => {
   const [noQuestions, setNoQuestions] = useState("");
   const [categories, setCategories] = useState([]);
 
-  const user_id = localStorage.getItem("user_id");  // Get the user_id (student or professor) from localStorage
+  // Get user details from localStorage
+  const user_id = localStorage.getItem("user_id"); 
 
   useEffect(() => {
+    // Fetch categories from the backend
     const fetchCategories = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/categories");
-        console.log("Fetched Categories:", response.data); // Log the fetched categories
-        setCategories(response.data.categories); // Ensure categories are stored correctly in state
+        console.log("Fetched Categories:", response.data);
+        setCategories(response.data.categories); 
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -32,6 +33,7 @@ const CreateQuiz = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const token = localStorage.getItem("token");
 
     if (!token || !user_id) {
@@ -59,6 +61,7 @@ const CreateQuiz = () => {
       return;
     }
 
+    // Construct the form data to send to the server
     const formData = {
       title,
       category,
@@ -72,6 +75,7 @@ const CreateQuiz = () => {
     console.log("Form Data:", formData);
 
     try {
+      // API call to create a quiz
       const response = await axios.post("http://localhost:5000/api/quizzes", formData, {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -82,11 +86,11 @@ const CreateQuiz = () => {
         alert("Quiz created successfully!");
         const quizId = response.data.quizId;
         navigate(`/create-question/${quizId}`, {
-          state: {     
+          state: {
             professor_id: user_id,  // Pass user_id to create question
-            noQuestions: validNoQuestions,     
+            noQuestions: validNoQuestions,
             category, // Pass selected category
-            quizId, 
+            quizId,
           },
         });
       }
@@ -100,15 +104,28 @@ const CreateQuiz = () => {
     <div className="create-quiz-container">
       <h2>Create a New Quiz</h2>
       <form onSubmit={handleSubmit} className="create-quiz-form">
-        
+
+        {/* Title */}
         <div className="form-group">
           <label htmlFor="title">Quiz Title</label>
-          <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input 
+            type="text" 
+            id="title" 
+            value={title} 
+            onChange={(e) => setTitle(e.target.value)} 
+            required 
+          />
         </div>
 
+        {/* Category */}
         <div className="form-group">
           <label htmlFor="category">Category</label>
-          <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required>
+          <select 
+            id="category" 
+            value={category} 
+            onChange={(e) => setCategory(e.target.value)} 
+            required
+          >
             <option value="">Select a Category</option>
             {categories.length > 0 ? (
               categories.map((cat) => (
@@ -122,11 +139,19 @@ const CreateQuiz = () => {
           </select>
         </div>
 
+        {/* Time Limit */}
         <div className="form-group">
           <label htmlFor="timeLimit">Time Limit (minutes)</label>
-          <input type="number" id="timeLimit" value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} required />
+          <input 
+            type="number" 
+            id="timeLimit" 
+            value={timeLimit} 
+            onChange={(e) => setTimeLimit(e.target.value)} 
+            required 
+          />
         </div>
 
+        {/* Deduction Percentage */}
         <div className="form-group">
           <label htmlFor="deductionPercentage">Deduction Percentage</label>
           <input
@@ -144,37 +169,43 @@ const CreateQuiz = () => {
           />
         </div>
 
-
-<div className="checkbox-wrapper">
-
-  <input
-    type="checkbox"
-    id="retakeAllowed"
-    checked={retakeAllowed}
-    onChange={() => setRetakeAllowed(!retakeAllowed)}
-    className="checkbox-input"
-  />
-
-<label htmlFor="retakeAllowed" className="checkbox-label">Allow Retakes</label>
-
-</div>
-
-<div className="checkbox-wrapper">
-  <input
-    type="checkbox"
-    id="isActive"
-    checked={isActive}
-    onChange={() => setIsActive(!isActive)}
-    className="checkbox-input"
-  />
-  <label htmlFor="isActive" className="checkbox-label">Activate Quiz</label>
-</div>
-
-        <div className="form-group">
-          <label htmlFor="noQuestions">Number of Questions</label>
-          <input type="number" id="noQuestions" value={noQuestions} onChange={(e) => setNoQuestions(e.target.value)} required />
+        {/* Retake Allowed */}
+        <div className="checkbox-wrapper">
+          <input
+            type="checkbox"
+            id="retakeAllowed"
+            checked={retakeAllowed}
+            onChange={() => setRetakeAllowed(!retakeAllowed)}
+            className="checkbox-input"
+          />
+          <label htmlFor="retakeAllowed" className="checkbox-label">Allow Retakes</label>
         </div>
 
+        {/* Is Active */}
+        <div className="checkbox-wrapper">
+          <input
+            type="checkbox"
+            id="isActive"
+            checked={isActive}
+            onChange={() => setIsActive(!isActive)}
+            className="checkbox-input"
+          />
+          <label htmlFor="isActive" className="checkbox-label">Activate Quiz</label>
+        </div>
+
+        {/* Number of Questions */}
+        <div className="form-group">
+          <label htmlFor="noQuestions">Number of Questions</label>
+          <input 
+            type="number" 
+            id="noQuestions" 
+            value={noQuestions} 
+            onChange={(e) => setNoQuestions(e.target.value)} 
+            required 
+          />
+        </div>
+
+        {/* Submit Button */}
         <button type="submit" className="submit-button">Next</button>
       </form>
     </div>

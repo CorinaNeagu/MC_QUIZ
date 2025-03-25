@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // You can use axios to make API requests
+import axios from "axios";
 import "./UserProfile.css";
 
 const UserProfile = () => {
@@ -11,7 +11,8 @@ const UserProfile = () => {
     userType: "",
   });
 
-  const [questions, setQuestions] = useState([]); // State to store the questions
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({}); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,24 +42,45 @@ const UserProfile = () => {
           }
         })
         .catch((error) => console.error("Error fetching profile:", error));
-
-      // Fetch questions added by the professor only if user is a professor
-      if (userProfile.userType === "professor") {
-        axios
-          .get("http://localhost:5000/api/user/professor/questions", {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-            },
-          })
-          .then((response) => {
-            setQuestions(response.data); // Set the questions in state
-          })
-          .catch((error) => {
-            console.error("Error fetching professor's questions:", error);
-          });
-      }
     }
-  }, [navigate, userProfile.userType]);
+  }, [navigate]);
+
+  // Fetch professor's questions after the profile is fetched and user is a professor
+  useEffect(() => {
+    if (userProfile.userType === "professor") {
+      const token = localStorage.getItem("token");
+      axios
+        .get("http://localhost:5000/api/user/professor/questions", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setQuestions(response.data); // Set the questions in state
+        })
+        .catch((error) => {
+          console.error("Error fetching professor's questions:", error);
+        });
+    }
+  }, [userProfile.userType]); // Only trigger when userType changes
+
+  const fetchAnswers = (questionId) => {
+    axios
+      .get(`http://localhost:5000/api/answers/${questionId}`)
+      .then((response) => {
+        // Check if the response contains the 'answers' array
+        if (response.data && Array.isArray(response.data.answers)) {
+          setAnswers((prevAnswers) => ({
+            ...prevAnswers,
+            [questionId]: response.data.answers, // Ensure it's an array of answers
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching answers:", error);
+      });
+  };
+
 
   const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
 
@@ -107,20 +129,34 @@ const UserProfile = () => {
             questions.map((question, index) => (
               <div key={index} className="question-item">
                 <p><strong>Question:</strong> {question.question_content}</p>
-                <p><strong>Category:</strong> {question.category_id}</p>
+                <p><strong>Category:</strong> {question.category_name}</p>
                 <p><strong>Multiple Choice:</strong> {question.is_multiple_choice ? 'Yes' : 'No'}</p>
+                {/* Button to fetch and show answers for each question */}
+                <button onClick={() => fetchAnswers(question.question_id)}>
+                  View Answers
+                </button>
+
+                {/* Show answers for the specific question */}
+                {answers[question.question_id] && (
+                  <div className="answers-list">
+                    <h4>Answers:</h4>
+                    {answers[question.question_id].map((answer, idx) => (
+                      <div key={idx}>
+                        <p><strong>Answer:</strong> {answer.answer_content}</p>
+                        <p><strong>Correct:</strong> {answer.is_correct ? "Yes" : "No"}</p>
+                        <p><strong>Score:</strong> {answer.score}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           )}
         </div>
-      )}
-
-      {/* Optionally, show a message for non-professor users */}
-      {userProfile.userType !== "professor" && userProfile.userType !== "" && (
-        <p>You are not authorized to view questions.</p>
-      )}
+      )}      
     </div>
   );
+
 };
 
 export default UserProfile;

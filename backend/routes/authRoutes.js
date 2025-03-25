@@ -66,10 +66,6 @@ router.post("/register", async (req, res) => {
     }
 });
 
-
-
-
-// Login Route (Student or Professor)
 // Login Route (Student or Professor)
 router.post("/login", async (req, res) => {
     const { email, password, userType } = req.body;

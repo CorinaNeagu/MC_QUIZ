@@ -2,191 +2,148 @@ const express = require('express');
 const db = require('../db');
 const authenticateJWT = require('../middleware/authMiddleware'); // Import the authentication middleware
 const router = express.Router();
+const jwt = require('jsonwebtoken'); 
 
-// Route to fetch questions by quizId
-router.get('/quizzes/:quizId/questions', (req, res) => {
-    const { quizId } = req.params;
-    console.log(`🔹 Fetching questions for quizId: ${quizId}`);
+router.get('/quiz/:quizId', async (req, res) => {
+    const quizId = req.params.quizId;
   
-    // SQL query to fetch question details only
-    const query = `
-      SELECT 
-        qq.quiz_id, 
-        q.question_bank_id, 
-        q.question_content
-      FROM QuizQuestions qq
-      JOIN QuestionBank q ON qq.question_bank_id = q.question_bank_id
-      WHERE qq.quiz_id = ?;
-    `;
-  
-    db.query(query, [quizId], (err, results) => {
-      if (err) {
-        console.error('Error fetching quiz questions:', err);
-        return res.status(500).json({ error: 'Error fetching quiz questions' });
-      }
-  
-      // Format the results into an array of questions
-      const formattedQuestions = results.map(row => ({
-        question_bank_id: row.question_bank_id,
-        question_content: row.question_text
-      }));
-  
-      // Log formatted questions for debugging
-      console.log("Formatted questions:", JSON.stringify(formattedQuestions, null, 2));
-  
-      // Return the formatted questions
-      res.json(formattedQuestions);
-    });
-  });
-
-
-  // Route to fetch answers for a specific question by question_bank_id
-router.get('/questions/:questionBankId/answers', (req, res) => {
-    const { questionBankId } = req.params;
-    
-    const query = `
-      SELECT 
-        a.answer_id, 
-        a.answer_content, 
-        a.is_correct, 
-        a.score
-      FROM AnswerBank a
-      WHERE a.question_bank_id = ?;
-    `;
-    
-    db.query(query, [questionBankId], (err, results) => {
-      if (err) {
-        console.error('Error fetching answers for question:', err);
-        return res.status(500).json({ error: 'Error fetching answers' });
-      }
-  
-      // Format the answers into the desired response
-      const formattedAnswers = results.map(row => ({
-        answer_id: row.answer_id,
-        answer_content: row.answer_content,
-        is_correct: row.is_correct,
-        score: row.score
-      }));
-  
-      // Return the list of answers
-      res.json(formattedAnswers);
-    });
-  });
-  
-  
-
-// POST: Start Quiz - Create a new QuizAttempt
-router.post('/quiz/:quizId/start', (req, res) => {
-  const { quizId } = req.params;
-  const { studentId } = req.body; // Assume studentId is passed in the body
-
-  const query = 'INSERT INTO QuizAttempt (quiz_id, student_id, score) VALUES (?, ?, 0)';
-  const values = [quizId, studentId];
-
-  db.query(query, values, (err, results) => {
-    if (err) {
-      console.error('Error creating quiz attempt:', err);
-      return res.status(500).json({ error: 'Failed to start quiz attempt' });
-    }
-
-    const attemptId = results.insertId;  // Get the attempt ID
-    res.status(201).json({ attemptId });  // Return the attemptId for future reference
-  });
-});
-
-// POST: Submit Student's Response to a Question
-router.post('/quiz/:quizId/attempt/:attemptId/response', (req, res) => {
-    const { quizId, attemptId } = req.params;
-    const responses = req.body; // This will be an array of responses
-
-    if (!responses || responses.length === 0) {
-        return res.status(400).json({ error: 'No responses provided' });
-    }
-
-    // Loop through each response and insert it into the database
-    responses.forEach((response) => {
-        const { student_id, question_bank_id, answer_id, quiz_id, attempt_id, is_correct } = response;
-
-        if (!student_id || !question_bank_id || !answer_id || is_correct === undefined) {
-            return res.status(400).json({ error: 'Missing required fields in response' });
-        }
-
-        // Prepare the query to insert the response
-        const query = `
-            INSERT INTO StudentResponse (student_id, question_bank_id, answer_id, quiz_id, attempt_id, is_correct)
-            VALUES (?, ?, ?, ?, ?, ?);
-        `;
-
-        // Values to be inserted into the query
-        const values = [student_id, question_bank_id, answer_id, quiz_id, attempt_id, is_correct];
-
-        // Execute the query
-        db.query(query, values, (err, results) => {
-            if (err) {
-                console.error('Error storing student response:', err);
-                return res.status(500).json({ error: 'Failed to store response' });
-            }
-
-            // Send success response
-            res.status(201).json({ message: 'Response saved successfully', responseId: results.insertId });
-        });
-    });
-});
-
-// Route to submit the quiz attempt
-router.post('/quiz/:quizId/attempt/:attemptId/submit', async (req, res) => {
-    const { quizId, attemptId } = req.params;
-    const { studentId, score } = req.body;  // studentId and score sent from the frontend
-
-    // Ensure studentId and score are present
-    if (!studentId || score === undefined) {
-        return res.status(400).json({ error: 'Missing studentId or score' });
-    }
-
     try {
-        // 1. Insert responses into StudentResponse table
-        const responses = req.body.responses;  // Assuming responses are passed in the body as an array
-
-        if (!responses || responses.length === 0) {
-            return res.status(400).json({ error: 'No responses provided' });
-        }
-
-        // Loop through responses and insert each into the database
-        for (const response of responses) {
-            const { student_id, question_bank_id, answer_id, quiz_id, attempt_id, is_correct } = response;
-
-            if (!student_id || !question_bank_id || !answer_id || is_correct === undefined) {
-                return res.status(400).json({ error: 'Missing required fields in response' });
+        // First query to fetch quiz information and settings
+        const quizQuery = `
+            SELECT q.quiz_id, q.title, q.created_at, c.category_name, qs.time_limit, 
+                   qs.deduction_percentage, qs.retake_allowed, qs.is_active, qs.no_questions
+            FROM Quiz q
+            JOIN Category c ON q.category_id = c.category_id
+            JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+            WHERE q.quiz_id = ?;
+        `;
+        
+        // Second query to fetch the questions for the quiz
+        const questionsQuery = `
+            SELECT * FROM Questions WHERE quiz_id = ?;
+        `;
+        
+        // Third query to fetch the answers for the quiz questions
+        const answersQuery = `
+            SELECT * FROM Answers WHERE question_id IN (SELECT question_id FROM Questions WHERE quiz_id = ?);
+        `;
+        
+        db.query(quizQuery, [quizId], (err, quizResult) => {
+            if (err) {
+                console.error("Error fetching quiz info:", err);
+                return res.status(500).json({ message: 'Error fetching quiz details from database.' });
             }
 
-            const query = `
-                INSERT INTO StudentResponse (student_id, question_bank_id, answer_id, quiz_id, attempt_id, is_correct)
-                VALUES (?, ?, ?, ?, ?, ?);
-            `;
-            const values = [student_id, question_bank_id, answer_id, quiz_id, attempt_id, is_correct];
+            // Fetch questions
+            db.query(questionsQuery, [quizId], (err, questionsResult) => {
+                if (err) {
+                    console.error("Error fetching questions:", err);
+                    return res.status(500).json({ message: 'Error fetching questions.' });
+                }
 
-            // Use the promise version of the query for async/await compatibility
-            await db.promise().query(query, values);
-        }
+                // Fetch answers
+                db.query(answersQuery, [quizId], (err, answersResult) => {
+                    if (err) {
+                        console.error("Error fetching answers:", err);
+                        return res.status(500).json({ message: 'Error fetching answers.' });
+                    }
 
-        // 2. Update quiz attempt with final score
-        const updateAttemptQuery = `
-            UPDATE QuizAttempt
-            SET score = ?
-            WHERE attempt_id = ? AND student_id = ?;
-        `;
-        // Use the promise version of the query for async/await compatibility
-        await db.promise().query(updateAttemptQuery, [score, attemptId, studentId]);
+                    // Combine all results
+                    const quizData = {
+                        ...quizResult[0],  // Quiz info
+                        questions: questionsResult.map(question => ({
+                            ...question,
+                            answers: answersResult.filter(answer => answer.question_id === question.question_id)
+                        }))
+                    };
 
-        // 3. Send success response
-        res.status(201).json({ message: 'Quiz submitted successfully', score });
-    } catch (error) {
-        console.error('Error submitting quiz:', error);
-        res.status(500).json({ error: 'Failed to submit quiz' });
+                    return res.status(200).json(quizData);
+                });
+            });
+        });
+
+    } catch (err) {
+        console.error("Error:", err);
+        return res.status(500).json({ message: 'An error occurred while fetching quiz details.' });
     }
 });
 
-  
-  
 
-module.exports = router;
+router.post('/quiz_attempts', (req, res) => {
+    const { quiz_id } = req.body; // Only receive quiz_id from the request body
+  
+    const token = req.headers['authorization']?.split(' ')[1]; // Extract JWT token
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized: No token provided' });
+    }
+  
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+      }
+  
+      const student_id = decoded.id; // Get student ID from the token
+
+      const insertAttemptQuery = `
+        INSERT INTO QuizAttempt (student_id, quiz_id, score, start_time, time_taken)
+        VALUES (?, ?, 0.00, NOW(), 0)
+      `;
+  
+      db.query(insertAttemptQuery, [student_id, quiz_id], (attemptErr, attemptResults) => {
+        if (attemptErr) {
+          console.error("Error creating quiz attempt:", attemptErr);
+          return res.status(500).json({ message: 'Error starting quiz attempt' });
+        }
+
+        // Get the attempt ID
+        const attemptId = attemptResults.insertId;
+
+        return res.status(200).json({ message: 'Quiz attempt created successfully', attemptId });
+      });
+    });
+});
+
+  router.get('/quiz/:quiz_id/questions', (req, res) => {
+    const { quiz_id } = req.params;
+
+    const getQuestionsQuery = `
+        SELECT q.question_id, q.question_content, a.answer_id, a.answer_content
+        FROM Questions q
+        LEFT JOIN Answers a ON q.question_id = a.question_id
+        WHERE q.quiz_id = ?
+    `;
+
+    db.query(getQuestionsQuery, [quiz_id], (err, results) => {
+        if (err) {
+            console.error("Error fetching questions:", err);
+            return res.status(500).json({ message: "Error fetching questions" });
+        }
+
+        // Organize data into a structured format
+        const questionsMap = {};
+        results.forEach(row => {
+            if (!questionsMap[row.question_id]) {
+                questionsMap[row.question_id] = {
+                    question_id: row.question_id,
+                    question_content: row.question_content,
+                    answers: []
+                };
+            }
+            if (row.answer_id) { // Only add answers if they exist
+                questionsMap[row.question_id].answers.push({
+                    answer_id: row.answer_id,
+                    answer_content: row.answer_content
+                });
+            }
+        });
+
+        const questions = Object.values(questionsMap);
+        res.status(200).json(questions);
+    });
+});
+
+
+
+
+  module.exports = router;
