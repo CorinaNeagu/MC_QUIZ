@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import './QuizPreview.css';
 
 const QuizPreview = () => {
   const location = useLocation();
   const { quizId } = location.state; // Get quizId from the state passed via navigate
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const [quizDetails, setQuizDetails] = useState([]); // Store quiz details
   const [error, setError] = useState(""); // Error state
@@ -47,6 +48,10 @@ const QuizPreview = () => {
   // If there is an error, display it
   if (error) return <div>{error}</div>;
 
+  const goToHomepage = () => {
+    navigate("/home"); // This will navigate to the homepage ("/")
+  };
+
   return (
     <div className="quiz-preview-container">
       <h2>Quiz Preview</h2>
@@ -77,6 +82,11 @@ const QuizPreview = () => {
       ) : (
         <p>No questions found for this quiz.</p>
       )}
+
+      <button onClick={goToHomepage} className="home-button">
+        Go to Homepage
+      </button>
+
     </div>
   );
 };

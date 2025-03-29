@@ -19,7 +19,7 @@ const CreateQuestion = () => {
   const [questionCount, setQuestionCount] = useState(0); 
   const [questions, setQuestions] = useState([]); 
   const [questionAnswers, setQuestionAnswers] = useState({}); 
-  const [pointsPerAnswer, setPointsPerAnswer] = useState(0);
+  const [pointsPerQuestion, setPointsPerQuestion] = useState(0);  // Changed state to reflect points per question
   const [deductionPercentage, setDeductionPercentage] = useState(0); // New state for deduction
 
   const fetchQuestions = async () => {
@@ -115,24 +115,46 @@ const CreateQuestion = () => {
     // Toggle the correct answer state
     newAnswers[index].isCorrect = !newAnswers[index].isCorrect;
   
-    if (newAnswers[index].isCorrect) {
-      // If the answer is correct, assign the points
-      newAnswers[index].score = pointsPerAnswer;
-    } else {
-      // If it's not correct, set the score to 0
-      newAnswers[index].score = 0;
-    }
-  
     if (!isMultipleChoice) {
       // For single choice questions, uncheck other answers
       newAnswers.forEach((answer, i) => {
-        if (i !== index) answer.isCorrect = false; // Uncheck other answers
-        if (i !== index && answer.isCorrect) answer.score = pointsPerAnswer; // Ensure other answers that are not selected are marked with 0 score.
+        if (i !== index) {
+          answer.isCorrect = false;  // Uncheck other answers
+        }
       });
+  
+      // Count how many answers are marked as correct
+      const correctAnswersCount = newAnswers.filter(answer => answer.isCorrect).length;
+  
+      // If there are correct answers, divide points evenly
+      if (correctAnswersCount > 0) {
+        newAnswers.forEach((answer) => {
+          if (answer.isCorrect) {
+            answer.score = pointsPerQuestion / correctAnswersCount;  // Divide points equally
+          } else {
+            answer.score = 0;  // Set score to 0 for incorrect answers
+          }
+        });
+      }
+    } else {
+      // For multiple choice questions, divide points per question evenly among selected answers
+      const correctAnswersCount = newAnswers.filter(answer => answer.isCorrect).length;
+  
+      if (correctAnswersCount > 0) {
+        newAnswers.forEach((answer) => {
+          if (answer.isCorrect) {
+            answer.score = pointsPerQuestion / correctAnswersCount;  // Divide points equally
+          } else {
+            answer.score = 0;  // Set score to 0 for incorrect answers
+          }
+        });
+      }
     }
   
     setAnswers(newAnswers);
   };
+  
+  
   
 
   const handleMultipleChoiceChange = () => {
@@ -148,7 +170,7 @@ const CreateQuestion = () => {
   };
 
   const handleAddAnswer = () => {
-    const newAnswer = { answerContent: "", isCorrect: false, score: pointsPerAnswer }; // Assign pointsPerAnswer to new answer
+    const newAnswer = { answerContent: "", isCorrect: false, score: pointsPerQuestion }; // Assign pointsPerAnswer to new answer
     setAnswers([...answers, newAnswer]);
   };
 
@@ -179,6 +201,7 @@ const CreateQuestion = () => {
           quizId,
           questionContent,
           isMultipleChoice,
+          pointsPerQuestion, // Pass pointsPerQuestion to backend
         },
         {
           headers: {
@@ -190,15 +213,15 @@ const CreateQuestion = () => {
       // Ensure questionId is treated as a number
       const questionId = Number(questionResponse.data.questionId);
   
+      // Send the answers to the backend, including the calculated score
       for (let answer of answers) {
         await axios.post(
           "http://localhost:5000/api/answers",
           {
-            // Ensure questionId is a number before sending
             questionId: questionId,
             answerContent: answer.answerContent,
-            isCorrect: !!answer.isCorrect,  
-            score: answer.isCorrect ? answer.score : 0,  
+            isCorrect: !!answer.isCorrect,
+            score: answer.isCorrect ? answer.score : 0,
           },
           {
             headers: {
@@ -209,7 +232,7 @@ const CreateQuestion = () => {
       }
   
       setQuestionCount(questionCount + 1);
-      
+  
       fetchQuestions();
       fetchAnswers(questionId);
   
@@ -219,11 +242,12 @@ const CreateQuestion = () => {
     }
   };
   
+  
 
   const handlePointsChange = (e) => {
     const value = parseInt(e.target.value, 10) || 0;
-    setPointsPerAnswer(value);
-    setAnswers(answers.map(answer => ({ ...answer, score: value })));
+    setPointsPerQuestion(value);
+    setAnswers(answers.map(answer => ({ ...answer, score: value })));  // Update points for answers
   };
 
   const handleSubmitQuiz = async () => {
@@ -259,14 +283,15 @@ const CreateQuestion = () => {
     <div className="create-question-container">
       {/* Points per Answer Input */}
       <div className="form-group">
-        <label>Points per Answer</label>
-        <input
-          type="number"
-          value={pointsPerAnswer}
-          onChange={handlePointsChange}
-          placeholder="Enter default points"
-        />
-      </div>
+  <label>Points per Question</label>
+  <input
+    type="number"
+    value={pointsPerQuestion}
+    onChange={handlePointsChange}
+    placeholder="Enter points for this question"
+  />
+</div>
+
 
       <div className="quiz-content-wrapper">
         <form onSubmit={handleAddQuestion} className="create-question-form-wrapper">

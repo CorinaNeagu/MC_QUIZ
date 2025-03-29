@@ -6,7 +6,6 @@
     justify-content: flex-start;
     padding: 20px;
     min-height: 100vh;
-    background-color: #f4f6f9;
     overflow-y: auto; /* Enable vertical scrolling */
   }
   
@@ -28,7 +27,6 @@
     max-width: 1000px;
     background-color: #fff;
     border-radius: 10px;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     padding: 20px;
     margin-top: 20px;
   }
@@ -39,7 +37,6 @@
     margin-bottom: 20px;
     background-color: #f9f9f9;
     border-radius: 8px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
   }
   
   .quiz-preview-container h3 {

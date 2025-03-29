@@ -91,33 +91,31 @@ router.post('/quizzes', (req, res) => {
   });
 });
 
+// Create a new question
 router.post("/questions", async (req, res) => {
-  const { quizId, questionContent, isMultipleChoice } = req.body;
-  const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
+  const { quizId, questionContent, isMultipleChoice, pointsPerQuestion } = req.body; 
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "No token provided. Please log in." });
   }
 
   try {
-    // Verify token to get the user_id (professor_id)
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const professor_id = decoded.id;
 
-    // Validate required fields
-    if (!quizId || !questionContent) {
+    if (!quizId || !questionContent || pointsPerQuestion == null) {  
       return res.status(400).json({ message: "Please provide all required fields." });
     }
 
-    // Insert question into the Questions table
-    const questionQuery = `INSERT INTO Questions (quiz_id, question_content, is_multiple_choice) VALUES (?, ?, ?)`;
-    db.query(questionQuery, [quizId, questionContent, isMultipleChoice], (err, result) => {
+    const questionQuery = `INSERT INTO Questions (quiz_id, question_content, is_multiple_choice, points_per_question) VALUES (?, ?, ?, ?)`;
+    db.query(questionQuery, [quizId, questionContent, isMultipleChoice, pointsPerQuestion], (err, result) => {
       if (err) {
         console.error('Error creating question:', err);
         return res.status(500).json({ message: 'Database error while creating question' });
       }
 
-      const questionId = result.insertId; // Get the ID of the newly created question
+      const questionId = result.insertId;
 
       return res.status(200).json({
         message: "Question created successfully!",
@@ -131,9 +129,9 @@ router.post("/questions", async (req, res) => {
 });
 
 // Create answer(s) for a question
-router.post("/answers", (req, res) => {
-  const { questionId, answerContent, isCorrect, score } = req.body;
-  const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
+router.post("/answers", async (req, res) => {
+  const { questionId, answerContent, isCorrect } = req.body;
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "No token provided. Please log in." });
@@ -141,26 +139,68 @@ router.post("/answers", (req, res) => {
 
   try {
     // Validate required fields
-    if (!questionId || !answerContent || score == null) {
+    if (!questionId || !answerContent || isCorrect == null) {
       return res.status(400).json({ message: "Please provide all required fields." });
     }
 
-    const isCorrectValue = isCorrect ? true : false;  // ✅ Always `true` or `false`
-    // Insert answer into the Answers table
-    const answerQuery = `INSERT INTO Answers (question_id, answer_content, is_correct, score) VALUES (?, ?, ?, ?)`;
-    db.query(answerQuery, [questionId, answerContent, isCorrectValue, score], (err, result) => {
+    // Fetch points_per_question for the question
+    const questionQuery = `SELECT points_per_question FROM Questions WHERE question_id = ?`;
+    db.query(questionQuery, [questionId], (err, result) => {
       if (err) {
-        console.error('Error creating answer:', err);
-        return res.status(500).json({ message: 'Database error while creating answer' });
+        console.error('Error fetching question points:', err);
+        return res.status(500).json({ message: 'Database error while fetching question points' });
       }
 
-      return res.status(200).json({ message: "Answer created successfully!" });
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+
+      const pointsPerQuestion = result[0].points_per_question;
+
+      // Fetch the current answers for this question
+      const fetchAnswersQuery = `SELECT * FROM Answers WHERE question_id = ?`;
+      db.query(fetchAnswersQuery, [questionId], (err, answersResult) => {
+        if (err) {
+          console.error('Error fetching answers:', err);
+          return res.status(500).json({ message: 'Database error while fetching answers' });
+        }
+
+        // Count the number of correct answers already in the system
+        const correctAnswers = answersResult.filter(answer => answer.is_correct);
+
+        // Calculate the score per correct answer
+        const correctAnswersCount = correctAnswers.length + (isCorrect ? 1 : 0); // Include the new correct answer if applicable
+        const scorePerAnswer = correctAnswersCount > 0 ? pointsPerQuestion / correctAnswersCount : 0;
+
+        // Update the scores for all correct answers
+        const updateQuery = `UPDATE Answers SET score = ? WHERE question_id = ? AND is_correct = 1`;
+        db.query(updateQuery, [scorePerAnswer, questionId], (err, updateResult) => {
+          if (err) {
+            console.error('Error updating answers:', err);
+            return res.status(500).json({ message: 'Database error while updating answers' });
+          }
+
+          // Now insert the new answer
+          const answerScore = isCorrect ? scorePerAnswer : 0;
+          const insertAnswerQuery = `INSERT INTO Answers (question_id, answer_content, is_correct, score) VALUES (?, ?, ?, ?)`;
+          db.query(insertAnswerQuery, [questionId, answerContent, isCorrect, answerScore], (err, insertResult) => {
+            if (err) {
+              console.error('Error creating answer:', err);
+              return res.status(500).json({ message: 'Database error while creating answer' });
+            }
+
+            return res.status(200).json({ message: "Answer created successfully!" });
+          });
+        });
+      });
     });
   } catch (err) {
     console.error('JWT error:', err);
     return res.status(401).json({ message: 'Invalid or expired token. Please log in again.' });
   }
 });
+
+
 
 // GET route to fetch all questions for a specific quiz
 router.get('/questions/:quizId', async (req, res) => {

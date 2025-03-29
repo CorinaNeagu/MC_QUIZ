@@ -49,28 +49,22 @@ const DisplayScore = () => {
   }, [attemptId]);
 
   useEffect(() => {
-    if (score !== null && maxScore !== null) {
-      console.log("Score:", score);  
-      console.log("Max Score:", maxScore);  
-
-     
+    if (score !== null && deduction !== null) {
+      // Calculate the deduction from the max score
+      const deductionAmount = (deduction / 100) * maxScore;
+      console.log("Deduction Amount (before rounding):", deductionAmount);
   
-      if (score !== null && deduction !== null) {
-        // Calculate the deduction from the max score
-        const deductionAmount = (deduction / 100) * maxScore;
-        console.log("Deduction Amount (before rounding):", deductionAmount);
+      const finalScore = score - deductionAmount;
+      console.log("Final Score (before rounding):", finalScore);
   
-        const finalScore = score - deductionAmount;
-        console.log("Final Score (before rounding):", finalScore);
+      const final = Math.round(finalScore * 100) / 100;
   
-        const final = Math.round(finalScore * 100) / 100;  
+      // Ensure the final score is not negative
+      setFinalScore(Math.max(final, 0)); 
+      console.log("Final Score (after rounding):", final); 
+  }
+  }, [score, deduction, score]); // Make sure totalPoints represents earned points
   
-        // Ensure the final score is not negative
-        setFinalScore(Math.max(final, 0)); 
-        console.log("Final Score (after rounding):", final); 
-      }
-    }
-  }, [score, deduction, maxScore]);
   
 
   return (
