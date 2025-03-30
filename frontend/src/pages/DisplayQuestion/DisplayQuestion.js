@@ -102,7 +102,7 @@ const DisplayQuestion = () => {
       );
   
       navigate(`/display-score/${attemptId}`);
-    } catch (err) {
+        } catch (err) {
       console.error("Error submitting quiz:", err);
       setError("Error submitting the quiz.");
     }
@@ -129,13 +129,13 @@ const DisplayQuestion = () => {
         <div>
           <h2>Question {currentQuestionIndex + 1} of {questions.length}</h2>
           <p>{questions[currentQuestionIndex].question_content}</p>
-
+  
           <div className="options">
             {questions[currentQuestionIndex].answers.map((answer) => (
               <div key={answer.answer_id} className="checkbox-wrapper">
                 <input
                   type="checkbox"
-                  id={`answer-${answer.answer_id}`}
+                  id={`answer-${answer.answer_id}`} // Correct string interpolation
                   checked={answers[questions[currentQuestionIndex].question_id]?.includes(answer.answer_id) || false}
                   onChange={() => handleAnswerSelect(
                     questions[currentQuestionIndex].question_id,
@@ -143,18 +143,18 @@ const DisplayQuestion = () => {
                   )}
                   className="checkbox-input"
                 />
-                <label htmlFor={`answer-${answer.answer_id}`} className="checkbox-label">
+                <label htmlFor={`answer-${answer.answer_id}`} className="checkbox-label"> {/* Correct string interpolation */}
                   {answer.answer_content}
                 </label>
               </div>
             ))}
           </div>
-
+  
           <div className="button-group">
             <button className="next-btn" onClick={handleNextQuestion}>
               Next Question
             </button>
-
+  
             <button className="submit-btn" onClick={submitQuiz}>
               Submit Quiz
             </button>
@@ -165,6 +165,7 @@ const DisplayQuestion = () => {
       )}
     </div>
   );
+  
 };
 
 export default DisplayQuestion;

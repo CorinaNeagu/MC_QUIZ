@@ -1,0 +1,215 @@
+body, html {
+  height: 100%;
+  margin: 0;
+}
+
+
+.responses-container {
+  height: 100%;
+  overflow-y: auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+  max-width: 800px;
+  max-height: 100vh;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease-out forwards;
+  background-color: #f9f9f9; 
+}
+
+/* Each question's container */
+.question-container {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  background-color: #fafafa; /* Slight background for each question */
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.question-container:last-child {
+  border-bottom: none;
+}
+
+/* Styling the question text */
+.question-text {
+  font-size: 1.4em;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  line-height: 1.6; /* Spacing for better readability */
+}
+
+/* Styling the list of answers */
+.answer-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.answer-item {
+  font-size: 1.2em;  /* Smaller font size */
+  color: #555;
+  margin-bottom: 12px;
+  padding-left: 20px;
+  position: relative;
+  background-color: #f0f0f0; /* Light grey background for each answer */
+  border-radius: 6px;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+}
+
+/* Answer item hover effect */
+.answer-item:hover {
+  background-color: #e1f5fe; /* Light blue on hover for better interaction */
+}
+
+/* Answer item with bullet */
+.answer-item::before {
+  content: "•";
+  position: absolute;
+  left: 10px;
+  top: 0;
+  color: #007bff;
+  font-size: 1.8em;
+}
+
+/* Style for correct answers */
+.correct-answer {
+  color: green;
+  font-weight: 600;
+}
+
+/* Style for wrong answers */
+.wrong-answer {
+  color: red;
+  font-weight: 600;
+}
+
+/* Back to DisplayScore Button */
+.back-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.4em;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 5px 10px rgba(0, 123, 255, 0.2);
+  transform: scale(1);
+  margin-top: 30px;
+  display: inline-block;
+  opacity: 0;
+  animation: fadeIn 0.6s ease-in-out 0.6s forwards;
+  margin-bottom: 40px; /* Spacing between button and last answer */
+}
+
+/* Back button hover effect */
+.back-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+  box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Back button active effect */
+.back-button:active {
+  background-color: #004085;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+}
+
+/* Back button focus effect */
+.back-button:focus {
+  outline: none;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .responses-container {
+    padding: 20px;
+  }
+
+  .question-text {
+    font-size: 1.2em;
+  }
+
+  .answer-item {
+    font-size: 1.1em;
+  }
+
+  .back-button {
+    font-size: 1.2em;
+    padding: 12px 25px;
+  }
+}
+
+
+.responses-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.responses-list {
+  list-style-type: none; /* Removes default bullet points from the outer list */
+  padding: 0;
+}
+
+.response-item {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.response-details {
+  list-style-type: none; /* Removes bullet points from the details list */
+  padding: 0;
+}
+
+.answer-list {
+  list-style-type: none; /* Removes default bullet points */
+  padding-left: 20px; /* Indentation for nested lists */
+}
+
+.answer-list li {
+  margin-bottom: 5px; /* Adds space between each answer */
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

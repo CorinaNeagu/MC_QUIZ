@@ -8,11 +8,12 @@ const CreateQuiz = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [timeLimit, setTimeLimit] = useState("");
-  const [deductionPercentage, setDeductionPercentage] = useState("");
   const [retakeAllowed, setRetakeAllowed] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [noQuestions, setNoQuestions] = useState("");
   const [categories, setCategories] = useState([]);
+  const [deductionPercentage, setDeductionPercentage] = useState(""); // New state for deduction
+
 
   // Get user details from localStorage
   const user_id = localStorage.getItem("user_id"); 
@@ -48,12 +49,14 @@ const CreateQuiz = () => {
       return;
     }
 
-    const validDeductionPercentage = deductionPercentage === "" || isNaN(deductionPercentage)
-                                    ? 0 : parseFloat(deductionPercentage);
+    
+    const validDeductionPercentage = deductionPercentage === "" || isNaN(deductionPercentage)? 0 : parseFloat(deductionPercentage);
     if (validDeductionPercentage < 0 || validDeductionPercentage > 100) {
       alert("Deduction percentage must be between 0 and 100.");
-      return;
+    return;
     }
+
+
 
     const validNoQuestions = parseInt(noQuestions, 10);
     if (isNaN(validNoQuestions) || validNoQuestions <= 0) {
@@ -151,8 +154,8 @@ const CreateQuiz = () => {
           />
         </div>
 
-        {/* Deduction Percentage */}
-        <div className="form-group">
+         {/* Deduction Percentage */}
+         <div className="form-group">
           <label htmlFor="deductionPercentage">Deduction Percentage</label>
           <input
             type="number"
@@ -168,6 +171,8 @@ const CreateQuiz = () => {
             required
           />
         </div>
+
+       
 
         {/* Retake Allowed */}
         <div className="checkbox-wrapper">

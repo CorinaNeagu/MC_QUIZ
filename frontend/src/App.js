@@ -11,6 +11,7 @@ import CreateQuestion from "./pages/CreateQuestion/CreateQuestion";
 import DisplayQuiz from "./pages/DisplayQuiz/DisplayQuiz";
 import DisplayQuestion from "./pages/DisplayQuestion/DisplayQuestion";
 import DisplayScore from "./pages/DisplayScore/DisplayScore";
+import DisplayResponses from "./pages/DisplayResponses/DisplayResponses";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/quiz/:quizId" element={<DisplayQuiz />} />
         <Route path="/display-question/:quizId/:attemptId" element={<DisplayQuestion />} /> 
         <Route path="/display-score/:attemptId" element={<DisplayScore />} />
+        <Route path="/responses/:attemptId" element={<DisplayResponses />} />
        </Routes>
     </Router>
   );

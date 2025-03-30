@@ -257,7 +257,7 @@ const CreateQuestion = () => {
         alert("You must be logged in to submit the quiz.");
         return;
       }
-  
+
       const allQuestions = questions.map((question) => ({
         quizId,
         questionContent: questionContent,
@@ -282,17 +282,17 @@ const CreateQuestion = () => {
   return (
     <div className="create-question-container">
       {/* Points per Answer Input */}
-      <div className="form-group">
-  <label>Points per Question</label>
-  <input
-    type="number"
-    value={pointsPerQuestion}
-    onChange={handlePointsChange}
-    placeholder="Enter points for this question"
-  />
-</div>
+        <div className="form-group">
+          <label>Points per Question</label>
+            <input
+            type="number"
+            value={pointsPerQuestion}
+            onChange={handlePointsChange}
+            placeholder="Enter points for this question"
+          />
+        </div>
 
-
+    
       <div className="quiz-content-wrapper">
         <form onSubmit={handleAddQuestion} className="create-question-form-wrapper">
           <div className="form-group">

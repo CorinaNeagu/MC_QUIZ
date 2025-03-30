@@ -87,8 +87,8 @@ router.post('/quiz_attempts', (req, res) => {
 
       const insertAttemptQuery = `
         INSERT INTO QuizAttempt (student_id, quiz_id, score, start_time, time_taken)
-        VALUES (?, ?, 0.00, NOW(), 0)
-      `;
+        VALUES (?, ?, 0.00, NOW(), 0)`
+      ;
   
       db.query(insertAttemptQuery, [student_id, quiz_id], (attemptErr, attemptResults) => {
         if (attemptErr) {
@@ -103,6 +103,7 @@ router.post('/quiz_attempts', (req, res) => {
       });
     });
 });
+
 
   router.get('/quiz/:quiz_id/questions', (req, res) => {
     const { quiz_id } = req.params;

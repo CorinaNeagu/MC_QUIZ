@@ -21,7 +21,7 @@ const DisplayQuiz = () => {
         }
 
         const response = await axios.get(
-          `http://localhost:5000/api/takeQuiz/quiz/${quizId}`,
+         `http://localhost:5000/api/takeQuiz/quiz/${quizId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -51,7 +51,7 @@ const DisplayQuiz = () => {
 
       // Create a quiz attempt entry
       const response = await axios.post(
-        "http://localhost:5000/api/takeQuiz/quiz_attempts", 
+        `http://localhost:5000/api/takeQuiz/quiz_attempts`, 
         {
           student_id: studentId,
           quiz_id: quizId,
