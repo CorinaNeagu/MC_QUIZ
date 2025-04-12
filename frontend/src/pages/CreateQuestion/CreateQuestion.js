@@ -111,48 +111,42 @@ const CreateQuestion = () => {
 
   const handleCheckboxChange = (index) => {
     const newAnswers = [...answers];
-    
-    // Toggle the correct answer state
+  
+    // Toggle the 'isCorrect' state for the clicked answer
     newAnswers[index].isCorrect = !newAnswers[index].isCorrect;
   
     if (!isMultipleChoice) {
-      // For single choice questions, uncheck other answers
+      // For single-choice questions, uncheck other answers
       newAnswers.forEach((answer, i) => {
         if (i !== index) {
-          answer.isCorrect = false;  // Uncheck other answers
+          answer.isCorrect = false; // Uncheck other answers
         }
       });
   
-      // Count how many answers are marked as correct
+      // Calculate the score for the answers
       const correctAnswersCount = newAnswers.filter(answer => answer.isCorrect).length;
   
-      // If there are correct answers, divide points evenly
+      // Distribute points evenly for correct answers
       if (correctAnswersCount > 0) {
         newAnswers.forEach((answer) => {
-          if (answer.isCorrect) {
-            answer.score = pointsPerQuestion / correctAnswersCount;  // Divide points equally
-          } else {
-            answer.score = 0;  // Set score to 0 for incorrect answers
-          }
+          answer.score = answer.isCorrect ? pointsPerQuestion / correctAnswersCount : 0;
         });
       }
     } else {
-      // For multiple choice questions, divide points per question evenly among selected answers
+      // For multiple-choice questions, handle answers being selected as correct
       const correctAnswersCount = newAnswers.filter(answer => answer.isCorrect).length;
   
       if (correctAnswersCount > 0) {
         newAnswers.forEach((answer) => {
-          if (answer.isCorrect) {
-            answer.score = pointsPerQuestion / correctAnswersCount;  // Divide points equally
-          } else {
-            answer.score = 0;  // Set score to 0 for incorrect answers
-          }
+          answer.score = answer.isCorrect ? pointsPerQuestion / correctAnswersCount : 0;
         });
       }
     }
   
+    // Update the answers state
     setAnswers(newAnswers);
   };
+  
   
   
   

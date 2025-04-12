@@ -4,6 +4,30 @@ const authenticateJWT = require('../middleware/authMiddleware'); // Import the a
 const router = express.Router();
 const jwt = require('jsonwebtoken'); 
 
+// GET quiz settings
+router.get('/quiz-settings/:quizId', (req, res) => {
+  const quizId = req.params.quizId;
+
+  const query = `
+    SELECT time_limit, deduction_percentage, retake_allowed, is_active, no_questions
+    FROM QuizSettings
+    WHERE quiz_id = ?
+  `;
+
+  db.query(query, [quizId], (err, results) => {
+    if (err) {
+      console.error("Error fetching quiz settings:", err);
+      return res.status(500).json({ message: "Failed to retrieve settings" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Settings not found for this quiz" });
+    }
+
+    res.status(200).json({ settings: results[0] });
+  });
+});
+
 router.get('/quiz/:quizId', async (req, res) => {
     const quizId = req.params.quizId;
   
@@ -143,6 +167,26 @@ router.post('/quiz_attempts', (req, res) => {
         res.status(200).json(questions);
     });
 });
+
+// POST submit quiz
+router.post('/takeQuiz/submit-quiz', (req, res) => {
+    const { attempt_id, time_taken } = req.body;
+  
+    const query = `
+      UPDATE QuizAttempts
+      SET end_time = NOW(), time_taken = ?
+      WHERE attempt_id = ?
+    `;
+  
+    db.query(query, [time_taken, attempt_id], (err, result) => {
+      if (err) {
+        console.error("Error submitting quiz:", err);
+        return res.status(500).json({ message: "Failed to submit quiz" });
+      }
+  
+      res.status(200).json({ message: "Quiz submitted successfully" });
+    });
+  });
 
 
 

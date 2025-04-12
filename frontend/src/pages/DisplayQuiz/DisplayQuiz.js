@@ -1,57 +1,90 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import "./DisplayQuiz.css"; 
+import "./DisplayQuiz.css";
 
 const DisplayQuiz = () => {
-  const { quizId } = useParams(); 
+  const { quizId } = useParams();
   const [quizData, setQuizData] = useState(null);
+  const [quizSettings, setQuizSettings] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [startTime, setStartTime] = useState(null);
+  const [quizAttemptId, setQuizAttemptId] = useState(null);
   const [error, setError] = useState("");
-  const navigate = useNavigate(); 
-  const [quizAttemptId, setQuizAttemptId] = useState(null); 
+  const [quizStarted, setQuizStarted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch quiz details
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("You must be logged in to view the quiz.");
+      return;
+    }
+
     const fetchQuizDetails = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          alert("You must be logged in to view the quiz.");
-          return;
-        }
-
         const response = await axios.get(
-         `http://localhost:5000/api/takeQuiz/quiz/${quizId}`,
+          `http://localhost:5000/api/takeQuiz/quiz/${quizId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-
-        setQuizData(response.data); 
+        setQuizData(response.data);
       } catch (err) {
         console.error("Error fetching quiz details:", err);
         setError("There was an error fetching quiz details.");
       }
     };
 
+    const fetchQuizSettings = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/takeQuiz/quiz-settings/${quizId}`
+        );
+        setQuizSettings(response.data.settings);
+      } catch (err) {
+        console.error("Failed to fetch quiz settings", err);
+        setError("There was an error fetching quiz settings.");
+      }
+    };
+
     fetchQuizDetails();
+    fetchQuizSettings();
   }, [quizId]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!quizStarted || timeLeft === null || timeLeft <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleSubmit(); // Auto-submit when time is up
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [quizStarted, timeLeft]);
 
   const startQuiz = async () => {
     try {
       const token = localStorage.getItem("token");
-      const studentId = localStorage.getItem("user_id"); 
-
+      const studentId = localStorage.getItem("user_id");
+  
       if (!studentId) {
         alert("You must be logged in to start the quiz.");
         return;
       }
-
-      // Create a quiz attempt entry
+  
       const response = await axios.post(
-        `http://localhost:5000/api/takeQuiz/quiz_attempts`, 
+        `http://localhost:5000/api/takeQuiz/quiz_attempts`,
         {
           student_id: studentId,
           quiz_id: quizId,
@@ -62,18 +95,59 @@ const DisplayQuiz = () => {
           },
         }
       );
-
+  
       if (response.status === 200) {
-        // Successfully created quiz attempt, now redirect to DisplayQuestion page
-        setQuizAttemptId(response.data.attemptId);  // Store the quiz attempt ID
-
-        // Navigate to DisplayQuestion page with quiz attempt ID and quiz ID
-        navigate(`/display-question/${quizId}/${response.data.attemptId}`);
+        setQuizStarted(true);
+        if (!quizSettings?.time_limit) {
+          alert("Invalid quiz time limit.");
+          return;
+        }
+        setTimeLeft(quizSettings.time_limit * 60); // Set initial time based on quiz settings
+        setStartTime(Date.now()); // Start time
+  
+        // Pass timeLeft and startTime as query parameters to DisplayQuestion
+        navigate(`/display-question/${quizId}/${response.data.attemptId}?timeLeft=${quizSettings.time_limit * 60}&startTime=${Date.now()}`);
       }
     } catch (err) {
       console.error("Error starting quiz:", err);
       setError("There was an error starting the quiz.");
     }
+  };
+  
+
+  const handleSubmit = async () => {
+    const endTime = Date.now();
+    const timeTakenInSeconds = Math.floor((endTime - startTime) / 1000);
+    try {
+      alert("Submitting your answers...");
+  
+      // Replace this with your real submission logic
+      await axios.post(
+        `http://localhost:5000/api/takeQuiz/submit-quiz`, // example route
+        {
+          attempt_id: quizAttemptId,
+          time_taken: timeTakenInSeconds,
+          // Include answers, scores etc.
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+  
+      alert(`Quiz submitted! Time taken: ${timeTakenInSeconds} seconds`);
+      // Optionally navigate away or show a result screen
+    } catch (err) {
+      console.error("Error submitting quiz:", err);
+      alert("There was an error submitting the quiz.");
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const min = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const sec = (seconds % 60).toString().padStart(2, "0");
+    return `${min}:${sec}`;
   };
 
   if (error) return <div>{error}</div>;
@@ -85,17 +159,29 @@ const DisplayQuiz = () => {
           <h2>{quizData.title}</h2>
           <div className="quiz-details">
             <p><strong>Category:</strong> {quizData.category_name}</p>
-            <p><strong>Time Limit:</strong> {quizData.time_limit} minutes</p>
-            <p><strong>Deduction Percentage:</strong> {quizData.deduction_percentage}%</p>
-            <p><strong>Retake Allowed:</strong> {quizData.retake_allowed ? "Yes" : "No"}</p>
-            <p><strong>Active:</strong> {quizData.is_active ? "Yes" : "No"}</p>
-            <p><strong>Number of Questions:</strong> {quizData.no_questions}</p>
+            <p><strong>Time Limit:</strong> {quizSettings?.time_limit} minutes</p>
+            <p><strong>Deduction Percentage:</strong> {quizSettings?.deduction_percentage}%</p>
+            <p><strong>Retake Allowed:</strong> {quizSettings?.retake_allowed ? "Yes" : "No"}</p>
+            <p><strong>Active:</strong> {quizSettings?.is_active ? "Yes" : "No"}</p>
+            <p><strong>Number of Questions:</strong> {quizSettings?.no_questions}</p>
           </div>
 
-          {/* Start Quiz Button */}
-          <div className="start-quiz-button">
-            <button onClick={startQuiz}>Start Quiz</button>
-          </div>
+          {!quizStarted ? (
+            <div className="start-quiz-button">
+              <button onClick={startQuiz}>Start Quiz</button>
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize: "1.5rem", margin: "20px 0" }}>
+                Time Left: <strong>{formatTime(timeLeft)}</strong>
+              </div>
+
+              {/* Replace this with your actual quiz question rendering */}
+              <p>Questions will go here...</p>
+
+              <button onClick={handleSubmit}>Submit Quiz</button>
+            </div>
+          )}
         </>
       ) : (
         <p>Loading quiz details...</p>

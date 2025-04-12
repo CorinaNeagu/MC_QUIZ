@@ -18,8 +18,7 @@ router.post('/quiz_attempts/:attempt_id/submit', (req, res) => {
   const selectQuizAndStudentQuery = `
     SELECT quiz_id, student_id
     FROM QuizAttempt
-    WHERE attempt_id = ?`
-  ;
+    WHERE attempt_id = ?`;
 
   db.query(selectQuizAndStudentQuery, [attempt_id], (err, results) => {
     if (err || results.length === 0) {
@@ -32,105 +31,147 @@ router.post('/quiz_attempts/:attempt_id/submit', (req, res) => {
     console.log("Student ID: ", studentId);
 
     const selectStartTimeQuery = `SELECT start_time FROM QuizAttempt WHERE attempt_id = ?`;
-
     db.query(selectStartTimeQuery, [attempt_id], (err, results) => {
       if (err || results.length === 0) {
         return res.status(404).json({ message: 'Quiz attempt not found' });
       }
 
       const start_time = new Date(results[0].start_time);
+      // Calculate time taken in seconds
       const time_taken = Math.floor((end_time - start_time) / 1000);
+      console.log("Time taken: ", time_taken, "seconds");
 
-      const insertAnswersQuery = 
-        `INSERT INTO StudentResponses (attempt_id, quiz_id, student_id, question_id, answer_id) 
-        VALUES ?`
-      ;
+      // Query to get default_answer_id for 'No Response'
+      const getDefaultAnswerQuery = `
+        SELECT default_answer_id
+        FROM DefaultAnswers
+        WHERE answer_content = "No Response"`;
 
-      // Prepare values from the answers object
-      const answerValues = [];
-      for (const [questionId, answerIds] of Object.entries(answers)) {
-        answerIds.forEach(answerId => {
-          answerValues.push([attempt_id, quizId, studentId, questionId, answerId]);
-        });
-      }
-
-      db.query(insertAnswersQuery, [answerValues], (insertErr) => {
-        if (insertErr) {
-          console.error("Error inserting answers:", insertErr);
-          return res.status(500).json({ message: 'Error saving student responses.' });
+      db.query(getDefaultAnswerQuery, (err, defaultAnswerResults) => {
+        if (err || defaultAnswerResults.length === 0) {
+          console.error("Error fetching default answer ID:", err);
+          return res.status(500).json({ message: 'Error fetching default answer.' });
         }
 
-        // Query to get deduction points for the quiz
-        const getDeductionQuery = `
-          SELECT qs.deduction_percentage AS deduction_points
-          FROM QuizSettings qs
-          JOIN QuizAttempt qa ON qs.quiz_id = qa.quiz_id
-          WHERE qa.attempt_id = ?`
-        ;
+        const defaultAnswerId = defaultAnswerResults[0].default_answer_id;
+        console.log("Default Answer ID: ", defaultAnswerId);
 
-        db.query(getDeductionQuery, [attempt_id], (deductionErr, deductionResults) => {
-          if (deductionErr || deductionResults.length === 0) {
-            console.error("Error fetching deduction:", deductionErr);
-            return res.status(500).json({ message: 'Error fetching deduction setting.' });
+        // Prepare values for StudentResponses
+        const answerValues = [];
+        const unansweredQuestions = new Set();
+
+        // Loop through the answers and create values for the StudentResponses
+        for (const [questionId, answerIds] of Object.entries(answers)) {
+          answerIds.forEach(answerId => {
+            if (!answerId) {
+              // If the answer is null or empty, use the default answer
+              answerId = defaultAnswerId;
+            }
+            answerValues.push([attempt_id, quizId, studentId, questionId, answerId, null]);
+          });
+        }
+
+        // Query to get all questions for the quiz
+        const getQuestionsQuery = `
+          SELECT question_id
+          FROM Questions
+          WHERE quiz_id = ?`;
+
+        db.query(getQuestionsQuery, [quizId], (getQuestionsErr, questions) => {
+          if (getQuestionsErr || questions.length === 0) {
+            console.error("Error fetching questions:", getQuestionsErr);
+            return res.status(500).json({ message: 'Error fetching questions for the quiz.' });
           }
 
-          const deductionPoints = deductionResults[0].deduction_points || 0;
+          // Find unanswered questions (those that are not in answers)
+          questions.forEach(question => {
+            if (!answers[question.question_id]) {
+              unansweredQuestions.add(question.question_id);
+              // Assign default answer (answer_id = default_answer_id, default_answer_id = 2) to unanswered questions in StudentResponses
+              answerValues.push([attempt_id, quizId, studentId, question.question_id, defaultAnswerId, 2]);
+            }
+          });
 
-          // Calculate score based on correct answers
-          const calculateScoreQuery = `
-            SELECT SUM(a.score) AS total_score
-            FROM StudentResponses sr
-            JOIN Answers a ON sr.answer_id = a.answer_id
-            WHERE sr.attempt_id = ? AND a.is_correct = TRUE;`
-          ;
+          // Insert all the answers (including unanswered ones with score 0)
+          const insertAnswersQuery = `
+            INSERT INTO StudentResponses (attempt_id, quiz_id, student_id, question_id, answer_id, default_answer_id) 
+            VALUES ?`;
 
-          db.query(calculateScoreQuery, [attempt_id], (scoreErr, scoreResults) => {
-            if (scoreErr) {
-              console.error("Error calculating score:", scoreErr);
-              return res.status(500).json({ message: 'Error calculating score.' });
+          db.query(insertAnswersQuery, [answerValues], (insertErr) => {
+            if (insertErr) {
+              console.error("Error inserting answers:", insertErr);
+              return res.status(500).json({ message: 'Error saving student responses.' });
             }
 
-            let total_score = scoreResults[0]?.total_score; // Use optional chaining to ensure safe access
-            console.log("Total score after correct answers:", total_score);
+            // Query to get deduction points for the quiz
+            const getDeductionQuery = `
+              SELECT qs.deduction_percentage AS deduction_points
+              FROM QuizSettings qs
+              JOIN QuizAttempt qa ON qs.quiz_id = qa.quiz_id
+              WHERE qa.attempt_id = ?`;
 
-            // Calculate the total number of wrong answers
-            const wrongAnswersQuery = `
-              SELECT COUNT(*) AS wrong_answers
-              FROM StudentResponses sr
-              JOIN Answers a ON sr.answer_id = a.answer_id
-              WHERE sr.attempt_id = ? AND a.is_correct = FALSE;`
-            ;
-
-            db.query(wrongAnswersQuery, [attempt_id], (wrongErr, wrongResults) => {
-              if (wrongErr) {
-                console.error("Error fetching wrong answers:", wrongErr);
-                return res.status(500).json({ message: 'Error calculating wrong answers.' });
+            db.query(getDeductionQuery, [attempt_id], (deductionErr, deductionResults) => {
+              if (deductionErr || deductionResults.length === 0) {
+                console.error("Error fetching deduction:", deductionErr);
+                return res.status(500).json({ message: 'Error fetching deduction setting.' });
               }
 
-              const wrongAnswersCount = wrongResults[0].wrong_answers;
+              const deductionPoints = deductionResults[0].deduction_points || 0;
 
-              // Apply deduction if there are wrong answers
-              if (wrongAnswersCount > 0) {
-                total_score -= deductionPoints;
-              }
+              // Calculate score based on correct answers, excluding unanswered questions
+              const calculateScoreQuery = `
+                SELECT SUM(a.score) AS total_score
+                FROM StudentResponses sr
+                JOIN Answers a ON sr.answer_id = a.answer_id
+                WHERE sr.attempt_id = ? AND a.is_correct = TRUE AND sr.default_answer_id IS NULL`; // Exclude unanswered questions
 
-              // Prevent negative score
-              total_score = Math.max(total_score, 0);
-
-              // Update the quiz attempt with the final score
-              const updateAttemptQuery = `
-                UPDATE QuizAttempt
-                SET end_time = ?, time_taken = ?, score = ?
-                WHERE attempt_id = ?`
-              ;
-
-              db.query(updateAttemptQuery, [end_time, time_taken, total_score, attempt_id], (updateErr) => {
-                if (updateErr) {
-                  console.error("Error updating quiz attempt:", updateErr);
-                  return res.status(500).json({ message: 'Error updating quiz attempt.' });
+              db.query(calculateScoreQuery, [attempt_id], (scoreErr, scoreResults) => {
+                if (scoreErr) {
+                  console.error("Error calculating score:", scoreErr);
+                  return res.status(500).json({ message: 'Error calculating score.' });
                 }
 
-                return res.status(200).json({ message: 'Quiz attempt submitted successfully!', score: total_score });
+                let total_score = scoreResults[0]?.total_score || 0; // Use optional chaining to ensure safe access
+                console.log("Total score after correct answers:", total_score);
+
+                // Calculate the total number of wrong answers, excluding unanswered questions
+                const wrongAnswersQuery = `
+                  SELECT COUNT(*) AS wrong_answers
+                  FROM StudentResponses sr
+                  JOIN Answers a ON sr.answer_id = a.answer_id
+                  WHERE sr.attempt_id = ? AND a.is_correct = FALSE AND sr.default_answer_id IS NULL`; // Exclude unanswered questions
+
+                db.query(wrongAnswersQuery, [attempt_id], (wrongErr, wrongResults) => {
+                  if (wrongErr) {
+                    console.error("Error fetching wrong answers:", wrongErr);
+                    return res.status(500).json({ message: 'Error calculating wrong answers.' });
+                  }
+
+                  const wrongAnswersCount = wrongResults[0].wrong_answers;
+
+                  // Apply deduction if there are wrong answers
+                  if (wrongAnswersCount > 0) {
+                    total_score -= deductionPoints;
+                  }
+
+                  // Prevent negative score
+                  total_score = Math.max(total_score, 0);
+
+                  // Update the quiz attempt with the final score
+                  const updateAttemptQuery = `
+                    UPDATE QuizAttempt
+                    SET end_time = ?, time_taken = ?, score = ?
+                    WHERE attempt_id = ?`;
+
+                  db.query(updateAttemptQuery, [end_time, time_taken, total_score, attempt_id], (updateErr) => {
+                    if (updateErr) {
+                      console.error("Error updating quiz attempt:", updateErr);
+                      return res.status(500).json({ message: 'Error updating quiz attempt.' });
+                    }
+
+                    return res.status(200).json({ message: 'Quiz attempt submitted successfully!', score: total_score });
+                  });
+                });
               });
             });
           });

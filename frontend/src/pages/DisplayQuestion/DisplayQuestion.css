@@ -28,6 +28,68 @@ body {
     line-height: 1.6;
     margin-bottom: 20px;
   }
+
+/* General Timer Style */
+.timer-box {
+  background: lightgrey; /* Gradient effect */
+  border: 3px solid #2c6e8f; /* Darker border */
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  font-weight: 900; /* Bold and heavy font weight */
+  color: #007bff;  /* White text for better contrast */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Soft shadow */
+  width: 100%;
+  max-width: 300px;  /* Limit the width for better readability */
+  margin: 0 auto;  /* Center the timer box */
+  font-family: 'Roboto', sans-serif; /* Modern sans-serif font */
+  letter-spacing: 2px;  /* Slight spacing for better readability */
+}
+
+/* Timer warning when time is under 60 seconds */
+.timer-warning {
+  background-color: #ff0000; /* Pure red background */
+  border: 3px solid #ff0000;  /* Red border */
+  animation: pulse 1s ease-in-out infinite; /* Apply pulsing animation */
+}
+
+/* Pulsing animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  }
+  50% {
+    transform: scale(1.05); /* Slightly increase size for pulsing effect */
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  }
+}
+
+/* Timer Time Styling */
+.timer-box .time {
+  font-size: 3rem;  /* Increase font size for better visibility */
+  font-weight: 900;  /* Heavy bold text for high visibility */
+  text-transform: uppercase; /* Make the text uppercase for more emphasis */
+  letter-spacing: 2px;  /* Space out the letters */
+  color: #007bff;  /* White color for high contrast */
+}
+
+/* Timer warning: make text bold and highly visible */
+.timer-warning .time {
+  color: #fff;  /* White color when time is under 60 seconds */
+  text-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500; /* Glow effect for the text */
+}
+
+
+
   
   /* Styles for question options */
   .options {
@@ -87,7 +149,6 @@ body {
     width: 8px;
     height: 8px;
     background-color: white;
-    border-radius: 50%; /* Circle indicator */
   }
   
   /* Hover effect for the checkbox */
@@ -146,4 +207,10 @@ body {
       font-size: 1rem;
     }
   }
+
+
+
+
+  
+  
   
