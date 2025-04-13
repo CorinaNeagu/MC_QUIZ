@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import './CreateQuestion.css'
+import './CreateQuestion.css';
 
 const CreateQuestion = () => {
   const navigate = useNavigate();
@@ -15,196 +15,133 @@ const CreateQuestion = () => {
     { answerContent: "", isCorrect: false, score: 0 },
     { answerContent: "", isCorrect: false, score: 0 },
   ]);
+  const [questions, setQuestions] = useState([]);
+  const [questionAnswers, setQuestionAnswers] = useState({});
+  const [pointsPerQuestion, setPointsPerQuestion] = useState(0);
   const [error, setError] = useState("");
-  const [questions, setQuestions] = useState([]); 
-  const [questionCount, setQuestionCount] = useState(0);
-  const [questionAnswers, setQuestionAnswers] = useState({}); 
-  const [pointsPerQuestion, setPointsPerQuestion] = useState(0);  // Changed state to reflect points per question
-  const [deductionPercentage, setDeductionPercentage] = useState(0); // New state for deduction
 
   const fetchQuestions = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to view the questions.");
-        return;
-      }
-  
-      const response = await axios.get(
-        `http://localhost:5000/api/questions/${quizId}`, 
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      if (response.data && response.data.questions) {
-        // Make sure to sanitize questionId for each question
-        const sanitizedQuestions = response.data.questions.map(question => ({
-          ...question,
-          question_id: Number(question.question_id),  // Ensure it's treated as a number
+      const res = await axios.get(`http://localhost:5000/api/questions/${quizId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.questions) {
+        const sanitized = res.data.questions.map(q => ({
+          ...q,
+          question_id: Number(q.question_id),
         }));
-  
-        setQuestions(sanitizedQuestions);
-      } else {
-        console.error("No questions found in the response data");
+
+        setQuestions(sanitized);
       }
     } catch (err) {
-      console.error("Error fetching questions:", err);
-      alert(err.response ? err.response.data.message : "There was an error fetching the questions.");
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to fetch questions.");
     }
   };
-  
 
-  // Fetch answers for a specific question
   const fetchAnswers = async (questionId) => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to view the answers.");
-        return;
-      }
-  
-      // Ensure questionId is treated as a number before making the request
-      const sanitizedQuestionId = Number(questionId);
-  
-      const response = await axios.get(
-        `http://localhost:5000/api/answers/${sanitizedQuestionId}`, 
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      if (response.data && response.data.answers) {
-        setQuestionAnswers((prevState) => ({
-          ...prevState,
-          [sanitizedQuestionId]: response.data.answers, 
-        }));
-      } else {
-        console.error("No answers found in the response data");
+      const res = await axios.get(`http://localhost:5000/api/answers/${questionId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.answers) {
+        setQuestionAnswers(prev => ({ ...prev, [questionId]: res.data.answers }));
       }
     } catch (err) {
-      console.error("Error fetching answers:", err);
-      alert(err.response ? err.response.data.message : "There was an error fetching the answers.");
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to fetch answers.");
     }
   };
-  
 
   useEffect(() => {
     fetchQuestions();
   }, [quizId]);
 
   useEffect(() => {
-    questions.forEach((question) => {
-      fetchAnswers(question.question_id);
-    });
+    questions.forEach((q) => fetchAnswers(q.question_id));
   }, [questions]);
 
-  const handleAnswerChange = (index, event) => {
+  const handleAnswerChange = (index, e) => {
     const newAnswers = [...answers];
-    newAnswers[index][event.target.name] = event.target.value;
+    newAnswers[index][e.target.name] = e.target.value;
     setAnswers(newAnswers);
   };
 
   const handleCheckboxChange = (index) => {
-    const newAnswers = [...answers];
-    newAnswers[index].isCorrect = !newAnswers[index].isCorrect;
+    const updated = answers.map((a, i) => ({
+      ...a,
+      isCorrect: isMultipleChoice
+        ? (i === index ? !a.isCorrect : a.isCorrect) // Only toggle the selected answer
+        : (i === index ? true : false) // For single choice, set only the selected one to true
+    }));
   
-    console.log("Updated Answer:", newAnswers[index]);  // Debugging line
-  
+    // If it's single-choice, uncheck other answers
     if (!isMultipleChoice) {
-      newAnswers.forEach((answer, i) => {
+      updated.forEach((a, i) => {
         if (i !== index) {
-          answer.isCorrect = false;  // Uncheck other answers
+          a.isCorrect = false;
         }
       });
     }
   
-    setAnswers(newAnswers);
+    setAnswers(updated);
   };
   
-  
-  
+
   const handleMultipleChoiceChange = () => {
     setIsMultipleChoice(!isMultipleChoice);
-
-    if (!isMultipleChoice) {
-      const clearedAnswers = answers.map((answer) => ({
-        ...answer,
-        isCorrect: false, 
-      }));
-      setAnswers(clearedAnswers);
-    }
+    setAnswers(answers.map(a => ({ ...a, isCorrect: false })));
   };
 
   const handleAddAnswer = () => {
-    const newAnswer = { answerContent: "", isCorrect: false, score: pointsPerQuestion }; // Assign pointsPerAnswer to new answer
-    setAnswers([...answers, newAnswer]);
+    setAnswers([...answers, { answerContent: "", isCorrect: false, score: pointsPerQuestion }]);
   };
 
   const handleAddQuestion = async (e) => {
     e.preventDefault();
-  
     if (!questionContent) {
-      setError("Question content is required.");
-      return;
+      return setError("Question content is required.");
     }
-  
-    if (questionCount >= noQuestions) {
-      alert("You have reached the maximum number of questions.");
-      return;
+    if (questions.length >= noQuestions) return;
+
+    const isAnyAnswerCorrect = answers.some(a => a.isCorrect);
+    if (!isAnyAnswerCorrect) {
+      return alert("At least one answer must be marked as correct.");
     }
-  
+
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to create a question.");
-        return;
-      }
-  
-      // Create the question and ensure the `questionId` is a number
-      const questionResponse = await axios.post(
+      const res = await axios.post(
         "http://localhost:5000/api/questions",
         {
           quizId,
           questionContent,
           isMultipleChoice,
-          pointsPerQuestion, // Pass pointsPerQuestion to backend
+          pointsPerQuestion,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      // Ensure questionId is treated as a number
-      const questionId = Number(questionResponse.data.questionId);
-  
-      // Send the answers to the backend, including the calculated score
-      for (let answer of answers) {
-        await axios.post(
-          "http://localhost:5000/api/answers",
-          {
-            questionId: questionId,
-            answerContent: answer.answerContent,
-            isCorrect: !!answer.isCorrect,
-            score: answer.isCorrect ? answer.score : 0,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
+
+      const questionId = Number(res.data.questionId);
+
+      await Promise.all(
+        answers.map((a) =>
+          axios.post(
+            "http://localhost:5000/api/answers",
+            {
+              questionId,
+              answerContent: a.answerContent,
+              isCorrect: !!a.isCorrect,
+              score: a.isCorrect ? a.score : 0,
             },
-          }
-        );
-      }
-      setQuestionCount(questionCount + 1);
-  
-      fetchQuestions();
-      fetchAnswers(questionId);
+            { headers: { Authorization: `Bearer ${token}` } }
+          )
+        )
+      );
 
       setQuestionContent("");
       setAnswers([
@@ -212,115 +149,78 @@ const CreateQuestion = () => {
         { answerContent: "", isCorrect: false, score: 0 },
       ]);
       setIsMultipleChoice(false);
-      setPointsPerQuestion(0);  // Reset points per question to 0
-      setError("");  // Clear error message
-  
+      setPointsPerQuestion(0);
+      setError("");
+
+      fetchQuestions();
     } catch (err) {
-      console.error("Error creating question:", err);
-      alert(err.response ? err.response.data.message : "There was an error creating the question.");
-    }
-  };
-  
-  
-
-  const handlePointsChange = (e) => {
-    const value = parseInt(e.target.value, 10) || 0;
-    setPointsPerQuestion(value);
-    setAnswers(answers.map(answer => ({ ...answer, score: value })));  // Update points for answers
-  };
-
-  const handleSubmitQuiz = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to submit the quiz.");
-        return;
-      }
-
-      const allQuestions = questions.map((question) => ({
-        quizId,
-        questionContent: questionContent,
-        isMultipleChoice,
-        answers: answers.map((answer) => ({
-          answerContent: answer.answerContent,
-          isCorrect: !!answer.isCorrect,
-          score: answer.isCorrect ? answer.score : 0,
-        })),
-      }));
-  
-      navigate("/quizPreview", { state: { quizId } });
-
-      alert("Quiz submitted successfully! You are now viewing the quiz preview.");
-  
-    } catch (err) {
-      console.error("Error submitting quiz:", err);
-      alert(err.response ? err.response.data.message : "There was an error submitting the quiz.");
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to create question.");
     }
   };
 
   const handleDeleteQuestion = async (questionId) => {
+    const confirm = window.confirm("Are you sure you want to delete this question?");
+    if (!confirm) return;
+
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to delete a question.");
-        return;
-      }
-  
-      const confirmed = window.confirm("Are you sure you want to delete this question?");
-      if (!confirmed) return;
-  
-      // Delete the question from the backend
       await axios.delete(`http://localhost:5000/api/delete/${questionId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-  
-      // Remove the deleted question from state
-      setQuestions((prevQuestions) =>
-        prevQuestions.filter((q) => q.question_id !== questionId)
-      );
-  
-      // Remove its corresponding answers from state
-      setQuestionAnswers((prevAnswers) => {
-        const updatedAnswers = { ...prevAnswers };
-        delete updatedAnswers[questionId];
-        return updatedAnswers;
+
+      setQuestions(prev => prev.filter(q => q.question_id !== questionId));
+      setQuestionAnswers(prev => {
+        const updated = { ...prev };
+        delete updated[questionId];
+        return updated;
       });
-  
-      alert("Question deleted successfully.");
     } catch (err) {
-      console.error("Error deleting question:", err);
-      alert(
-        err.response
-          ? err.response.data.message
-          : "There was an error deleting the question."
-      );
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to delete question.");
     }
   };
-  
-  
-  
+
+  const handlePointsChange = (e) => {
+    const val = parseInt(e.target.value);
+    
+    // Check if the value is a positive number
+    if (val <= 0 || isNaN(val)) {
+      setError("Points per question must be a positive number.");
+    } else {
+      setError(""); // Clear the error if valid
+      setPointsPerQuestion(val); // Set the points per question
+      setAnswers(answers.map(a => ({ ...a, score: val }))); // Update the score for each answer
+    }
+  };
+
+  const handleSubmitQuiz = () => {
+    navigate("/quizPreview", { state: { quizId } });
+  };
+
+  const canAddMore = questions.length < noQuestions;
+
   return (
     <div className="create-question-container">
-      {/* Points per Answer Input */}
-        <div className="form-group">
-          <label>Points per Question</label>
-            <input
-            type="number"
-            value={pointsPerQuestion}
-            onChange={handlePointsChange}
-            placeholder="Enter points for this question"
-          />
-        </div>
+      <div className="form-group">
+        <label>Points per Question</label>
+        <input
+          type="number"
+          value={pointsPerQuestion}
+          onChange={handlePointsChange}
+          placeholder="Enter points"
+          required
+          min="1" 
+        />
+      </div>
 
-    
+      {error && <p className="error-message">{error}</p>}
+
       <div className="quiz-content-wrapper">
         <form onSubmit={handleAddQuestion} className="create-question-form-wrapper">
           <div className="form-group">
             <label>Question Content</label>
             <textarea
-              type="text"
               value={questionContent}
               onChange={(e) => setQuestionContent(e.target.value)}
               required
@@ -335,44 +235,43 @@ const CreateQuestion = () => {
                 id="multipleChoice"
                 checked={isMultipleChoice}
                 onChange={handleMultipleChoiceChange}
-                className="checkbox-input"
               />
-              <label htmlFor="multipleChoice" className="checkbox-label">Yes</label>
+              <label htmlFor="multipleChoice">Yes</label>
             </div>
           </div>
 
           {answers.map((answer, index) => (
-          <div key={index} className="answer-group">
-            <textarea
-              type="text"
-              name="answerContent"
-              value={answer.answerContent}
-              onChange={(e) => handleAnswerChange(index, e)}
-              placeholder={`Answer Option ${index + 1}`}
-              required
-            />
+  <div key={index} className="answer-group">
+    <textarea
+      name="answerContent"
+      value={answer.answerContent}
+      onChange={(e) => handleAnswerChange(index, e)}
+      placeholder={`Answer ${index + 1}`}
+      required
+    />
 
-          <label className="checkbox-label">
-            Correct:
-            <div className="checkbox-wrapper">
-              <input
-                type="checkbox"
-                id={`correctCheckbox-${index}`}
-                checked={answer.isCorrect}
-                onChange={() => handleCheckboxChange(index)}
-                className="checkbox-input"
-              />
-              <div className="checkbox-custom"></div> {/* Custom checkbox */}
-              <label htmlFor={`correctCheckbox-${index}`} className="checkbox-label-text">Yes</label>
-            </div>
-          </label>
-          </div>
-        ))}
+    <label className="checkbox-label">
+      Correct:
+      <div className="checkbox-wrapper">
+        <input
+          type="checkbox"
+          id={`correctCheckbox-${index}`}
+          checked={answer.isCorrect}
+          onChange={() => handleCheckboxChange(index)}
+          className="checkbox-input"
+        />
+        <div className="checkbox-custom"></div>
+      </div>
+    </label>
+  </div>
+))}
+
 
           <div className="form-group">
-            <button type="button" 
-            onClick={handleAddAnswer}
-            disabled={questions.length >= noQuestions}
+            <button
+              type="button"
+              onClick={handleAddAnswer}
+              disabled={!canAddMore}
             >
               Add Answer
             </button>
@@ -381,55 +280,44 @@ const CreateQuestion = () => {
           {error && <p className="error-message">{error}</p>}
 
           <div className="form-group">
-            <button type="submit" disabled={questions.length >= noQuestions}>
-              {questionCount >= noQuestions ? "Maximum Questions Reached" : "Add Question"}
+            <button 
+              type="submit" 
+              disabled={!canAddMore}>
+              {canAddMore ? "Submit Question" : "Maximum Questions Reached"}
             </button>
           </div>
 
-           {/* Submit Quiz Button */}
-        <div className="form-group">
-          <button type="button" onClick={handleSubmitQuiz}>
-            Submit Quiz
-          </button>
-        </div>
+          <div className="form-group">
+            <button type="button" onClick={handleSubmitQuiz}>
+              Submit Quiz
+            </button>
+          </div>
         </form>
 
         <div className="added-questions">
           <h3>Added Questions:</h3>
-          {questions && questions.length > 0 ? (
+          {questions.length > 0 ? (
             <ul>
-              {questions.map((question) => (
-                <li key={question.question_id}>
-
-                <strong>{question.question_content}</strong>
-                <button
-                  style={{ marginLeft: "10px", color: "red" }}
-                  onClick={() => handleDeleteQuestion(question.question_id)}
-                >
-                  Delete
-                </button>
-                
-                {questionAnswers[question.question_id] && questionAnswers[question.question_id].length > 0 ? (
+              {questions.map((q) => (
+                <li key={q.question_id}>
+                  <strong>{q.question_content}</strong>
+                  <button onClick={() => handleDeleteQuestion(q.question_id)} style={{ color: "red", marginLeft: "10px" }}>
+                    Delete
+                  </button>
                   <ul>
-                    {questionAnswers[question.question_id].map((answer) => (
-                      <li key={answer.answer_id}>
-                        {answer.answer_content} - {answer.is_correct ? "Correct" : "Incorrect"} - Score: {answer.score}
+                    {(questionAnswers[q.question_id] || []).map((a) => (
+                      <li key={a.answer_id}>
+                        {a.answer_content} - {a.is_correct ? "Correct" : "Incorrect"} - Score: {a.score}
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <p>No answers yet.</p>
-                )}
-                
-              </li>
+                </li>
               ))}
             </ul>
           ) : (
             <p>No questions added yet.</p>
           )}
         </div>
-
-       
       </div>
     </div>
   );

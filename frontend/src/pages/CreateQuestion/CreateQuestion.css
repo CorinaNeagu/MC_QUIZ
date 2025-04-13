@@ -68,7 +68,7 @@ html, body {
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input, .form-group textarea {
   padding: 12px;
   font-size: 1.1em;
   border-radius: 8px;
@@ -80,12 +80,13 @@ html, body {
   color: #333;
 }
 
-.form-group input:focus {
+.form-group input:focus, .form-group textarea:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
   background-color: #ffffff;
 }
+
 
 /* Button Styling */
 button {
@@ -145,83 +146,48 @@ button:active {
   color: #444;
 }
 
-/* Styling for Correct/Incorrect Answers */
-.correct-answer {
-  color: green;
-}
-
-.incorrect-answer {
-  color: red;
-}
-
-/* Custom Checkbox Styling */
 .checkbox-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px; /* Increased space between checkbox and label */
-  margin-bottom: 20px;
+  gap: 10px;
 }
 
 .checkbox-input {
-  display: none; /* Hide default checkbox */
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  cursor: pointer;
 }
 
 .checkbox-custom {
   width: 20px;
   height: 20px;
-  border: 2px solid #ccc;
+  border: 2px solid #333;
   border-radius: 4px;
+  background-color: white;
   position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.checkbox-custom::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 10px;
-  height: 10px;
-  background-color: transparent;
-  border-radius: 2px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 
 .checkbox-input:checked + .checkbox-custom {
-  border-color: #007bff; /* Border color when checked */
-  background-color: #007bff; /* Background color when checked */
+  background-color: #007bff; /* Green when checked */
 }
 
 .checkbox-input:checked + .checkbox-custom::after {
-  background-color: white; /* White "tick" inside when checked */
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 4px 4px 0;
+  transform: rotate(45deg);
 }
 
 .checkbox-label-text {
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.checkbox-label {
-  font-size: 1.1rem;
-  color: #444;
-  cursor: pointer;
-  font-weight: 500;
-  user-select: none;
-  transition: color 0.3s ease;
-}
-
-.checkbox-label:hover {
-  color: #0056b3; /* Darker blue for hover effect on label */
-}
-
-/* Add some hover effects on the custom checkbox */
-.checkbox-custom:hover {
-  border-color: #007bff;
-}
-
-.checkbox-custom:active {
-  transform: scale(0.95); /* Slightly shrink the checkbox when clicked */
+  font-size: 14px;
+  color: #333;
 }
 
 /* Responsive Design */
