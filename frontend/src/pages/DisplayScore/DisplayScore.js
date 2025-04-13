@@ -13,7 +13,7 @@ const DisplayScore = () => {
   const [finalScore, setFinalScore] = useState(null);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [error, setError] = useState("");
-  
+
   // Fetch score data and handle calculation
   useEffect(() => {
     const fetchScore = async () => {
@@ -36,7 +36,7 @@ const DisplayScore = () => {
           wrong_answer_count
         } = data;
   
-        const deduction = (deduction_percentage / 100) * score * wrong_answer_count;
+        const deduction = (deduction_percentage / 100) * fetchedScore * wrong_answer_count;
   
         setScore(fetchedScore);
         setMaxScore(fetchedMaxScore);
@@ -50,7 +50,7 @@ const DisplayScore = () => {
   
     fetchScore();
   }, [attemptId]);
-  
+
   // Final score calculation
   useEffect(() => {
     if (score !== null && deduction !== null && maxScore !== null) {
@@ -60,6 +60,15 @@ const DisplayScore = () => {
       setFinalScore(Math.max(final, 0));
     }
   }, [score, deduction, maxScore]);
+
+  // Calculate Grade out of 100
+  const calculateGrade = () => {
+    if (finalScore !== null && maxScore !== null) {
+      const grade = (finalScore / maxScore) * 100;
+      return Math.round(grade);
+    }
+    return 0;
+  };
 
   const handleGoToDashboard = () => {
     navigate("/home");
@@ -73,12 +82,21 @@ const DisplayScore = () => {
           <h1>Quiz Completed</h1>
           <p>Great job! You've completed the quiz.</p>
 
-          <div className="score-value">Your Score: {finalScore.toFixed(2)}</div>
+          <div className="score-value">
+            Your Score: {finalScore.toFixed(2)} / {maxScore}
+          </div>
+
+          {/* Calculate Grade */}
+          <div className="grade">
+            Grade: {calculateGrade()} / 100
+          </div>
+
           {deduction > 0 ? (
             <p>Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answers</p>
           ) : (
             <p>No deductions applied!</p>
           )}
+
           <button onClick={handleGoToDashboard}>Go to Dashboard</button>
 
           {/* Button to show responses */}
@@ -86,7 +104,6 @@ const DisplayScore = () => {
                   onClick={() => navigate(`/responses/${attemptId}`)}>
             View My Responses
           </button>
-
         </>
       ) : (
         <p>Loading your score...</p>

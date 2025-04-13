@@ -3,6 +3,15 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./DisplayQuestion.css";
 
+// Fisher-Yates Shuffle to randomize the array
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+  return array;
+};
+
 const DisplayQuestion = () => {
   const { quizId, attemptId } = useParams();
   const location = useLocation();
@@ -45,7 +54,15 @@ const DisplayQuestion = () => {
           }
         );
 
-        setQuestions(response.data);
+        // Shuffle questions first
+        const shuffledQuestions = shuffleArray(response.data);
+
+        // Shuffle answers for each question
+        shuffledQuestions.forEach(question => {
+          question.answers = shuffleArray(question.answers);
+        });
+
+        setQuestions(shuffledQuestions);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -121,7 +138,6 @@ const DisplayQuestion = () => {
       }
 
       // For any unanswered questions, assign them a score of 0
-      // Here we assume that `questions` is an array of all the questions in the quiz.
       const unansweredQuestions = questions.filter((question) => !formattedAnswers[question.question_id]);
 
       // Mark unanswered questions with a score of 0
@@ -207,7 +223,7 @@ const DisplayQuestion = () => {
             </div>
 
             <div className="button-group">
-              <button className="next-btn" onClick={handleNextQuestion}>
+              <button className="next-btn" onClick={handleNextQuestion} disabled={currentQuestionIndex === questions.length - 1}>
                 Next Question
               </button>
 

@@ -55,7 +55,7 @@ const QuizPreview = () => {
   if (loading) return <div>Loading quiz details...</div>;
 
   const goToHomepage = () => {
-    navigate("/"); // This will navigate to the homepage ("/")
+    navigate("/home"); // This will navigate to the homepage ("/")
   };
 
   return (
