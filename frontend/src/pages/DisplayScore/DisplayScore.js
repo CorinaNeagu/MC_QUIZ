@@ -11,6 +11,7 @@ const DisplayScore = () => {
   const [maxScore, setMaxScore] = useState(null);
   const [deduction, setDeduction] = useState(0);
   const [finalScore, setFinalScore] = useState(null);
+  const [wrongAnswers, setWrongAnswers] = useState(0);
   const [error, setError] = useState("");
   
   // Fetch score data and handle calculation
@@ -22,44 +23,46 @@ const DisplayScore = () => {
           alert("You must be logged in to view your score.");
           return;
         }
-
-        // Fetch score, max score, and deduction details
+  
         const { data } = await axios.get(
           `http://localhost:5000/api/score/quiz_attempts/${attemptId}/score`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        if (data) {
-          const { score: fetchedScore, max_score: fetchedMaxScore, deduction_percentage: fetchedDeduction } = data;
-          setScore(fetchedScore);
-          setMaxScore(fetchedMaxScore);
-          setDeduction(fetchedDeduction);
-        }
+  
+        const {
+          score: fetchedScore,
+          max_score: fetchedMaxScore,
+          deduction_percentage,
+          wrong_answer_count
+        } = data;
+  
+        const deduction = (deduction_percentage / 100) * score * wrong_answer_count;
+  
+        setScore(fetchedScore);
+        setMaxScore(fetchedMaxScore);
+        setDeduction(deduction);
+        setWrongAnswers(wrong_answer_count);
       } catch (err) {
         console.error("Error fetching score:", err);
         setError("Error loading your score.");
       }
     };
-
+  
     fetchScore();
   }, [attemptId]);
-
-  // Handle final score calculation with deduction
+  
+  // Final score calculation
   useEffect(() => {
     if (score !== null && deduction !== null && maxScore !== null) {
-      const cappedScore = Math.min(score, maxScore);  // Cap the score at maxScore
+      const cappedScore = Math.min(score, maxScore);
       const finalScoreBeforeDeduction = cappedScore - deduction;
-      const final = Math.round(finalScoreBeforeDeduction * 100) / 100;  // Round the score to 2 decimal places
-
-      setFinalScore(Math.max(final, 0));  // Prevent negative score
+      const final = Math.round(finalScoreBeforeDeduction * 100) / 100;
+      setFinalScore(Math.max(final, 0));
     }
   }, [score, deduction, maxScore]);
 
-  // Handle navigating back to the dashboard
   const handleGoToDashboard = () => {
-    navigate("/home");  // Navigate to the dashboard
+    navigate("/home");
   };
 
   return (
@@ -72,7 +75,7 @@ const DisplayScore = () => {
 
           <div className="score-value">Your Score: {finalScore.toFixed(2)}</div>
           {deduction > 0 ? (
-            <p>Deduction Applied: {deduction}%</p>
+            <p>Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answers</p>
           ) : (
             <p>No deductions applied!</p>
           )}

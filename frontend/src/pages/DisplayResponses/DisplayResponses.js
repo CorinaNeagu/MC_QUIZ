@@ -9,8 +9,8 @@ const DisplayResponses = () => {
 
   const [responses, setResponses] = useState([]);
   const [error, setError] = useState(null);
+  const [deductionPercentage, setDeductionPercentage] = useState(0);
 
-  // Fetch user responses for the quiz
   useEffect(() => {
     const fetchResponses = async () => {
       try {
@@ -29,6 +29,7 @@ const DisplayResponses = () => {
 
         if (data) {
           setResponses(data.responses);
+          setDeductionPercentage(data.deduction_percentage || 0);
         }
       } catch (err) {
         console.error("Error fetching responses:", err);
@@ -39,25 +40,76 @@ const DisplayResponses = () => {
     fetchResponses();
   }, [attemptId]);
 
-  // Normalize and compare answers
   const normalizeAnswers = (answers) => {
-    if (Array.isArray(answers)) {
-      return answers.map(answer => answer.trim().toLowerCase());
+    if (typeof answers === 'string') {
+      return [answers.trim().toLowerCase()];
     }
-    return answers.split(',').map(answer => answer.trim().toLowerCase());
+    return answers.map(answer => answer.trim().toLowerCase());
+  };
+
+  const removeDuplicates = (answers) => {
+    return [...new Set(answers)];
   };
 
   const checkAnswerCorrectness = (userAnswer, correctAnswers) => {
     const normalizedUserAnswer = normalizeAnswers(userAnswer);
     const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
-
-    // Check if user's answer matches any of the correct answers
+  
+    // Check if any normalized user answer matches any correct answer
     return normalizedUserAnswer.some(answer =>
       normalizedCorrectAnswers.includes(answer)
     );
   };
 
-  // Navigate back to DisplayScore page
+  const calculatePartialPoints = (studentAnswers, correctAnswers, totalPoints) => {
+    const normalizedStudentAnswers = normalizeAnswers(studentAnswers);
+    const uniqueCorrectAnswers = removeDuplicates(normalizeAnswers(correctAnswers));
+    const correctSelections = normalizedStudentAnswers.filter(answer =>
+      uniqueCorrectAnswers.includes(answer)
+    ).length;
+
+    const correctAnswerCount = uniqueCorrectAnswers.length;
+    const pointsPerCorrectAnswer = totalPoints / correctAnswerCount;
+    return pointsPerCorrectAnswer * correctSelections;
+  };
+
+  const calculateDeduction = (points, wrongAnswersCount) => {
+    if (wrongAnswersCount > 0 && deductionPercentage > 0) {
+      const deductionPerWrongAnswer = (deductionPercentage / 100) * points;
+      return deductionPerWrongAnswer * wrongAnswersCount;
+    }
+    return 0;
+  };
+
+  const calculatePointsAwarded = (response) => {
+    const wrongAnswersCount = response.studentAnswer
+      .split(', ')
+      .filter(answer => !checkAnswerCorrectness(answer, response.correctAnswers)).length;
+
+    const deduction = calculateDeduction(response.points, wrongAnswersCount);
+    let awardedPoints = calculatePartialPoints(response.studentAnswer, response.correctAnswers, response.points) - deduction;
+
+    return awardedPoints > 0 ? awardedPoints : 0;
+  };
+
+  // Example: Check the correctness for multiple correct answers
+const getAnswerStatus = (userAnswer, correctAnswers) => {
+  const normalizedUserAnswer = normalizeAnswers(userAnswer);
+  const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
+
+  const matchedAnswers = normalizedUserAnswer.filter(userAnswer =>
+    normalizedCorrectAnswers.includes(userAnswer)
+  );
+
+  if (matchedAnswers.length === 0) {
+    return "Incorrect";
+  } else if (matchedAnswers.length < normalizedCorrectAnswers.length) {
+    return "Partially Correct";
+  } else {
+    return "Correct";
+  }
+};
+
   const handleBackToScore = () => {
     navigate(`/display-score/${attemptId}`);
   };
@@ -77,43 +129,27 @@ const DisplayResponses = () => {
                   </div>
                   <div className="your-answer">
                     <strong>Your Answer(s): </strong>
-                    {/* Displaying user answers in a div */}
                     <div className="answer-list">
-                      {Array.isArray(response.studentAnswer) ? (
-                        response.studentAnswer.map((answer, idx) => (
-                          <div key={idx}>{answer}</div>
-                        ))
-                      ) : (
-                        <div>{response.studentAnswer}</div>
-                      )}
+                      {normalizeAnswers(response.studentAnswer).map((answer, idx) => (
+                        <div key={idx}>{answer}</div>
+                      ))}
                     </div>
                   </div>
                   <div className="correct-answers">
                     <strong>Correct Answer(s): </strong>
-                    {/* Displaying correct answers in separate divs */}
                     <div className="answer-list">
-                      {Array.isArray(response.correctAnswers) ? (
-                        response.correctAnswers.map((answer, idx) => (
-                          <div key={idx} className="correct-answer">{answer}</div>
-                        ))
-                      ) : (
-                        response.correctAnswers.split(",").map((answer, idx) => (
-                          <div key={idx} className="correct-answer">{answer.trim()}</div>
-                        ))
-                      )}
+                      {removeDuplicates(normalizeAnswers(response.correctAnswers)).map((answer, idx) => (
+                        <div key={idx} className="correct-answer">{answer}</div>
+                      ))}
                     </div>
                   </div>
                   <div className="answer-status">
                     <strong>Your Answer Was: </strong>
-                    {checkAnswerCorrectness(response.studentAnswer, response.correctAnswers)
-                      ? "Correct"
-                      : "Incorrect"}
+                    {getAnswerStatus(response.studentAnswer, response.correctAnswers)}
                   </div>
                   <div className="points-awarded">
                     <strong>Points Awarded: </strong>
-                    {checkAnswerCorrectness(response.studentAnswer, response.correctAnswers)
-                      ? response.points
-                      : 0}
+                    {calculatePointsAwarded(response)}
                   </div>
                 </div>
                 <hr />

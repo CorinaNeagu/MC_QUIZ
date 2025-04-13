@@ -187,39 +187,42 @@ router.post('/quiz_attempts/:attempt_id/submit', (req, res) => {
 router.get('/quiz_attempts/:attempt_id/score', (req, res) => {
   const { attempt_id } = req.params;
 
-  const selectScoreQuery = `
+  const query = `
     SELECT 
-        qa.score AS score,
-        qs.deduction_percentage AS deduction_percentage,
-        SUM(a.score) AS max_score
+      qa.score AS score,
+      qs.deduction_percentage AS deduction_percentage,
+      (
+        SELECT SUM(a.score)
+        FROM Questions q
+        JOIN Answers a ON q.question_id = a.question_id
+        WHERE q.quiz_id = qa.quiz_id AND a.is_correct = TRUE
+      ) AS max_score,
+      (
+        SELECT COUNT(*) 
+        FROM StudentResponses sr
+        JOIN Answers a ON sr.answer_id = a.answer_id
+        WHERE sr.attempt_id = qa.attempt_id AND a.is_correct = FALSE
+      ) AS wrong_answer_count
     FROM QuizAttempt qa
-    LEFT JOIN QuizSettings qs ON qa.quiz_id = qs.quiz_id
-    LEFT JOIN Questions q ON qa.quiz_id = q.quiz_id
-    LEFT JOIN Answers a ON q.question_id = a.question_id
+    JOIN QuizSettings qs ON qa.quiz_id = qs.quiz_id
     WHERE qa.attempt_id = ?
-    GROUP BY qa.attempt_id, qs.deduction_percentage`
-  ;
+  `;
 
-  db.query(selectScoreQuery, [attempt_id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error fetching score.' });
-    }
+  db.query(query, [attempt_id], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error fetching score.' });
+    if (results.length === 0) return res.status(404).json({ message: 'Quiz attempt not found.' });
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'Quiz attempt not found.' });
-    }
+    const { score, deduction_percentage, max_score, wrong_answer_count } = results[0];
 
-    const score = results[0].score;
-    const deductionPercentage = results[0].deduction_percentage;
-    const maxScore = results[0].max_score || 0;
-
-    return res.status(200).json({
-      score: score,  // Return the raw score
-      deduction_percentage: deductionPercentage,
-      max_score: maxScore
+    res.status(200).json({
+      score: parseFloat(score),
+      max_score: parseFloat(max_score),
+      deduction_percentage: parseFloat(deduction_percentage),
+      wrong_answer_count: parseInt(wrong_answer_count)
     });
   });
 });
+
 
 
 router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
@@ -227,18 +230,18 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
 
   const query = `
     SELECT q.question_content, 
-           MAX(a.answer_content) AS student_answer, 
-           MAX(a.is_correct) AS student_is_correct,
-           GROUP_CONCAT(correct_answers.answer_content) AS correct_answers, 
-           q.points_per_question AS points
+       MAX(a.answer_content) AS student_answer, 
+       MAX(a.is_correct) AS student_is_correct,
+       GROUP_CONCAT(DISTINCT correct_answers.answer_content) AS correct_answers, -- DISTINCT to remove duplicates
+       q.points_per_question AS points
     FROM StudentResponses sr
     JOIN Questions q ON sr.question_id = q.question_id
     JOIN Answers a ON sr.answer_id = a.answer_id
     JOIN Answers correct_answers ON q.question_id = correct_answers.question_id 
-        AND correct_answers.is_correct = TRUE
+    AND correct_answers.is_correct = TRUE
     WHERE sr.attempt_id = ?
     GROUP BY sr.question_id, q.question_content, q.points_per_question;
-  `;
+    `;
 
   db.query(query, [attempt_id], (err, results) => {
     if (err) {
@@ -261,10 +264,5 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
     return res.status(200).json({ responses });
   });
 });
-
-
-
-  
-
 
 module.exports = router;

@@ -10,6 +10,7 @@ const QuizPreview = () => {
 
   const [quizDetails, setQuizDetails] = useState([]); // Store quiz details
   const [error, setError] = useState(""); // Error state
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     // Fetch the quiz details (questions and answers)
@@ -39,6 +40,8 @@ const QuizPreview = () => {
       } catch (err) {
         console.error("Error fetching quiz details:", err);
         setError("There was an error fetching quiz details.");
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched
       }
     };
 
@@ -48,8 +51,11 @@ const QuizPreview = () => {
   // If there is an error, display it
   if (error) return <div>{error}</div>;
 
+  // Show loading state while the data is being fetched
+  if (loading) return <div>Loading quiz details...</div>;
+
   const goToHomepage = () => {
-    navigate("/home"); // This will navigate to the homepage ("/")
+    navigate("/"); // This will navigate to the homepage ("/")
   };
 
   return (
@@ -86,10 +92,8 @@ const QuizPreview = () => {
       <button onClick={goToHomepage} className="home-button">
         Go to Homepage
       </button>
-
     </div>
   );
 };
 
 export default QuizPreview;
-

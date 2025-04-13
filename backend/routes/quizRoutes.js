@@ -326,6 +326,33 @@ router.get('/display/quizzes', (req, res) => {
 });
 
 
+router.delete("/delete/:questionId", authenticateJWT, (req, res) => {
+  const { questionId } = req.params;
+
+  // First delete the answers related to the question
+  db.query("DELETE FROM answers WHERE question_id = ?", [questionId], (err, result) => {
+    if (err) {
+      console.error("Error deleting answers:", err);
+      return res.status(500).json({ message: "Failed to delete answers.", error: err.message });
+    }
+
+    // Then delete the question itself
+    db.query("DELETE FROM questions WHERE question_id = ?", [questionId], (err, result) => {
+      if (err) {
+        console.error("Error deleting question:", err);
+        return res.status(500).json({ message: "Failed to delete question.", error: err.message });
+      }
+
+      // If no rows were affected in the second query, the question was not found
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Question not found." });
+      }
+
+      res.status(200).json({ message: "Question and its answers deleted successfully." });
+    });
+  });
+});
+
 
 
 

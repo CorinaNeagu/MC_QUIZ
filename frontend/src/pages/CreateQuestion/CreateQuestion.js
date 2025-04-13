@@ -16,8 +16,8 @@ const CreateQuestion = () => {
     { answerContent: "", isCorrect: false, score: 0 },
   ]);
   const [error, setError] = useState("");
-  const [questionCount, setQuestionCount] = useState(0); 
   const [questions, setQuestions] = useState([]); 
+  const [questionCount, setQuestionCount] = useState(0);
   const [questionAnswers, setQuestionAnswers] = useState({}); 
   const [pointsPerQuestion, setPointsPerQuestion] = useState(0);  // Changed state to reflect points per question
   const [deductionPercentage, setDeductionPercentage] = useState(0); // New state for deduction
@@ -111,46 +111,23 @@ const CreateQuestion = () => {
 
   const handleCheckboxChange = (index) => {
     const newAnswers = [...answers];
-  
-    // Toggle the 'isCorrect' state for the clicked answer
     newAnswers[index].isCorrect = !newAnswers[index].isCorrect;
   
+    console.log("Updated Answer:", newAnswers[index]);  // Debugging line
+  
     if (!isMultipleChoice) {
-      // For single-choice questions, uncheck other answers
       newAnswers.forEach((answer, i) => {
         if (i !== index) {
-          answer.isCorrect = false; // Uncheck other answers
+          answer.isCorrect = false;  // Uncheck other answers
         }
       });
-  
-      // Calculate the score for the answers
-      const correctAnswersCount = newAnswers.filter(answer => answer.isCorrect).length;
-  
-      // Distribute points evenly for correct answers
-      if (correctAnswersCount > 0) {
-        newAnswers.forEach((answer) => {
-          answer.score = answer.isCorrect ? pointsPerQuestion / correctAnswersCount : 0;
-        });
-      }
-    } else {
-      // For multiple-choice questions, handle answers being selected as correct
-      const correctAnswersCount = newAnswers.filter(answer => answer.isCorrect).length;
-  
-      if (correctAnswersCount > 0) {
-        newAnswers.forEach((answer) => {
-          answer.score = answer.isCorrect ? pointsPerQuestion / correctAnswersCount : 0;
-        });
-      }
     }
   
-    // Update the answers state
     setAnswers(newAnswers);
   };
   
   
   
-  
-
   const handleMultipleChoiceChange = () => {
     setIsMultipleChoice(!isMultipleChoice);
 
@@ -224,11 +201,19 @@ const CreateQuestion = () => {
           }
         );
       }
-  
       setQuestionCount(questionCount + 1);
   
       fetchQuestions();
       fetchAnswers(questionId);
+
+      setQuestionContent("");
+      setAnswers([
+        { answerContent: "", isCorrect: false, score: 0 },
+        { answerContent: "", isCorrect: false, score: 0 },
+      ]);
+      setIsMultipleChoice(false);
+      setPointsPerQuestion(0);  // Reset points per question to 0
+      setError("");  // Clear error message
   
     } catch (err) {
       console.error("Error creating question:", err);
@@ -272,6 +257,49 @@ const CreateQuestion = () => {
       alert(err.response ? err.response.data.message : "There was an error submitting the quiz.");
     }
   };
+
+  const handleDeleteQuestion = async (questionId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to delete a question.");
+        return;
+      }
+  
+      const confirmed = window.confirm("Are you sure you want to delete this question?");
+      if (!confirmed) return;
+  
+      // Delete the question from the backend
+      await axios.delete(`http://localhost:5000/api/delete/${questionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      // Remove the deleted question from state
+      setQuestions((prevQuestions) =>
+        prevQuestions.filter((q) => q.question_id !== questionId)
+      );
+  
+      // Remove its corresponding answers from state
+      setQuestionAnswers((prevAnswers) => {
+        const updatedAnswers = { ...prevAnswers };
+        delete updatedAnswers[questionId];
+        return updatedAnswers;
+      });
+  
+      alert("Question deleted successfully.");
+    } catch (err) {
+      console.error("Error deleting question:", err);
+      alert(
+        err.response
+          ? err.response.data.message
+          : "There was an error deleting the question."
+      );
+    }
+  };
+  
+  
   
   return (
     <div className="create-question-container">
@@ -314,34 +342,38 @@ const CreateQuestion = () => {
           </div>
 
           {answers.map((answer, index) => (
-            <div key={index} className="answer-group">
-              <textarea
-                type="text"
-                name="answerContent"
-                value={answer.answerContent}
-                onChange={(e) => handleAnswerChange(index, e)}
-                placeholder={`Answer Option ${index + 1}`}
-                required
+          <div key={index} className="answer-group">
+            <textarea
+              type="text"
+              name="answerContent"
+              value={answer.answerContent}
+              onChange={(e) => handleAnswerChange(index, e)}
+              placeholder={`Answer Option ${index + 1}`}
+              required
+            />
+
+          <label className="checkbox-label">
+            Correct:
+            <div className="checkbox-wrapper">
+              <input
+                type="checkbox"
+                id={`correctCheckbox-${index}`}
+                checked={answer.isCorrect}
+                onChange={() => handleCheckboxChange(index)}
+                className="checkbox-input"
               />
-             
-              <label className="checkbox-label">
-                Correct:
-                <div className="checkbox-wrapper">
-                  <input
-                    type="checkbox"
-                    id={`correctCheckbox-${index}`}
-                    checked={answer.isCorrect}
-                    onChange={() => handleCheckboxChange(index)}
-                    className="checkbox-input"
-                  />
-                  <label htmlFor={`correctCheckbox-${index}`} className="checkbox-label-text">Yes</label>
-                </div>
-              </label>
+              <div className="checkbox-custom"></div> {/* Custom checkbox */}
+              <label htmlFor={`correctCheckbox-${index}`} className="checkbox-label-text">Yes</label>
             </div>
-          ))}
+          </label>
+          </div>
+        ))}
 
           <div className="form-group">
-            <button type="button" onClick={handleAddAnswer}>
+            <button type="button" 
+            onClick={handleAddAnswer}
+            disabled={questions.length >= noQuestions}
+            >
               Add Answer
             </button>
           </div>
@@ -349,7 +381,7 @@ const CreateQuestion = () => {
           {error && <p className="error-message">{error}</p>}
 
           <div className="form-group">
-            <button type="submit" disabled={questionCount >= noQuestions}>
+            <button type="submit" disabled={questions.length >= noQuestions}>
               {questionCount >= noQuestions ? "Maximum Questions Reached" : "Add Question"}
             </button>
           </div>
@@ -368,19 +400,28 @@ const CreateQuestion = () => {
             <ul>
               {questions.map((question) => (
                 <li key={question.question_id}>
-                  <strong>{question.question_content}</strong>
-                  {questionAnswers[question.question_id] && questionAnswers[question.question_id].length > 0 ? (
-                    <ul>
-                      {questionAnswers[question.question_id].map((answer) => (
-                        <li key={answer.answer_id}>
-                          {answer.answer_content} - {answer.is_correct ? "Correct" : "Incorrect"} - Score: {answer.score}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No answers yet.</p>
-                  )}
-                </li>
+
+                <strong>{question.question_content}</strong>
+                <button
+                  style={{ marginLeft: "10px", color: "red" }}
+                  onClick={() => handleDeleteQuestion(question.question_id)}
+                >
+                  Delete
+                </button>
+                
+                {questionAnswers[question.question_id] && questionAnswers[question.question_id].length > 0 ? (
+                  <ul>
+                    {questionAnswers[question.question_id].map((answer) => (
+                      <li key={answer.answer_id}>
+                        {answer.answer_content} - {answer.is_correct ? "Correct" : "Incorrect"} - Score: {answer.score}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No answers yet.</p>
+                )}
+                
+              </li>
               ))}
             </ul>
           ) : (

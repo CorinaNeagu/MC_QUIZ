@@ -24,8 +24,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<UserProfile />} /> 
-        <Route path = "/create-quiz" element={<CreateQuiz/>} /> 
-        <Route path = "/create-question/:quizId" element={<CreateQuestion/>} /> 
+        <Route path="/create-quiz" element={<CreateQuiz/>} /> 
+        <Route path="/create-question/:quizId" element={<CreateQuestion/>} /> 
         <Route path="/quizPreview" element={<QuizPreview />} />
         <Route path="/quiz/:quizId" element={<DisplayQuiz />} />
         <Route path="/display-question/:quizId/:attemptId" element={<DisplayQuestion />} /> 
