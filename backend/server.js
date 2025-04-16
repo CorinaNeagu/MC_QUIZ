@@ -14,8 +14,8 @@ app.use(express.json());
 app.use(cors());
 
 // Use the routes
-app.use("/api/auth", authRoutes); // Authentication routes (register, login)
-app.use("/api/user", userRoutes); // User routes (profile, etc.)
+app.use("/api/auth", authRoutes); 
+app.use("/api/user", userRoutes); 
 app.use("/api", quizRoutes);
 app.use("/api/takeQuiz", takeQuizRoutes);
 app.use("/api/score", scoreRoutes);

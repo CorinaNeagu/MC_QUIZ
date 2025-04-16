@@ -103,18 +103,23 @@ const CreateQuestion = () => {
 
   const handleAddQuestion = async (e) => {
     e.preventDefault();
+  
+    // Validation
     if (!questionContent) {
       return setError("Question content is required.");
     }
+  
     if (questions.length >= noQuestions) return;
-
-    const isAnyAnswerCorrect = answers.some(a => a.isCorrect);
+  
+    const isAnyAnswerCorrect = answers.some((a) => a.isCorrect);
     if (!isAnyAnswerCorrect) {
       return alert("At least one answer must be marked as correct.");
     }
-
+  
     try {
       const token = localStorage.getItem("token");
+  
+      // Create the question
       const res = await axios.post(
         "http://localhost:5000/api/questions",
         {
@@ -125,24 +130,33 @@ const CreateQuestion = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       const questionId = Number(res.data.questionId);
-
-      await Promise.all(
-        answers.map((a) =>
-          axios.post(
-            "http://localhost:5000/api/answers",
-            {
-              questionId,
-              answerContent: a.answerContent,
-              isCorrect: !!a.isCorrect,
-              score: a.isCorrect ? a.score : 0,
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          )
-        )
-      );
-
+  
+      // Calculate score for correct answers only
+      const correctCount = answers.filter((a) => a.isCorrect).length;
+      const scorePerCorrect = correctCount > 0 ? pointsPerQuestion / correctCount : 0;
+  
+      console.log(`Correct Answers Count: ${correctCount}`);
+      console.log(`Score Per Correct Answer: ${scorePerCorrect}`);
+  
+      // **Send answers one by one as individual objects**
+      for (let a of answers) {
+        console.log('Sending answer: ', a); // Log the answer being sent to the backend
+  
+        await axios.post(
+          "http://localhost:5000/api/answers",
+          {
+            questionId,
+            answerContent: a.answerContent,
+            isCorrect: !!a.isCorrect,
+            score: a.isCorrect ? scorePerCorrect : 0, // The score should be calculated and sent correctly
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+  
+      // Reset state after successful question
       setQuestionContent("");
       setAnswers([
         { answerContent: "", isCorrect: false, score: 0 },
@@ -151,13 +165,17 @@ const CreateQuestion = () => {
       setIsMultipleChoice(false);
       setPointsPerQuestion(0);
       setError("");
-
-      fetchQuestions();
+  
+      fetchQuestions(); // Refresh list
     } catch (err) {
-      console.error(err);
+      console.error("Error: ", err);
       alert(err.response?.data?.message || "Failed to create question.");
     }
   };
+  
+  
+  
+  
 
   const handleDeleteQuestion = async (questionId) => {
     const confirm = window.confirm("Are you sure you want to delete this question?");
@@ -190,7 +208,6 @@ const CreateQuestion = () => {
     } else {
       setError(""); // Clear the error if valid
       setPointsPerQuestion(val); // Set the points per question
-      setAnswers(answers.map(a => ({ ...a, score: val }))); // Update the score for each answer
     }
   };
 
