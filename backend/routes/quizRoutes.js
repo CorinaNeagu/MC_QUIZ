@@ -352,6 +352,75 @@ router.delete("/delete/:questionId", authenticateJWT, (req, res) => {
 });
 
 
+// Update an existing question and its answers by editingQuestionId
+router.put("/questions/:editingQuestionId", authenticateJWT, async (req, res) => {
+  const { editingQuestionId } = req.params; // Get the dynamic question ID from the URL parameter
+  const { questionContent, isMultipleChoice, pointsPerQuestion, answers } = req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Extract the token from the header
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided. Please log in." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
+    const professor_id = decoded.id; // Get the professor ID from the decoded token
+
+    if (!questionContent || pointsPerQuestion == null || !answers) {
+      return res.status(400).json({ message: "Please provide all required fields." });
+    }
+
+    // Step 1: Get the quiz information to check the professor_id
+    const getQuizQuery = `SELECT professor_id FROM Quiz WHERE quiz_id = (SELECT quiz_id FROM Questions WHERE question_id = ?)`;
+    db.query(getQuizQuery, [editingQuestionId], (err, result) => {
+      if (err) {
+        console.error('Error fetching quiz data:', err);
+        return res.status(500).json({ message: 'Database error while fetching quiz data' });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({ message: "Quiz not found for this question." });
+      }
+
+      const quiz = result[0];
+
+      // Step 2: Check if the professor_id from the JWT matches the quiz's professor_id
+      if (quiz.professor_id !== professor_id) {
+        return res.status(403).json({ message: "Not authorized to update this question." });
+      }
+
+      // Step 3: Proceed to update the question and answers
+      const updateQuestionQuery = `UPDATE Questions SET question_content = ?, is_multiple_choice = ? WHERE question_id = ?`;
+      db.query(updateQuestionQuery, [questionContent, isMultipleChoice, editingQuestionId], (err, result) => {
+        if (err) {
+          console.error('Error updating question:', err);
+          return res.status(500).json({ message: 'Database error while updating the question' });
+        }
+
+        // Step 4: Update the answers for this question
+        answers.forEach((answer) => {
+          const { answerId, answerContent, isCorrect, score } = answer;
+
+          const updateAnswerQuery = `UPDATE Answers SET answer_content = ?, is_correct = ?, score = ? WHERE answer_id = ? AND question_id = ?`;
+          db.query(updateAnswerQuery, [answerContent, isCorrect, score, answerId, editingQuestionId], (err, result) => {
+            if (err) {
+              console.error('Error updating answer:', err);
+              return res.status(500).json({ message: 'Database error while updating the answer' });
+            }
+          });
+        });
+
+        return res.status(200).json({
+          message: "Question and answers updated successfully!",
+        });
+      });
+    });
+  } catch (err) {
+    console.error('JWT error:', err);
+    return res.status(401).json({ message: 'Invalid or expired token. Please log in again.' });
+  }
+});
+
 
 
 

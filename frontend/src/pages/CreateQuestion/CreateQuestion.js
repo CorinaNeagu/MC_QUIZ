@@ -19,6 +19,7 @@ const CreateQuestion = () => {
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [pointsPerQuestion, setPointsPerQuestion] = useState(0);
   const [error, setError] = useState("");
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
 
   const fetchQuestions = async () => {
     try {
@@ -211,6 +212,70 @@ const CreateQuestion = () => {
     }
   };
 
+  const handleEditQuestion = (questionId) => {
+    setEditingQuestionId(questionId);
+    const questionToEdit = questions.find(q => q.question_id === questionId);
+    
+    if (questionToEdit) {
+      setQuestionContent(questionToEdit.question_content);
+      setIsMultipleChoice(questionToEdit.is_multiple_choice);
+      setPointsPerQuestion(questionToEdit.points_per_question);
+  
+      const currentAnswers = questionAnswers[questionId] || [];
+      setAnswers(currentAnswers.map(answer => ({
+        answerContent: answer.answer_content,
+        isCorrect: answer.is_correct,
+        score: answer.score,
+      })));
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!questionContent) {
+      return setError("Question content is required.");
+    }
+  
+    if (!answers.some(a => a.isCorrect)) {
+      return alert("At least one answer must be marked as correct.");
+    }
+  
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await axios.put(
+        `http://localhost:5000/api/questions/${editingQuestionId}`,
+        {
+          questionContent,
+          isMultipleChoice,
+          pointsPerQuestion,
+          answers: answers.map((answer, index) => ({
+            answerId: questionAnswers[editingQuestionId][index]?.answer_id,
+            answerContent: answer.answerContent,
+            isCorrect: answer.isCorrect,
+            score: answer.score,
+          })),
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      alert(res.data.message);
+      setQuestionContent(""); // Clear question content
+      setAnswers([
+        { answerContent: "", isCorrect: false, score: 0 },
+        { answerContent: "", isCorrect: false, score: 0 }
+      ]); // Clear answers
+      setIsMultipleChoice(false); // Reset multiple choice
+      setPointsPerQuestion(0); // Reset points per question
+      setError(""); // Clear any error messages
+      setEditingQuestionId(null); // Reset editing mode
+      fetchQuestions(); // Refresh the questions list
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to update question.");
+    }
+  };
+  
+
   const handleSubmitQuiz = () => {
     navigate("/quizPreview", { state: { quizId } });
   };
@@ -266,7 +331,6 @@ const CreateQuestion = () => {
       placeholder={`Answer ${index + 1}`}
       required
     />
-
     <label className="checkbox-label">
       Correct:
       <div className="checkbox-wrapper">
@@ -275,7 +339,6 @@ const CreateQuestion = () => {
           id={`correctCheckbox-${index}`}
           checked={answer.isCorrect}
           onChange={() => handleCheckboxChange(index)}
-          className="checkbox-input"
         />
         <div className="checkbox-custom"></div>
       </div>
@@ -311,6 +374,8 @@ const CreateQuestion = () => {
           </div>
         </form>
 
+      
+
         <div className="added-questions">
           <h3>Added Questions:</h3>
           {questions.length > 0 ? (
@@ -318,7 +383,27 @@ const CreateQuestion = () => {
               {questions.map((q) => (
                 <li key={q.question_id}>
                   <strong>{q.question_content}</strong>
-                  <button onClick={() => handleDeleteQuestion(q.question_id)} style={{ color: "red", marginLeft: "10px" }}>
+
+                  {editingQuestionId !== null && (
+                  <div className="form-group">
+                    <button type="button" onClick={handleSaveEdit}>
+                    Save Edit
+                    </button>
+                  </div>
+                )}
+                  <button 
+                    onClick={() => handleEditQuestion(q.question_id)} 
+                    style={{ color: "white", marginLeft: "10px" }}
+                    className = "delete-button"
+                    >
+                    Edit
+                  </button>
+
+                  <button 
+                    onClick={() => handleDeleteQuestion(q.question_id)} 
+                    style={{ color: "white", marginLeft: "10px" }}
+                    className = "delete-button"
+                    >
                     Delete
                   </button>
                   <ul>
