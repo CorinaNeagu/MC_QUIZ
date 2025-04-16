@@ -1,0 +1,269 @@
+/* Ensure that the entire body can scroll */
+html, body {
+    height: 100%; /* Make sure the page takes up full height */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Main container (making the whole page scrollable) */
+  .manage-quizzes-container {
+    min-height: 100vh; /* Ensures the container takes up the entire viewport height */
+    padding: 20px;
+    overflow-y: auto; /* Allow scrolling inside this container */
+    box-sizing: border-box;
+  }
+  
+  /* Quiz List Layout */
+  .quiz-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
+  }
+  
+  /* Individual Quiz Card */
+  .quiz-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 20px;
+    width: 280px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .quiz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Button to Inspect Quiz */
+  .btn-inspect {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-inspect:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Questions Section */
+  .questions-container {
+    margin-top: 40px;
+    margin-left: 200px;
+    margin-right: 200px;
+    padding: 30px;
+    background-color: #fdfdfd;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    max-height: 70vh; /* Set a max height for the questions container */
+    overflow-y: auto; /* Allow scrolling within the questions section */
+  }
+  
+  /* Heading for Questions */
+  .questions-heading {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #333;
+  }
+
+  .question-list {
+    display: flex; /* Arrange items horizontally */
+    flex-wrap: wrap; /* Allow wrapping if screen is too small */
+    gap: 25px; /* Space between the questions */
+    justify-content: flex-start; /* Align to the left */
+  }
+  
+  
+/* Individual Question Card */
+.question-card {
+    background-color: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    padding: 20px;
+    width: 320px; /* Width of each question card */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
+    transition: transform 0.3s ease;
+    flex-shrink: 0; /* Prevent shrinking of question cards */
+  }
+  
+  .question-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .question-content h4 {
+    font-size: 1.2rem;
+    color: #444;
+    margin-bottom: 15px;
+  }
+  
+  /* Button to Fetch Answers */
+  .btn-fetch-answers {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-fetch-answers:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Answers Section */
+  .answers-container {
+    margin-top: 20px;
+    background-color: #f7faff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    max-height: 400px; /* Limit the answers section height */
+    overflow-y: auto; /* Allow scrolling within the answers section */
+  }
+  
+  .answers-container h5 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .answers-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Consistent spacing between answers */
+  }
+  
+  .answers-list li {
+    background-color: #f9f9f9;
+    padding: 12px;
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .answers-list li::before {
+    content: none; /* Removes the bullet/blue dot */
+  }
+  
+  .answers-list li:hover {
+    background-color: #f0f8ff;
+  }
+  
+  .correct-tag {
+    color: green;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+  
+  .incorrect-tag {
+    color: red;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+  
+  .answer-text {
+    flex: 1;
+  }
+  
+/* Back to Homepage Button - Even shorter */
+.btn-go-home {
+    position: fixed; /* Fix the button to the top of the screen */
+    top: 20px;
+    left: 50%; /* Position it in the center */
+    transform: translateX(-50%); /* Offset it by half its width to center it */
+    background-color: #007bff;
+    color: white;
+    padding: 4px 12px; /* Reduced padding for a more compact button */
+    border: none;
+    border-radius: 20px; /* Rounded corners */
+    font-size: 0.75rem; /* Smaller font size */
+    cursor: pointer;
+    z-index: 999; /* Ensure it's above other content */
+    width: 33.33%; /* Set the button width to one third of the screen */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  }
+  
+  .btn-go-home:hover {
+    background-color: #0056b3;
+    transform: scale(0.85) translateX(-50%); /* Slightly enlarge when hovered */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
+  }
+
+  /* Quiz Settings Section */
+.quiz-settings {
+  background-color: #f9f9f9; /* Light background for the settings section */
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  max-width: 800px; /* Limit the width of the settings section */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Heading for Quiz Settings */
+.quiz-settings h5 {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Quiz Settings List */
+.quiz-settings ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quiz-settings li {
+  background-color: #f1f1f1;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz-settings li span {
+  font-weight: bold;
+  color: #007bff; /* Blue color for the setting name */
+}
+
+/* Highlight active setting */
+.quiz-settings li strong {
+  color: #007bff;
+}
+
+/* Tooltip for inactive setting */
+.quiz-settings li.inactive {
+  background-color: #fce4e4; /* Light red background for inactive settings */
+  color: #d32f2f; /* Red color for inactive text */
+}
+
+
+  
+  

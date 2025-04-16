@@ -200,10 +200,6 @@ router.post("/answers", async (req, res) => {
   }
 });
 
-
-
-
-
 // GET route to fetch all questions for a specific quiz
 router.get('/questions/:quizId', async (req, res) => {
   const quizId = req.params.quizId;  // Extract quizId from URL parameters
@@ -354,6 +350,8 @@ router.delete("/delete/:questionId", authenticateJWT, (req, res) => {
     });
   });
 });
+
+
 
 
 

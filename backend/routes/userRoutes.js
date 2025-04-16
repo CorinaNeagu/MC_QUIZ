@@ -37,36 +37,90 @@ router.get('/profile', authenticateJWT, (req, res) => {
     });
 });
 
-// Route to fetch the professor's questions
-// Route to fetch professor's questions and category name
-router.get('/professor/questions', authenticateJWT, (req, res) => {
-    const { id, userType } = req.user; // Extract from JWT payload
+router.get('/professor/quizzes', authenticateJWT, (req, res) => {
+  const { id, userType } = req.user; // Extract from JWT payload
   
-    if (userType !== 'professor') {
-      return res.status(403).json({ error: 'You are not authorized to view questions.' });
+  // Ensure the user is a professor
+  if (userType !== 'professor') {
+    return res.status(403).json({ error: 'You are not authorized to view quizzes.' });
+  }
+
+  console.log('Fetching quizzes for professor id:', id);
+  
+  // Query to fetch quizzes for the professor, with category name
+  const query = `
+    SELECT q.quiz_id, q.title, c.category_name
+    FROM Quiz q
+    JOIN Category c ON q.category_id = c.category_id
+    WHERE q.professor_id = ?;
+  `;
+  
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Error fetching quizzes:", err);
+      return res.status(500).json({ error: "Error fetching quizzes" });
     }
-  
-    console.log('Fetching questions for professor id:', id);
-  
-    // Query to fetch quiz questions along with the category name
-    const query = `
-      SELECT q.question_id, q.question_content, q.is_multiple_choice, c.category_name
-      FROM questions q
-      JOIN quiz qu ON q.quiz_id = qu.quiz_id
-      JOIN category c ON qu.category_id = c.category_id
-      WHERE qu.professor_id = ?
-    `;
-  
-    db.query(query, [id], (err, result) => {
-      if (err) {
-        console.error("Error fetching questions:", err);
-        return res.status(500).json({ error: "Error fetching questions" });
-      }
-  
-      // Send the fetched questions with the category name
-      res.json(result);
-    });
+
+    // If no quizzes found, send an empty array
+    if (result.length === 0) {
+      return res.json([]);
+    }
+
+    // Return the quizzes along with their categories
+    res.json(result);
   });
+});
+
+router.get('/professor/questions/:quizId', authenticateJWT, (req, res) => {
+  const { id, userType } = req.user;
+  const { quizId } = req.params;
+
+  if (userType !== 'professor') {
+    return res.status(403).json({ error: 'You are not authorized to view questions.' });
+  }
+
+  const query = `
+    SELECT q.question_id, q.question_content, q.is_multiple_choice, c.category_name
+    FROM questions q
+    JOIN quiz qu ON q.quiz_id = qu.quiz_id
+    JOIN category c ON qu.category_id = c.category_id
+    WHERE qu.professor_id = ? AND q.quiz_id = ?
+  `;
+
+  db.query(query, [id, quizId], (err, result) => {
+    if (err) {
+      console.error("Error fetching questions:", err);
+      return res.status(500).json({ error: "Error fetching questions" });
+    }
+
+    res.json(result);
+  });
+});
+
+
+router.get('/settings/:quizId', authenticateJWT, (req, res) => {
+  const { quizId } = req.params;
+
+  // Fetch the settings for the specific quizId
+  const query = `
+    SELECT time_limit, deduction_percentage, retake_allowed, is_active 
+    FROM QuizSettings 
+    WHERE quiz_id = ?
+  `;
+
+  db.query(query, [quizId], (err, rows) => {
+    if (err) {
+      console.error('Error fetching quiz settings:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Settings not found for this quiz.' });
+    }
+
+    res.json(rows[0]); // Respond with the first row (there should be only one)
+  });
+});
   
 
 

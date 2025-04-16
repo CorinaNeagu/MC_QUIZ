@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./UserProfile.css";
+import Sidebar from "../../components/Sidebar/Sidebar";
+
 
 const UserProfile = () => {
   const [userProfile, setUserProfile] = useState({
@@ -86,6 +88,7 @@ const UserProfile = () => {
 
   return (
     <div className="user-profile-container">
+       <Sidebar />
       <div className="profile-header">
         <h2>User Profile</h2>
       </div>

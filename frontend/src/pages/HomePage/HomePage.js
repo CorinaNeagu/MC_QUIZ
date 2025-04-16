@@ -156,7 +156,6 @@ const HomePage = () => {
           <h2>Professor Dashboard</h2>
           <p>Welcome, professor! Here you can manage quizzes, view your students' progress, and update your profile.</p>
           <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
-          <button onClick={() => navigate("/profile")}>Go to Profile</button>
           <button onClick={() => navigate("/create-quiz")}>Create Quiz</button>
         </div>
       ) : (
