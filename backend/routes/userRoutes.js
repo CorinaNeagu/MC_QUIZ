@@ -121,7 +121,55 @@ router.get('/settings/:quizId', authenticateJWT, (req, res) => {
     res.json(rows[0]); // Respond with the first row (there should be only one)
   });
 });
-  
+
+
+//Method to update DB content
+router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
+  const { quizId } = req.params;
+  const { time_limit, deduction_percentage, retake_allowed, is_active, title } = req.body;
+
+  // First, update the settings in QuizSettings table
+  const query = `
+    UPDATE QuizSettings 
+    SET time_limit = ?, 
+        deduction_percentage = ?, 
+        retake_allowed = ?, 
+        is_active = ?
+    WHERE quiz_id = ?
+  `;
+
+  db.query(query, [time_limit, deduction_percentage, retake_allowed, is_active, quizId], (err, result) => {
+    if (err) {
+      console.error('Error updating quiz settings:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Quiz settings not found for this quiz.' });
+    }
+
+    // If title is being updated, update it in the Quiz table
+    if (title) {
+      const titleUpdateQuery = `
+        UPDATE Quiz 
+        SET title = ? 
+        WHERE quiz_id = ?
+      `;
+      
+      db.query(titleUpdateQuery, [title, quizId], (err, result) => {
+        if (err) {
+          console.error('Error updating quiz title:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+        
+        res.json({ message: 'Quiz settings and title updated successfully!' });
+      });
+    } else {
+      // If no title update is required, just respond with the settings update success
+      res.json({ message: 'Quiz settings updated successfully!' });
+    }
+  });
+});
 
 
 

@@ -47,43 +47,6 @@ const UserProfile = () => {
     }
   }, [navigate]);
 
-  // Fetch professor's questions after the profile is fetched and user is a professor
-  useEffect(() => {
-    if (userProfile.userType === "professor") {
-      const token = localStorage.getItem("token");
-      axios
-        .get("http://localhost:5000/api/user/professor/questions", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          setQuestions(response.data); // Set the questions in state
-        })
-        .catch((error) => {
-          console.error("Error fetching professor's questions:", error);
-        });
-    }
-  }, [userProfile.userType]); // Only trigger when userType changes
-
-  const fetchAnswers = (questionId) => {
-    axios
-      .get(`http://localhost:5000/api/answers/${questionId}`)
-      .then((response) => {
-        // Check if the response contains the 'answers' array
-        if (response.data && Array.isArray(response.data.answers)) {
-          setAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            [questionId]: response.data.answers, // Ensure it's an array of answers
-          }));
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching answers:", error);
-      });
-  };
-
-
   const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
 
   return (
@@ -120,43 +83,7 @@ const UserProfile = () => {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      {/* Only display professor's questions if the user is a professor */}
-      {userProfile.userType === "professor" && (
-        <div className="questions-list">
-          <h3>My Questions</h3>
-          {questions.length === 0 ? (
-            <p>No questions found.</p>
-          ) : (
-            questions.map((question, index) => (
-              <div key={index} className="question-item">
-                <p><strong>Question:</strong> {question.question_content}</p>
-                <p><strong>Category:</strong> {question.category_name}</p>
-                <p><strong>Multiple Choice:</strong> {question.is_multiple_choice ? 'Yes' : 'No'}</p>
-                {/* Button to fetch and show answers for each question */}
-                <button onClick={() => fetchAnswers(question.question_id)}>
-                  View Answers
-                </button>
-
-                {/* Show answers for the specific question */}
-                {answers[question.question_id] && (
-                  <div className="answers-list">
-                    <h4>Answers:</h4>
-                    {answers[question.question_id].map((answer, idx) => (
-                      <div key={idx}>
-                        <p><strong>Answer:</strong> {answer.answer_content}</p>
-                        <p><strong>Correct:</strong> {answer.is_correct ? "Yes" : "No"}</p>
-                        <p><strong>Score:</strong> {answer.score}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      )}      
+      </div>     
     </div>
   );
 

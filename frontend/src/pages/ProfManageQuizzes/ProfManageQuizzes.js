@@ -16,7 +16,10 @@ const ProfManageQuizzes = () => {
   const [quizSettings, setQuizSettings] = useState({});
   const [activeQuizId, setActiveQuizId] = useState(null);
   const [selectedQuizSettings, setSelectedQuizSettings] = useState({});
+  const [editSettingsQuizId, setEditSettingsQuizId] = useState(null);
+  const [editableSettings, setEditableSettings] = useState({});
   const navigate = useNavigate();
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -115,6 +118,89 @@ const ProfManageQuizzes = () => {
       console.error("Failed to fetch quiz settings:", error);
     }
   };
+
+  const handleToggleEdit = (quizId) => {
+    if (editSettingsQuizId === quizId) {
+      // Save logic here (next section)
+      handleSaveSettings(quizId);
+    } else {
+      const settings = selectedQuizSettings[quizId];
+      setEditableSettings({
+        title: quizzes.find(q => q.quiz_id === quizId)?.title || '',
+        time_limit: settings.time_limit,
+        deduction_percentage: settings.deduction_percentage,
+        retake_allowed: settings.retake_allowed,
+        is_active: settings.is_active,
+      });
+      setEditSettingsQuizId(quizId);
+    }
+  };
+
+  const handleSettingChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditableSettings(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+  };
+
+  const handleSaveSettings = async (quizId) => {
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No authentication token found.');
+      return;
+    }
+
+    try {
+      // Send GET request to retrieve the current settings (Optional)
+      const response = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Ensure you have the token set properly
+        },
+      });
+  
+      const currentSettings = response.data; // Assuming the response has the current settings
+      
+      // Send PUT request to update the settings
+      const updateResponse = await axios.put(
+        `http://localhost:5000/api/user/update-quiz-settings/${quizId}`,
+        editableSettings,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Ensure the authorization token is passed
+          },
+        }
+      );
+  
+      // Assuming updateResponse contains the updated quiz settings
+      if (updateResponse.status === 200) {
+        const updatedQuiz = updateResponse.data.updatedQuiz; // Assuming the backend returns the updated quiz
+  
+        // Update the state with the updated quiz settings
+        setSelectedQuizSettings((prev) => ({
+          ...prev,
+          [quizId]: {
+            ...prev[quizId],
+            ...editableSettings,
+          },
+        }));
+  
+        // Update quiz title locally
+        setQuizzes((prev) =>
+          prev.map((q) => (q.quiz_id === quizId ? { ...q, title: editableSettings.title } : q))
+        );
+  
+        setEditSettingsQuizId(null); // Exit edit mode
+        alert('Quiz settings updated successfully!');
+      }
+    } catch (err) {
+      console.error('Error updating quiz settings:', err);
+      alert('Error while saving settings. Please try again later.');
+    }
+  };
+  
   
 
   if (loading) return <div>Loading...</div>;
@@ -145,14 +231,49 @@ const ProfManageQuizzes = () => {
             {/* Conditionally render settings if this quiz's details are visible */}
             {activeQuizId === quiz.quiz_id && selectedQuizSettings[quiz.quiz_id] && (
               <div className="quiz-settings">
-                <h5>Quiz Settings:</h5>
+              <h5>Quiz Settings:</h5>
+            
+              {editSettingsQuizId === quiz.quiz_id ? (
+                <div className="settings-form">
+                  <label>
+                    Title:
+                    <input type="text" name="title" value={editableSettings.title} onChange={handleSettingChange} />
+                  </label>
+            
+                  <label>
+                    Time Limit:
+                    <input type="number" name="time_limit" value={editableSettings.time_limit} onChange={handleSettingChange} />
+                  </label>
+            
+                  <label>
+                    Deduction Percentage:
+                    <input type="number" name="deduction_percentage" value={editableSettings.deduction_percentage} onChange={handleSettingChange} />
+                  </label>
+            
+                  <label>
+                    Retake Allowed:
+                    <input type="checkbox" name="retake_allowed" checked={editableSettings.retake_allowed} onChange={handleSettingChange} />
+                  </label>
+            
+                  <label>
+                    Is Active:
+                    <input type="checkbox" name="is_active" checked={editableSettings.is_active} onChange={handleSettingChange} />
+                  </label>
+                </div>
+              ) : (
                 <ul>
+                  <li><strong>Title:</strong> {quiz.title}</li>
                   <li><strong>Time Limit:</strong> {selectedQuizSettings[quiz.quiz_id].time_limit} minutes</li>
                   <li><strong>Deduction Percentage:</strong> {selectedQuizSettings[quiz.quiz_id].deduction_percentage}%</li>
                   <li><strong>Retake Allowed:</strong> {selectedQuizSettings[quiz.quiz_id].retake_allowed ? "Yes" : "No"}</li>
                   <li><strong>Is Active:</strong> {selectedQuizSettings[quiz.quiz_id].is_active ? "Yes" : "No"}</li>
                 </ul>
-              </div>
+              )}
+            
+              <button onClick={() => handleToggleEdit(quiz.quiz_id)} className="btn-edit-settings">
+                {editSettingsQuizId === quiz.quiz_id ? "Save Settings" : "Change Settings"}
+              </button>
+            </div>
             )}
           </div>
         ))}
