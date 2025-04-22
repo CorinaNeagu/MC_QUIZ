@@ -200,6 +200,42 @@ const ProfManageQuizzes = () => {
       alert('Error while saving settings. Please try again later.');
     }
   };
+
+  const handleDeleteQuiz = async (quizId) => {
+    const token = localStorage.getItem("token");
+  
+    // Check if the token exists, if not, handle the error gracefully
+    if (!token) {
+      console.error('No authentication token found.');
+      alert('You must be logged in to perform this action.');
+      return;
+    }
+  
+    // Confirm deletion before proceeding
+    if (window.confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
+      try {
+        // Make the DELETE request to delete the quiz
+        const response = await axios.delete(`http://localhost:5000/api/user/delete-quiz/${quizId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // Check if the response status indicates success
+        if (response.status === 200) {
+          // Remove the deleted quiz from the state
+          setQuizzes((prevQuizzes) => prevQuizzes.filter((quiz) => quiz.quiz_id !== quizId));
+          alert(response.data.message);
+        } else {
+          alert('Failed to delete quiz. Please try again later.');
+        }
+      } catch (error) {
+        console.error('Error deleting quiz:', error);
+        alert('An error occurred while deleting the quiz. Please try again later.');
+      }
+    }
+  };
+  
   
   
 
@@ -209,7 +245,10 @@ const ProfManageQuizzes = () => {
   return (
     <div className="manage-quizzes-container">
       <Sidebar showBackButton={true} />
+
+      <div className="scrollable-content">
       <h2>Your Quizzes</h2>
+
 
       {quizzes.length === 0 ? (
         <p>You have not created any quizzes yet.</p>
@@ -220,12 +259,16 @@ const ProfManageQuizzes = () => {
             <h4>{quiz.title}</h4>
             <p>Category: {quiz.category_name}</p>
       
-            <button onClick={() => handleQuizClick(quiz.quiz_id)} className="btn-inspect">
+            <button onClick={() => handleQuizClick(quiz.quiz_id)} className={`btn-inspect ${selectedQuizId === quiz.quiz_id ? "active" : ""}`}>
               {selectedQuizId === quiz.quiz_id ? "Hide Quiz" : "Inspect Quiz"}
             </button>
       
             <button onClick={() => handleSeeDetails(quiz.quiz_id)} className="btn-see-details">
               {activeQuizId === quiz.quiz_id ? "Hide Details" : "See Details"}
+            </button>
+
+            <button onClick={() => handleDeleteQuiz(quiz.quiz_id)} className="btn-delete-quiz">
+              Delete Quiz
             </button>
       
             {/* Conditionally render settings if this quiz's details are visible */}
@@ -328,6 +371,7 @@ const ProfManageQuizzes = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -164,7 +164,6 @@ const CreateQuestion = () => {
         { answerContent: "", isCorrect: false, score: 0 },
       ]);
       setIsMultipleChoice(false);
-      setPointsPerQuestion(0);
       setError("");
   
       fetchQuestions(); // Refresh list
@@ -265,7 +264,6 @@ const CreateQuestion = () => {
         { answerContent: "", isCorrect: false, score: 0 }
       ]); // Clear answers
       setIsMultipleChoice(false); // Reset multiple choice
-      setPointsPerQuestion(0); // Reset points per question
       setError(""); // Clear any error messages
       setEditingQuestionId(null); // Reset editing mode
       fetchQuestions(); // Refresh the questions list
@@ -277,6 +275,10 @@ const CreateQuestion = () => {
   
 
   const handleSubmitQuiz = () => {
+    if (questions.length !== noQuestions) {
+      alert(`You must add exactly ${noQuestions} question(s) before submitting.`);
+      return;
+    }
     navigate("/quizPreview", { state: { quizId } });
   };
 
@@ -284,6 +286,7 @@ const CreateQuestion = () => {
 
   return (
     <div className="create-question-container">
+       
       <div className="form-group">
         <label>Points per Question</label>
         <input
@@ -317,30 +320,33 @@ const CreateQuestion = () => {
                 id="multipleChoice"
                 checked={isMultipleChoice}
                 onChange={handleMultipleChoiceChange}
+                className = "yesButton"
               />
-              <label htmlFor="multipleChoice">Yes</label>
+              <label htmlFor="multipleChoice" className="checkbox-label-text">Yes</label>
             </div>
           </div>
 
           {answers.map((answer, index) => (
-  <div key={index} className="answer-group">
-    <textarea
-      name="answerContent"
-      value={answer.answerContent}
-      onChange={(e) => handleAnswerChange(index, e)}
-      placeholder={`Answer ${index + 1}`}
-      required
-    />
-    <label className="checkbox-label">
-      Correct:
+            <div key={index} className="answer-group">
+              <textarea
+                name="answerContent"
+                value={answer.answerContent}
+                onChange={(e) => handleAnswerChange(index, e)}
+                placeholder={`Answer ${index + 1}`}
+                required
+              />
+    <label className="checkboxLabel">
+      
       <div className="checkbox-wrapper">
         <input
           type="checkbox"
           id={`correctCheckbox-${index}`}
           checked={answer.isCorrect}
           onChange={() => handleCheckboxChange(index)}
+                className="checkbox-input"
         />
-        <div className="checkbox-custom"></div>
+        Correct:
+        <label htmlFor={`correctCheckbox-${index}`} className="checkbox-custom"></label>
       </div>
     </label>
   </div>

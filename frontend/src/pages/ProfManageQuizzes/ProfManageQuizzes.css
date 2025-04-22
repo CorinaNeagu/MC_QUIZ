@@ -1,18 +1,27 @@
-/* Ensure that the entire body can scroll */
 html, body {
-    height: 100%; /* Make sure the page takes up full height */
+    height: 100%; 
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    max-height: fit-content;
+    overflow-x: hidden;
+    overflow-y: auto; /* Enable vertical scroll */
     font-family: Arial, sans-serif;
   }
-  
-  /* Main container (making the whole page scrollable) */
+
   .manage-quizzes-container {
-    min-height: 100vh; /* Ensures the container takes up the entire viewport height */
-    padding: 20px;
-    overflow-y: auto; /* Allow scrolling inside this container */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
+    padding: 150px;
+    overflow-y: auto; 
     box-sizing: border-box;
+  }
+
+  .scrollable-content {
+    overflow-y: auto;
+    flex: 1;
+    padding: 100px;
+    max-height: 100vh; 
   }
   
   /* Quiz List Layout */
@@ -55,6 +64,14 @@ html, body {
   
   .btn-inspect:hover {
     background-color: #0056b3;
+  }
+
+  .btn-inspect.active {
+    background-color: #007bff80; 
+  }
+
+  .btn-inspect.active:hover {
+    background-color: lightblue;
   }
   
   /* Questions Section */
@@ -264,6 +281,20 @@ html, body {
   color: #d32f2f; /* Red color for inactive text */
 }
 
+.btn-delete-quiz {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.btn-delete-quiz:hover {
+  background-color: #ff3333;
+}
 
   
   

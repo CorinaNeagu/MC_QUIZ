@@ -6,10 +6,10 @@
   justify-content: flex-start;
   padding: 20px;
   min-height: 100vh;
-  max-height: 100vh; /* Prevent the container from exceeding the viewport height */
-  overflow-y: auto; /* Enable vertical scrolling */
-  background-color: #f5f5f5; /* Light background for the whole page */
-  box-sizing: border-box; /* Ensure padding doesn't affect the height calculation */
+  max-height: 100vh; 
+  overflow-y: auto; 
+  background-color: #f5f5f5; 
+  box-sizing: border-box; 
 }
 
 /* Quiz Title */

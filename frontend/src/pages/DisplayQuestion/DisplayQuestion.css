@@ -120,8 +120,7 @@ body {
     display: inline-block;
   }
   
-  /* Custom checkbox appearance */
-  .checkbox-label::before {
+  .create-question-container .checkbox-label::before {
     content: '';
     position: absolute;
     left: 0;
@@ -129,19 +128,17 @@ body {
     width: 20px;
     height: 20px;
     border-radius: 4px;
-    background-color: #e0e0e0; /* Light gray background */
+    background-color: #e0e0e0; 
     border: 2px solid #ccc;
     transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
-  /* Checkbox checked state */
-  .checkbox-input:checked + .checkbox-label::before {
+  .create-question-container .checkbox-input:checked + .checkbox-label::before {
     background-color: #007bff; /* Blue when checked */
     border-color: #007bff;
   }
   
-  /* Checkbox checked inner indicator */
-  .checkbox-input:checked + .checkbox-label::after {
+  .create-question-container .checkbox-input:checked + .checkbox-label::after {
     content: '';
     position: absolute;
     left: 6px;
@@ -151,17 +148,14 @@ body {
     background-color: white;
   }
   
-  /* Hover effect for the checkbox */
-  .checkbox-label:hover::before {
-    background-color: #f1f1f1; /* Light hover effect */
+  .create-question-container .checkbox-label:hover::before {
+    background-color: #f1f1f1; 
   }
   
-  /* Focus effect for accessibility */
-  .checkbox-input:focus + .checkbox-label::before {
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Blue outline on focus */
+  .create-question-container .checkbox-input:focus + .checkbox-label::before {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); 
   }
   
-  /* Style for the next button */
   .next-btn {
     padding: 10px 20px;
     background-color: #007bff;

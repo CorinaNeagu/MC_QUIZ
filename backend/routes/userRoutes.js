@@ -171,6 +171,93 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
   });
 });
 
+  //Delete Quiz from DB
+  router.delete("/delete-quiz/:quizId", authenticateJWT, (req, res) => {
+    const { quizId } = req.params;
+  
+    if (!quizId) {
+      console.error("No quizId provided.");
+      return res.status(400).json({ message: "Quiz ID is required." });
+    }
+  
+    console.log(`Starting to delete quiz with quizId: ${quizId}`);
+  
+    // Step 1: Delete student responses that reference quiz attempts
+    db.query("DELETE FROM studentresponses WHERE attempt_id IN (SELECT attempt_id FROM quizattempt WHERE quiz_id = ?)", [quizId], (err, result) => {
+      if (err) {
+        console.error(`Error deleting student responses: ${err.message}`);
+        return res.status(500).json({ message: "Error deleting student responses.", error: err.message });
+      }
+      console.log(`Student responses deleted for quizId: ${quizId}`);
+  
+      // Step 2: Delete quiz attempts
+      db.query("DELETE FROM quizattempt WHERE quiz_id = ?", [quizId], (err, result) => {
+        if (err) {
+          console.error(`Error deleting quiz attempts: ${err.message}`);
+          return res.status(500).json({ message: "Error deleting quiz attempts.", error: err.message });
+        }
+        console.log(`Quiz attempts deleted for quizId: ${quizId}`);
+  
+        // Step 3: Delete answers
+        db.query("DELETE FROM Answers WHERE question_id IN (SELECT question_id FROM Questions WHERE quiz_id = ?)", [quizId], (err, result) => {
+          if (err) {
+            console.error(`Error deleting answers: ${err.message}`);
+            return res.status(500).json({ message: "Error deleting answers.", error: err.message });
+          }
+          console.log(`Answers deleted for quizId: ${quizId}`);
+  
+          // Step 4: Delete quiz settings
+          db.query("DELETE FROM QuizSettings WHERE quiz_id = ?", [quizId], (err, result) => {
+            if (err) {
+              console.error(`Error deleting QuizSettings: ${err.message}`);
+              return res.status(500).json({ message: "Error deleting QuizSettings.", error: err.message });
+            }
+            console.log(`QuizSettings deleted for quizId: ${quizId}`);
+  
+            // Step 5: Delete questions
+            db.query("DELETE FROM Questions WHERE quiz_id = ?", [quizId], (err, result) => {
+              if (err) {
+                console.error(`Error deleting questions: ${err.message}`);
+                return res.status(500).json({ message: "Error deleting questions.", error: err.message });
+              }
+              console.log(`Questions deleted for quizId: ${quizId}`);
+  
+              // Step 6: Finally, delete the quiz itself
+              db.query("DELETE FROM Quiz WHERE quiz_id = ?", [quizId], (err, result) => {
+                if (err) {
+                  console.error(`Error deleting quiz: ${err.message}`);
+                  return res.status(500).json({ message: "Error deleting quiz.", error: err.message });
+                }
+  
+                // If no rows were affected, quiz wasn't found
+                if (result.affectedRows === 0) {
+                  console.log(`No quiz found with quizId: ${quizId}`);
+                  return res.status(404).json({ message: "Quiz not found." });
+                }
+  
+                console.log(`Quiz with quizId ${quizId} deleted successfully.`);
+  
+                // Final success response
+                return res.status(200).json({
+                  message: "Quiz and its related student responses, answers, questions, and settings deleted successfully."
+                });
+
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 
 
