@@ -1,10 +1,10 @@
 body {
-  background-size: cover; /* Ensures the image covers the entire screen */
-  background-position: center center; /* Center the background image */
-  background-attachment: fixed; /* Fix the background image */
-  background-repeat: no-repeat; /* Prevent image from repeating */
-  min-height: 100vh; /* Ensure body takes up full viewport height */
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  background-size: cover; 
+  background-position: center center;
+  background-attachment: fixed; 
+  background-repeat: no-repeat;
+  min-height: 100vh; 
+  overflow-x: hidden; 
 }
 
 .homepage-container {
@@ -12,11 +12,11 @@ body {
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Align content to start from the top */
-  align-items: center; /* Center the content horizontally */
-  height: 100vh; /* Make the container take full viewport height */
+  justify-content: flex-start; 
+  align-items: center; 
+  height: 100vh; 
   margin: 0;
-  padding-top: 60px; /* Add some padding at the top to avoid overlap with fixed elements */
+  padding-top: 60px; 
 }
 
 .homepage-header {
@@ -34,11 +34,11 @@ h3 {
 
 .quiz-card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Grid with dynamic columns */
-  gap: 20px; /* Space between cards */
-  margin-top: 20px; /* Add space to the top */
-  padding-top: 20px; /* Padding ensures the first row isn't hidden */
-  max-width: 1200px; /* Optional: To control the max width of the grid */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+  gap: 20px; 
+  margin-top: 20px; 
+  padding-top: 20px; 
+  max-width: 1200px; 
   width: 100%;
 }
 
@@ -96,24 +96,22 @@ button:hover {
   background-color: #218838;
 }
 
-/* Container for Search Bar and Category Filter */
 .filters-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px; /* Optional, for spacing */
+  margin-bottom: 20px; 
 }
 
-/* Search Bar Container */
 .search-bar-container {
   position: relative;
-  width: 50%; /* Adjust width as needed */
+  width: 50%; 
 }
 
 .search-bar {
   width: 100%;
   padding: 10px;
-  padding-left: 30px; /* Add space for the icon */
+  padding-left: 30px; 
   border: 1px solid #ccc;
   border-radius: 25px;
   font-size: 16px;
@@ -128,9 +126,8 @@ button:hover {
   color: #888;
 }
 
-/* Category Filter Dropdown */
 .category-filter {
-  width: 30%; /* Adjust width as needed */
+  width: 30%; 
 }
 
 .category-select {

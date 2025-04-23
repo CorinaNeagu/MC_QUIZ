@@ -1,4 +1,3 @@
-/* Global Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -7,7 +6,6 @@ body {
     color: #333;
   }
   
-  /* Container for the whole question section */
   .question-container {
     max-width: 800px;
     margin: 40px auto;
@@ -29,10 +27,9 @@ body {
     margin-bottom: 20px;
   }
 
-/* General Timer Style */
 .timer-box {
-  background: lightgrey; /* Gradient effect */
-  border: 3px solid #2c6e8f; /* Darker border */
+  background: lightgrey; 
+  border: 3px solid #2c6e8f; 
   border-radius: 15px;
   padding: 20px;
   margin-bottom: 20px;
@@ -40,31 +37,29 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 2.5rem;
-  font-weight: 900; /* Bold and heavy font weight */
-  color: #007bff;  /* White text for better contrast */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Soft shadow */
+  font-weight: 900; 
+  color: #007bff;  
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  
   width: 100%;
-  max-width: 300px;  /* Limit the width for better readability */
-  margin: 0 auto;  /* Center the timer box */
-  font-family: 'Roboto', sans-serif; /* Modern sans-serif font */
-  letter-spacing: 2px;  /* Slight spacing for better readability */
+  max-width: 300px; 
+  margin: 0 auto;  
+  font-family: 'Roboto', sans-serif; 
+  letter-spacing: 2px;  
 }
 
-/* Timer warning when time is under 60 seconds */
 .timer-warning {
-  background-color: #ff0000; /* Pure red background */
-  border: 3px solid #ff0000;  /* Red border */
-  animation: pulse 1s ease-in-out infinite; /* Apply pulsing animation */
+  background-color: #ff0000; 
+  border: 3px solid #ff0000;  
+  animation: pulse 1s ease-in-out infinite; 
 }
 
-/* Pulsing animation */
 @keyframes pulse {
   0% {
     transform: scale(1);
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
   }
   50% {
-    transform: scale(1.05); /* Slightly increase size for pulsing effect */
+    transform: scale(1.05); 
     box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
   }
   100% {
@@ -73,41 +68,32 @@ body {
   }
 }
 
-/* Timer Time Styling */
 .timer-box .time {
-  font-size: 3rem;  /* Increase font size for better visibility */
-  font-weight: 900;  /* Heavy bold text for high visibility */
-  text-transform: uppercase; /* Make the text uppercase for more emphasis */
-  letter-spacing: 2px;  /* Space out the letters */
-  color: #007bff;  /* White color for high contrast */
+  font-size: 3rem;  
+  font-weight: 900;  
+  text-transform: uppercase; 
+  letter-spacing: 2px;  
+  color: #007bff;  
 }
 
-/* Timer warning: make text bold and highly visible */
 .timer-warning .time {
-  color: #fff;  /* White color when time is under 60 seconds */
-  text-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500; /* Glow effect for the text */
+  color: #fff;  
+  text-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500; 
 }
-
-
-
-  
-  /* Styles for question options */
   .options {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
   
-  /* Wrapper for the checkbox */
 .checkbox-wrapper {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
   }
   
-  /* Style for the checkbox input */
   .checkbox-input {
-    display: none; /* Hide the default checkbox */
+    display: none; 
   }
   
   .checkbox-label {
@@ -116,7 +102,7 @@ body {
     cursor: pointer;
     user-select: none;
     position: relative;
-    padding-left: 35px; /* Make space for the custom checkbox */
+    padding-left: 35px; 
     display: inline-block;
   }
   
@@ -134,7 +120,7 @@ body {
   }
   
   .create-question-container .checkbox-input:checked + .checkbox-label::before {
-    background-color: #007bff; /* Blue when checked */
+    background-color: #007bff; 
     border-color: #007bff;
   }
   
@@ -171,7 +157,6 @@ body {
     background-color: #0056b3;
   }
   
-  /* Loading/Error States */
   .loading, .error {
     font-size: 1.2rem;
     color: #e74c3c;
@@ -179,7 +164,6 @@ body {
     margin-top: 20px;
   }
   
-  /* Mobile Responsiveness */
   @media (max-width: 768px) {
     .question-container {
       padding: 15px;

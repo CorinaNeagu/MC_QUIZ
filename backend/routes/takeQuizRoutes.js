@@ -94,9 +94,9 @@ router.get('/quiz/:quizId', async (req, res) => {
 
 
 router.post('/quiz_attempts', (req, res) => {
-    const { quiz_id } = req.body; // Only receive quiz_id from the request body
+    const { quiz_id } = req.body; 
   
-    const token = req.headers['authorization']?.split(' ')[1]; // Extract JWT token
+    const token = req.headers['authorization']?.split(' ')[1]; 
   
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized: No token provided' });
@@ -107,7 +107,7 @@ router.post('/quiz_attempts', (req, res) => {
         return res.status(401).json({ message: 'Unauthorized: Invalid token' });
       }
   
-      const student_id = decoded.id; // Get student ID from the token
+      const student_id = decoded.id; 
 
       const insertAttemptQuery = `
         INSERT INTO QuizAttempt (student_id, quiz_id, score, start_time, time_taken)
@@ -120,7 +120,6 @@ router.post('/quiz_attempts', (req, res) => {
           return res.status(500).json({ message: 'Error starting quiz attempt' });
         }
 
-        // Get the attempt ID
         const attemptId = attemptResults.insertId;
 
         return res.status(200).json({ message: 'Quiz attempt created successfully', attemptId });
@@ -145,7 +144,6 @@ router.post('/quiz_attempts', (req, res) => {
             return res.status(500).json({ message: "Error fetching questions" });
         }
 
-        // Organize data into a structured format
         const questionsMap = {};
         results.forEach(row => {
             if (!questionsMap[row.question_id]) {

@@ -96,12 +96,11 @@ const ProfManageQuizzes = () => {
 
   const handleSeeDetails = async (quizId) => {
     if (activeQuizId === quizId) {
-      // Clicking again toggles it off
       setActiveQuizId(null);
       return;
     }
 
-    console.log('Fetching details for quizId:', quizId);  // Ensure quizId is correct
+    console.log('Fetching details for quizId:', quizId);  
   
     try {
       const token = localStorage.getItem("token");
@@ -121,7 +120,6 @@ const ProfManageQuizzes = () => {
 
   const handleToggleEdit = (quizId) => {
     if (editSettingsQuizId === quizId) {
-      // Save logic here (next section)
       handleSaveSettings(quizId);
     } else {
       const settings = selectedQuizSettings[quizId];
@@ -156,11 +154,11 @@ const ProfManageQuizzes = () => {
       // Send GET request to retrieve the current settings (Optional)
       const response = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Ensure you have the token set properly
+          Authorization: `Bearer ${token}`, 
         },
       });
   
-      const currentSettings = response.data; // Assuming the response has the current settings
+      const currentSettings = response.data; 
       
       // Send PUT request to update the settings
       const updateResponse = await axios.put(
@@ -169,16 +167,14 @@ const ProfManageQuizzes = () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Ensure the authorization token is passed
+            Authorization: `Bearer ${token}`, 
           },
         }
       );
   
-      // Assuming updateResponse contains the updated quiz settings
       if (updateResponse.status === 200) {
-        const updatedQuiz = updateResponse.data.updatedQuiz; // Assuming the backend returns the updated quiz
+        const updatedQuiz = updateResponse.data.updatedQuiz; 
   
-        // Update the state with the updated quiz settings
         setSelectedQuizSettings((prev) => ({
           ...prev,
           [quizId]: {
@@ -192,7 +188,7 @@ const ProfManageQuizzes = () => {
           prev.map((q) => (q.quiz_id === quizId ? { ...q, title: editableSettings.title } : q))
         );
   
-        setEditSettingsQuizId(null); // Exit edit mode
+        setEditSettingsQuizId(null);
         alert('Quiz settings updated successfully!');
       }
     } catch (err) {
@@ -204,7 +200,6 @@ const ProfManageQuizzes = () => {
   const handleDeleteQuiz = async (quizId) => {
     const token = localStorage.getItem("token");
   
-    // Check if the token exists, if not, handle the error gracefully
     if (!token) {
       console.error('No authentication token found.');
       alert('You must be logged in to perform this action.');
@@ -271,7 +266,6 @@ const ProfManageQuizzes = () => {
               Delete Quiz
             </button>
       
-            {/* Conditionally render settings if this quiz's details are visible */}
             {activeQuizId === quiz.quiz_id && selectedQuizSettings[quiz.quiz_id] && (
               <div className="quiz-settings">
               <h5>Quiz Settings:</h5>

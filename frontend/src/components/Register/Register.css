@@ -16,10 +16,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
-
-
-/* Title Styling */
 h2 {
   color: #333;
   font-size: 2rem;
@@ -27,13 +23,12 @@ h2 {
   font-weight: bold;
 }
 
-/* Input and Select Styling */
 .form-group {
   display: flex;
-  flex-direction: column; /* Stack label and input */
-  align-items: flex-start; /* Align to the left */
+  flex-direction: column; 
+  align-items: flex-start; 
   width: 100%;
-  margin-bottom: 20px; /* Space between input fields */
+  margin-bottom: 20px; 
 }
 
 .form-group label {
@@ -42,13 +37,10 @@ h2 {
   margin-bottom: 5px;
   color: #333;
 }
-
-
-/* Make input boxes uniform */
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%; /* Make all input boxes the same width */
+  width: 100%; 
   padding: 12px;
   font-size: 1rem;
   border-radius: 8px;
@@ -56,28 +48,27 @@ h2 {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   background-color: #f9f9f9; 
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px; /* Space after input field */
+  margin-bottom: 10px; 
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #007bff; /* Blue border on focus */
+  border-color: #007bff; 
   box-shadow: 0 2px 6px rgba(0, 123, 255, 0.5);
 }
 
-/* Align answer input fields properly */
 .answer-container {
   display: flex;
   align-items: center;
-  gap: 10px; /* Space between input and checkbox */
+  gap: 10px; 
   width: 100%;
   margin-bottom: 10px;
 }
 
 .answer-container input[type="text"] {
-  flex: 1; /* Make input take up available space */
+  flex: 1; 
 }
 
 .checkbox-label {
@@ -86,19 +77,15 @@ h2 {
   gap: 5px;
 }
 
-
-/* Button Container */
 .button-container {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
-  gap: 20px; /* Space between the buttons */
+  gap: 20px; 
 }
-
-/* Button Styling */
 .register-button,
 .login-button {
-  background-color: #007bff; /* Blue background */
+  background-color: #007bff; 
   color: white;
   font-size: 18px;
   padding: 14px 30px;
@@ -106,24 +93,23 @@ h2 {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  width: 48%; /* Make both buttons have equal width */
+  width: 48%; 
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .register-button:hover,
 .login-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-  transform: scale(1.05); /* Slightly enlarge the button */
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+  background-color: #0056b3; 
+  transform: scale(1.05); 
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); 
 }
 
 .register-button:focus,
 .login-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Focus ring effect */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
 }
 
-/* Error and Success Messages */
 .error {
   color: red;
   font-size: 1rem;
@@ -137,22 +123,20 @@ h2 {
   margin-bottom: 15px;
   text-align: center;
 }
-
-/* Add responsiveness */
 @media (max-width: 768px) {
   .register-container {
     padding: 20px;
-    width: 90%; /* Adjust container width for smaller screens */
+    width: 90%; 
   }
   
   h2 {
-    font-size: 1.5rem; /* Adjust font size for smaller screens */
+    font-size: 1.5rem; 
   }
 
   .register-button,
   .login-button {
     font-size: 16px;
     padding: 12px 24px;
-    width: 100%; /* Stack buttons vertically on small screens */
+    width: 100%; 
   }
 }

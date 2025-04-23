@@ -26,54 +26,74 @@ h2 {
 
 .checkbox-wrapper {
   display: flex;
-  align-items: center; /* Vertically align the label and checkbox */
-  gap: 10px; /* Add space between the checkbox and label */
-  margin-bottom: 20px; /* Space from other form elements */
-}
-
-.checkbox-container {
-  display: flex;
-  justify-content: space-between; /* Space out the label and checkbox */
-  align-items: center; /* Align the checkbox and label horizontally */
-  gap: 10px; /* Space between checkbox and label */
-  margin-bottom: 20px; /* Space below the checkbox */
-  width: 100%; /* Ensure it takes the full width available */
+  align-items: center; 
+  gap: 10px; /* Space between the checkbox and label */
+  margin-bottom: 20px; 
 }
 
 .checkbox-input {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: #007bff; /* Blue color for the checkbox when checked */
-  border-radius: 4px; /* Slight rounding for the checkbox */
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: none; /* Hide the native checkbox */
 }
 
+.checkbox-custom {
+  position: relative;
+  padding-left: 30px; /* Space for the custom checkbox */
+  cursor: pointer;
+  font-size: 1rem;
+  color: #444;
+  user-select: none;
+}
+
+/* Custom checkbox style */
+.checkbox-custom::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: background-color 0.2s ease;
+}
+
+/* When the checkbox is checked, change background and show the checkmark */
+.checkbox-input:checked + .checkbox-custom::before {
+  background-color: #007bff;
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+  content: "✓";
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  font-size: 18px;
+  color: white;
+}
+
+/* Label styling */
 .checkbox-label {
   font-size: 1rem;
   color: #444;
   cursor: pointer;
-  margin: 0; /* Remove default margin for the label */
+  margin: 0; 
   font-weight: 500;
-  user-select: none; /* Prevent text selection */
+  user-select: none; 
   transition: color 0.3s ease;
-
 }
 
-.checkbox-container input:checked + .checkbox-label {
-  color: #007bff; /* Change label color when checkbox is checked */
+/* Hover effect for input */
+.checkbox-wrapper input:hover {
+  transform: scale(1.1); 
 }
 
-/* Optional: Add some hover effect for better UX */
-.checkbox-container input:hover {
-  transform: scale(1.1); /* Slightly enlarge the checkbox on hover */
+/* Focus effect for input */
+.checkbox-wrapper input:focus {
+  outline: 2px solid #007bff; 
 }
 
-.checkbox-container input:focus {
-  outline: 2px solid #007bff; /* Blue outline when the checkbox is focused */
-}
 
-/* Form Group */
 .form-group {
   display: flex;
   justify-content: space-between;
@@ -184,7 +204,6 @@ input:checked + .toggle-slider:before {
   background-color: #0056b3;
 }
 
-/* Responsive Design */
 @media (max-width: 600px) {
   .create-quiz-container {
     padding: 20px;

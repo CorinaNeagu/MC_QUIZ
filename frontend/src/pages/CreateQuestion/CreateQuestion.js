@@ -141,9 +141,8 @@ const CreateQuestion = () => {
       console.log(`Correct Answers Count: ${correctCount}`);
       console.log(`Score Per Correct Answer: ${scorePerCorrect}`);
   
-      // **Send answers one by one as individual objects**
       for (let a of answers) {
-        console.log('Sending answer: ', a); // Log the answer being sent to the backend
+        console.log('Sending answer: ', a); 
   
         await axios.post(
           "http://localhost:5000/api/answers",
@@ -151,7 +150,7 @@ const CreateQuestion = () => {
             questionId,
             answerContent: a.answerContent,
             isCorrect: !!a.isCorrect,
-            score: a.isCorrect ? scorePerCorrect : 0, // The score should be calculated and sent correctly
+            score: a.isCorrect ? scorePerCorrect : 0, 
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );

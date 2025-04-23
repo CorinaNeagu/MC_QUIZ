@@ -21,12 +21,11 @@ body, html {
   background-color: #f9f9f9; 
 }
 
-/* Each question's container */
 .question-container {
   margin-bottom: 20px;
   padding-bottom: 20px;
   border-bottom: 2px solid #e0e0e0;
-  background-color: #fafafa; /* Slight background for each question */
+  background-color: #fafafa; 
   padding: 20px;
   border-radius: 8px;
 }
@@ -41,10 +40,10 @@ body, html {
   font-weight: 600;
   color: #333;
   margin-bottom: 12px;
-  line-height: 1.6; /* Spacing for better readability */
+  line-height: 1.6; 
 }
 
-/* Styling the list of answers */
+
 .answer-list {
   list-style-type: none;
   padding-left: 0;
@@ -52,23 +51,21 @@ body, html {
 }
 
 .answer-item {
-  font-size: 1.2em;  /* Smaller font size */
+  font-size: 1.2em;  
   color: #555;
   margin-bottom: 12px;
   padding-left: 20px;
   position: relative;
-  background-color: #f0f0f0; /* Light grey background for each answer */
+  background-color: #f0f0f0; 
   border-radius: 6px;
   padding: 10px;
   transition: background-color 0.3s ease;
 }
 
-/* Answer item hover effect */
 .answer-item:hover {
-  background-color: #e1f5fe; /* Light blue on hover for better interaction */
+  background-color: #e1f5fe; 
 }
 
-/* Answer item with bullet */
 .answer-item::before {
   content: "•";
   position: absolute;
@@ -78,19 +75,16 @@ body, html {
   font-size: 1.8em;
 }
 
-/* Style for correct answers */
 .correct-answer {
   color: green;
   font-weight: 600;
 }
 
-/* Style for wrong answers */
 .wrong-answer {
   color: red;
   font-weight: 600;
 }
 
-/* Back to DisplayScore Button */
 .back-button {
   background-color: #007bff;
   color: white;
@@ -106,29 +100,25 @@ body, html {
   display: inline-block;
   opacity: 0;
   animation: fadeIn 0.6s ease-in-out 0.6s forwards;
-  margin-bottom: 40px; /* Spacing between button and last answer */
+  margin-bottom: 40px; 
 }
 
-/* Back button hover effect */
 .back-button:hover {
   background-color: #0056b3;
   transform: scale(1.1);
   box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
 }
 
-/* Back button active effect */
 .back-button:active {
   background-color: #004085;
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
 }
 
-/* Back button focus effect */
 .back-button:focus {
   outline: none;
 }
 
-/* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -149,7 +139,6 @@ body, html {
   }
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .responses-container {
     padding: 20px;
@@ -176,7 +165,7 @@ body, html {
 }
 
 .responses-list {
-  list-style-type: none; /* Removes default bullet points from the outer list */
+  list-style-type: none; 
   padding: 0;
 }
 
@@ -188,17 +177,17 @@ body, html {
 }
 
 .response-details {
-  list-style-type: none; /* Removes bullet points from the details list */
+  list-style-type: none; 
   padding: 0;
 }
 
 .answer-list {
-  list-style-type: none; /* Removes default bullet points */
-  padding-left: 20px; /* Indentation for nested lists */
+  list-style-type: none; 
+  padding-left: 20px; 
 }
 
 .answer-list li {
-  margin-bottom: 5px; /* Adds space between each answer */
+  margin-bottom: 5px; 
 }
 
 button {

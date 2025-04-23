@@ -1,4 +1,3 @@
-/* General Styles for the Quiz Preview Page */
 .quiz-preview-container {
   display: flex;
   flex-direction: column;
@@ -12,7 +11,6 @@
   box-sizing: border-box; 
 }
 
-/* Quiz Title */
 .quiz-preview-container h2 {
   font-size: 2.5rem;
   font-weight: bold;
@@ -23,29 +21,25 @@
   text-align: center;
 }
 
-/* List of Quiz Questions */
 .quiz-preview-container ul {
   list-style: none;
   padding: 0;
-  width: 100%;
-  max-width: 1000px;
+  width: 90%; /* Increased width */
+  max-width: 1400px; /* Allow wider screens */
   background-color: #fff;
   border-radius: 10px;
-  padding: 20px;
+  padding: 30px;
   margin-top: 20px;
-  box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1); /* Light shadow for better visibility */
+  box-shadow: 0px 3px 18px rgba(0, 0, 0, 0.1);
 }
-
-/* Individual Question Item */
 .quiz-preview-container li {
   padding: 15px;
   margin-bottom: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  border: 1px solid #ddd; /* Light border around each question */
+  border: 1px solid #ddd; 
 }
 
-/* Question Heading */
 .quiz-preview-container h3 {
   font-size: 1.8rem;
   font-weight: 600;
@@ -53,13 +47,11 @@
   margin-bottom: 10px;
 }
 
-/* Answer List Styling */
 .quiz-preview-container .answer-list {
   padding-left: 20px;
-  list-style-type: none; /* Remove bullets */
+  list-style-type: none; 
 }
 
-/* Individual Answer */
 .quiz-preview-container ul li li {
   font-size: 1.1rem;
   color: #555;
@@ -67,26 +59,23 @@
   padding-left: 10px;
 }
 
-/* Answer Status: Correct and Incorrect */
 .quiz-preview-container .correct::before {
-  content: "✅"; /* Checkmark for correct answers */
-  color: #28a745; /* Green color */
+  content: "✅"; 
+  color: #28a745; 
   margin-right: 8px;
 }
 
 .quiz-preview-container .incorrect::before {
-  content: "❌"; /* Crossmark for incorrect answers */
-  color: #dc3545; /* Red color */
+  content: "❌"; 
+  color: #dc3545; 
 }
 
-/* No Answers Available Text */
 .quiz-preview-container p {
   font-size: 1.2rem;
   color: #888;
   font-style: italic;
 }
 
-/* Loading Spinner or Message */
 .quiz-preview-container .loading {
   font-size: 1.5rem;
   color: #333;
@@ -94,7 +83,6 @@
   margin-top: 30px;
 }
 
-/* Error Message */
 .quiz-preview-container .error {
   color: #dc3545;
   font-size: 1.2rem;
@@ -102,9 +90,8 @@
   margin-top: 20px;
 }
 
-/* Home Button */
 .home-button {
-  background-color: #007bff; /* Primary blue color */
+  background-color: #007bff; 
   color: white;
   border: none;
   padding: 10px 20px;
@@ -116,10 +103,9 @@
 }
 
 .home-button:hover {
-  background-color: #0056b3; /* Darker blue when hovered */
+  background-color: #0056b3; 
 }
 
-/* Responsive Design for Smaller Screens */
 @media (max-width: 800px) {
   .quiz-preview-container h2 {
       font-size: 2rem;

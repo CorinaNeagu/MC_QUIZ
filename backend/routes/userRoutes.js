@@ -3,7 +3,6 @@ const db = require("../db");
 const authenticateJWT = require("../middleware/authMiddleware");
 const router = express.Router();
 
-// Protected Route - Get User Profile
 // User Profile route
 router.get('/profile', authenticateJWT, (req, res) => {
     const { id, userType } = req.user;  // Extract from JWT payload
@@ -31,14 +30,14 @@ router.get('/profile', authenticateJWT, (req, res) => {
         res.json({
             username: result[0].username,
             email: result[0].email,
-            created_at: result[0].created_at, // Send the created_at field
-            userType, // Include userType in the response
+            created_at: result[0].created_at, 
+            userType, 
         });
     });
 });
 
 router.get('/professor/quizzes', authenticateJWT, (req, res) => {
-  const { id, userType } = req.user; // Extract from JWT payload
+  const { id, userType } = req.user; 
   
   // Ensure the user is a professor
   if (userType !== 'professor') {
@@ -61,12 +60,10 @@ router.get('/professor/quizzes', authenticateJWT, (req, res) => {
       return res.status(500).json({ error: "Error fetching quizzes" });
     }
 
-    // If no quizzes found, send an empty array
     if (result.length === 0) {
       return res.json([]);
     }
 
-    // Return the quizzes along with their categories
     res.json(result);
   });
 });
@@ -118,12 +115,12 @@ router.get('/settings/:quizId', authenticateJWT, (req, res) => {
       return res.status(404).json({ message: 'Settings not found for this quiz.' });
     }
 
-    res.json(rows[0]); // Respond with the first row (there should be only one)
+    res.json(rows[0]); 
   });
 });
 
 
-//Method to update DB content
+//Method to update DB title, time_limit, deduction_percentage
 router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
   const { quizId } = req.params;
   const { time_limit, deduction_percentage, retake_allowed, is_active, title } = req.body;
@@ -165,7 +162,6 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
         res.json({ message: 'Quiz settings and title updated successfully!' });
       });
     } else {
-      // If no title update is required, just respond with the settings update success
       res.json({ message: 'Quiz settings updated successfully!' });
     }
   });

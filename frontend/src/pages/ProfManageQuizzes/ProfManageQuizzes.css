@@ -4,7 +4,7 @@ html, body {
     padding: 0;
     max-height: fit-content;
     overflow-x: hidden;
-    overflow-y: auto; /* Enable vertical scroll */
+    overflow-y: auto; 
     font-family: Arial, sans-serif;
   }
 
@@ -24,7 +24,6 @@ html, body {
     max-height: 100vh; 
   }
   
-  /* Quiz List Layout */
   .quiz-list {
     display: flex;
     flex-wrap: wrap;
@@ -33,7 +32,6 @@ html, body {
     justify-content: center;
   }
   
-  /* Individual Quiz Card */
   .quiz-card {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
@@ -49,7 +47,6 @@ html, body {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   }
   
-  /* Button to Inspect Quiz */
   .btn-inspect {
     background-color: #007bff;
     color: #fff;
@@ -74,7 +71,6 @@ html, body {
     background-color: lightblue;
   }
   
-  /* Questions Section */
   .questions-container {
     margin-top: 40px;
     margin-left: 200px;
@@ -83,11 +79,10 @@ html, body {
     background-color: #fdfdfd;
     border-radius: 20px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-    max-height: 70vh; /* Set a max height for the questions container */
-    overflow-y: auto; /* Allow scrolling within the questions section */
+    max-height: 70vh; 
+    overflow-y: auto;
   }
   
-  /* Heading for Questions */
   .questions-heading {
     font-size: 1.8rem;
     margin-bottom: 30px;
@@ -96,23 +91,22 @@ html, body {
   }
 
   .question-list {
-    display: flex; /* Arrange items horizontally */
-    flex-wrap: wrap; /* Allow wrapping if screen is too small */
-    gap: 25px; /* Space between the questions */
-    justify-content: flex-start; /* Align to the left */
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 25px; 
+    justify-content: flex-start; 
   }
   
   
-/* Individual Question Card */
 .question-card {
     background-color: #ffffff;
     border: 1px solid #e8e8e8;
     border-radius: 16px;
     padding: 20px;
-    width: 320px; /* Width of each question card */
+    width: 320px; 
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
     transition: transform 0.3s ease;
-    flex-shrink: 0; /* Prevent shrinking of question cards */
+    flex-shrink: 0; 
   }
   
   .question-card:hover {
@@ -125,7 +119,6 @@ html, body {
     margin-bottom: 15px;
   }
   
-  /* Button to Fetch Answers */
   .btn-fetch-answers {
     background-color: #007bff;
     color: white;
@@ -141,15 +134,14 @@ html, body {
     background-color: #0056b3;
   }
   
-  /* Answers Section */
   .answers-container {
     margin-top: 20px;
     background-color: #f7faff;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    max-height: 400px; /* Limit the answers section height */
-    overflow-y: auto; /* Allow scrolling within the answers section */
+    max-height: 400px; 
+    overflow-y: auto; 
   }
   
   .answers-container h5 {
@@ -164,7 +156,7 @@ html, body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Consistent spacing between answers */
+    gap: 12px; 
   }
   
   .answers-list li {
@@ -180,7 +172,7 @@ html, body {
   }
 
   .answers-list li::before {
-    content: none; /* Removes the bullet/blue dot */
+    content: none; 
   }
   
   .answers-list li:hover {
@@ -203,50 +195,46 @@ html, body {
     flex: 1;
   }
   
-/* Back to Homepage Button - Even shorter */
 .btn-go-home {
-    position: fixed; /* Fix the button to the top of the screen */
+    position: fixed; 
     top: 20px;
-    left: 50%; /* Position it in the center */
-    transform: translateX(-50%); /* Offset it by half its width to center it */
+    left: 50%;
+    transform: translateX(-50%); 
     background-color: #007bff;
     color: white;
-    padding: 4px 12px; /* Reduced padding for a more compact button */
+    padding: 4px 12px; 
     border: none;
-    border-radius: 20px; /* Rounded corners */
-    font-size: 0.75rem; /* Smaller font size */
+    border-radius: 20px; 
+    font-size: 0.75rem; 
     cursor: pointer;
-    z-index: 999; /* Ensure it's above other content */
-    width: 33.33%; /* Set the button width to one third of the screen */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    z-index: 999; 
+    width: 33.33%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); 
   }
   
   .btn-go-home:hover {
     background-color: #0056b3;
-    transform: scale(0.85) translateX(-50%); /* Slightly enlarge when hovered */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
+    transform: scale(0.85) translateX(-50%); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
   }
 
-  /* Quiz Settings Section */
 .quiz-settings {
-  background-color: #f9f9f9; /* Light background for the settings section */
+  background-color: #f9f9f9; 
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
-  max-width: 800px; /* Limit the width of the settings section */
+  max-width: 800px; 
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Heading for Quiz Settings */
 .quiz-settings h5 {
   font-size: 1.4rem;
   color: #333;
   margin-bottom: 15px;
 }
 
-/* Quiz Settings List */
 .quiz-settings ul {
   list-style: none;
   padding: 0;
@@ -267,18 +255,16 @@ html, body {
 
 .quiz-settings li span {
   font-weight: bold;
-  color: #007bff; /* Blue color for the setting name */
+  color: #007bff; 
 }
 
-/* Highlight active setting */
 .quiz-settings li strong {
   color: #007bff;
 }
 
-/* Tooltip for inactive setting */
 .quiz-settings li.inactive {
-  background-color: #fce4e4; /* Light red background for inactive settings */
-  color: #d32f2f; /* Red color for inactive text */
+  background-color: #fce4e4; 
+  color: #d32f2f; 
 }
 
 .btn-delete-quiz {

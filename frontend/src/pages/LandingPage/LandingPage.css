@@ -1,6 +1,5 @@
-/* LandingPage.css */
 body {
-    background-image: url('/public/assets/background.jpg'); /* Use path relative to public folder */
+    background-image: url('/public/assets/background.jpg'); 
     background-size: cover;
     background-position: center;
     height: 100vh;
@@ -22,7 +21,6 @@ body {
     margin-top: 30px; 
   }
   
-  /* Default button style */
   .landing-page-buttons button {
     background-color: #007bff; 
     color: white;

@@ -7,12 +7,12 @@ const CreateQuiz = () => {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [timeLimit, setTimeLimit] = useState("");
+  const [timeLimit, setTimeLimit] = useState(0);
   const [retakeAllowed, setRetakeAllowed] = useState(false);
   const [isActive, setIsActive] = useState(true);
-  const [noQuestions, setNoQuestions] = useState("");
+  const [noQuestions, setNoQuestions] = useState(0);
   const [categories, setCategories] = useState([]);
-  const [deductionPercentage, setDeductionPercentage] = useState(""); // New state for deduction
+  const [deductionPercentage, setDeductionPercentage] = useState(0);
 
 
   // Get user details from localStorage
@@ -183,7 +183,8 @@ const CreateQuiz = () => {
             onChange={() => setRetakeAllowed(!retakeAllowed)}
             className="checkbox-input"
           />
-          <label htmlFor="retakeAllowed" className="checkbox-label">Allow Retakes</label>
+          <label htmlFor="retakeAllowed" className="checkbox-custom"> </label>
+          Allow Retakes
         </div>
 
         {/* Is Active */}
@@ -195,7 +196,8 @@ const CreateQuiz = () => {
             onChange={() => setIsActive(!isActive)}
             className="checkbox-input"
           />
-          <label htmlFor="isActive" className="checkbox-label">Activate Quiz</label>
+          <label htmlFor="isActive" className="checkbox-custom"></label>
+          Activate Quiz
         </div>
 
         {/* Number of Questions */}

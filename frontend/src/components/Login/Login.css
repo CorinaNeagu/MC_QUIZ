@@ -1,4 +1,3 @@
-/* General Styling */
 * {
     margin: 0;
     padding: 0;
@@ -20,15 +19,14 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 400px; /* Make the login box more compact */
+    max-width: 400px; 
     padding: 30px;
     border-radius: 8px;
-    background-color: white; /* White background for the form */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for better contrast */
-    border: 1px solid #ddd; /* Border to define the form container */
+    background-color: white; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    border: 1px solid #ddd; 
   }
   
-  /* Title Styling */
   h2 {
     font-size: 2rem;
     color: #333;
@@ -70,7 +68,7 @@
   select:focus {
     border-color: #007bff; 
     outline: none;
-    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.5); /* Blue shadow on focus */
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.5); 
   }
   
   button {
@@ -105,20 +103,19 @@
     text-align: center;
   }
   
-  /* Add responsive behavior */
   @media (max-width: 768px) {
     .login {
-      padding: 20px; /* Reduce padding on smaller screens */
-      max-width: 100%; /* Make the form take up full width on mobile */
+      padding: 20px; 
+      max-width: 100%; 
     }
   
     h2 {
-      font-size: 1.8rem; /* Adjust font size for smaller screens */
+      font-size: 1.8rem; 
     }
   
     input, select, button {
-      font-size: 1rem; /* Smaller font size on mobile */
-      padding: 10px; /* Reduced padding */
+      font-size: 1rem; 
+      padding: 10px; 
     }
   }
   
