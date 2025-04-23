@@ -100,11 +100,11 @@ const HomePage = () => {
         <h1>Welcome to Your Dashboard</h1>
         <Sidebar />
       </div>
-
+  
       {userType === "student" ? (
         <div className="student-content">
           <h3>Available Quizzes</h3>
-
+  
           <div className="filters-container">
             <div className="search-bar-container">
               <input
@@ -115,7 +115,7 @@ const HomePage = () => {
               />
               <i className="fas fa-search search-icon"></i>
             </div>
-
+  
             <div className="category-filter">
               <select
                 onChange={handleCategoryChange}
@@ -131,7 +131,7 @@ const HomePage = () => {
               </select>
             </div>
           </div>
-
+  
           {filteredQuizzes.length === 0 ? (
             <p>No quizzes available at the moment.</p>
           ) : (
@@ -140,9 +140,12 @@ const HomePage = () => {
                 <div key={quiz.quiz_id} className="quiz-card">
                   <h4>{quiz.title}</h4>
                   <p>Category: {quiz.category_name}</p>
+                  
+                  {/* Conditionally render the "Start Quiz" button */}
                   <button
                     className="start-quiz-btn"
                     onClick={() => startQuiz(quiz.quiz_id)}
+                    disabled={quiz.retake_allowed === 0}  // Disable if retake is not allowed (i.e., retake_allowed = 0)
                   >
                     Start Quiz
                   </button>

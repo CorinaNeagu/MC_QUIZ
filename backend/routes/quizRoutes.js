@@ -306,9 +306,11 @@ router.get('/quizPreview/:quizId', async (req, res) => {
 router.get('/display/quizzes', (req, res) => {
   // SQL query to get quizzes with their categories
   const query = `
-    SELECT q.quiz_id, q.title, q.category_id, c.category_name
+    SELECT q.quiz_id, q.title, q.category_id, c.category_name, qs.is_active, qs.retake_allowed
     FROM Quiz q
-    LEFT JOIN Category c ON q.category_id = c.category_id;
+    LEFT JOIN Category c ON q.category_id = c.category_id
+    LEFT JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+    WHERE qs.is_active = 1;
   `;
 
   // Execute the query to fetch quizzes and categories
