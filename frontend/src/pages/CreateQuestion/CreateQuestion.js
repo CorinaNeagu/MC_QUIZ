@@ -20,6 +20,7 @@ const CreateQuestion = () => {
   const [pointsPerQuestion, setPointsPerQuestion] = useState(0);
   const [error, setError] = useState("");
   const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [originalQuestionData, setOriginalQuestionData] = useState(null); // Store the original data
 
   const fetchQuestions = async () => {
     try {
@@ -232,21 +233,33 @@ const CreateQuestion = () => {
     if (!questionContent) {
       return setError("Question content is required.");
     }
-  
-    if (!answers.some(a => a.isCorrect)) {
+
+    if (!answers.some((a) => a.isCorrect)) {
       return alert("At least one answer must be marked as correct.");
     }
-  
+
+    // Recalculate the score for each correct answer
+    const correctAnswers = answers.filter(a => a.isCorrect);
+    const scorePerCorrectAnswer = correctAnswers.length > 0
+      ? pointsPerQuestion / correctAnswers.length
+      : 0;
+
+    // Update the answers with recalculated score
+    const updatedAnswers = answers.map(a => ({
+      ...a,
+      score: a.isCorrect ? scorePerCorrectAnswer : 0,
+    }));
+
     try {
       const token = localStorage.getItem("token");
-  
+
       const res = await axios.put(
         `http://localhost:5000/api/questions/${editingQuestionId}`,
         {
           questionContent,
           isMultipleChoice,
           pointsPerQuestion,
-          answers: answers.map((answer, index) => ({
+          answers: updatedAnswers.map((answer, index) => ({
             answerId: questionAnswers[editingQuestionId][index]?.answer_id,
             answerContent: answer.answerContent,
             isCorrect: answer.isCorrect,
@@ -255,7 +268,7 @@ const CreateQuestion = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       alert(res.data.message);
       setQuestionContent(""); // Clear question content
       setAnswers([
@@ -270,8 +283,17 @@ const CreateQuestion = () => {
       console.error(err);
       alert(err.response?.data?.message || "Failed to update question.");
     }
-  };
-  
+};
+
+const handleDiscardChanges = () => {
+  setQuestionContent(originalQuestionData?.questionContent);
+  setAnswers(originalQuestionData?.answers || []);
+  setEditingQuestionId(null); // Reset editing mode
+  setAnswers([
+    { answerContent: "", isCorrect: false, score: 0 },
+    { answerContent: "", isCorrect: false, score: 0 }
+  ]); 
+}
 
   const handleSubmitQuiz = () => {
     if (questions.length !== noQuestions) {
@@ -382,49 +404,73 @@ const CreateQuestion = () => {
       
 
         <div className="added-questions">
-          <h3>Added Questions:</h3>
-          {questions.length > 0 ? (
-            <ul>
-              {questions.map((q) => (
-                <li key={q.question_id}>
-                  <strong>{q.question_content}</strong>
+            <h3>Added Questions:</h3>
+            {questions.length > 0 ? (
 
-                  {editingQuestionId !== null && (
-                  <div className="form-group">
-                    <button type="button" onClick={handleSaveEdit}>
-                    Save Edit
+              <ul>
+                {questions.map((q, index) => (
+                  <div key={q.question_id}>
+                    <li key={q.question_id}>
+            <div className="question-content-wrapper">
+              <strong>{q.question_content}</strong>
+
+              {/* Conditionally render buttons based on edit mode */}
+              <div className="buttons-container">
+                {editingQuestionId === q.question_id ? (
+                  <>
+                    <button 
+                      onClick={handleSaveEdit}
+                      className="save-edit-button">
+                      Save Changes
                     </button>
-                  </div>
-                )}
-                  <button 
-                    onClick={() => handleEditQuestion(q.question_id)} 
-                    style={{ color: "white", marginLeft: "10px" }}
-                    className = "delete-button"
-                    >
-                    Edit
-                  </button>
 
-                  <button 
-                    onClick={() => handleDeleteQuestion(q.question_id)} 
-                    style={{ color: "white", marginLeft: "10px" }}
-                    className = "delete-button"
+                    <button 
+                      onClick={handleDiscardChanges}
+                      className="discard-edit-button">
+                      Discard Changes
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleEditQuestion(q.question_id)}
+                      className="edit-button"
                     >
-                    Delete
-                  </button>
-                  <ul>
-                    {(questionAnswers[q.question_id] || []).map((a) => (
-                      <li key={a.answer_id}>
-                        {a.answer_content} - {a.is_correct ? "Correct" : "Incorrect"} - Score: {a.score}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No questions added yet.</p>
-          )}
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteQuestion(q.question_id)}
+                      className="delete-button"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+              {/* Answer list */}
+              <ul>
+                {(questionAnswers[q.question_id] || []).map((a) => (
+                  <li key={a.answer_id}>
+                    {a.answer_content} - {a.is_correct ? "Correct" : "Incorrect"} - Score: {a.score}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          {/* Add a separator between each question */}
+          {index < questions.length - 1 && <hr />} 
         </div>
+      ))}
+    </ul>
+  ) : (
+    <p>No questions added yet.</p>
+  )}
+</div>
+
+
+
       </div>
     </div>
   );

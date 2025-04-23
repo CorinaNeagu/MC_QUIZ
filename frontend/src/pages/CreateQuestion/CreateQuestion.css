@@ -201,14 +201,26 @@ button:active {
   justify-content: center; 
 }
 
+.buttons-container {
+  display: flex; /* Use Flexbox to layout buttons */
+  align-items: center; /* Align the buttons vertically in the center */
+  gap: 10px; /* Space between the buttons */
+  justify-content: flex-start; /* Align the buttons to the left */
+}
+
 .edit-button,
-.delete-button {
+.delete-button,
+.btn-save-edit,
+.discard-edit-button {
   padding: 12px 20px;
   font-size: 1.1em;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   width: auto; 
+  justify-content: left; 
+  display: inline-flex; 
+  align-items: center; 
 }
 
 .edit-button {
@@ -221,13 +233,33 @@ button:active {
 }
 
 .delete-button {
-  background-color: #e53935; /* Red */
+  background-color: #e53935; 
   color: white;
 }
 
 .delete-button:hover {
   background-color: #d32f2f;
 }
+
+.btn-save-edit{
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-save-edit:hover {
+  background-color: #3986d9;
+}
+
+.discard-edit-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.discard-edit-button::hover {
+  background-color: #3986d9;
+}
+
+
 
 @media (max-width: 768px) {
   .quiz-content-wrapper {
@@ -242,4 +274,18 @@ button:active {
   h2 {
     font-size: 2em;
   }
+}
+
+.question-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd; 
+}
+
+.question-item:last-child {
+  border-bottom: none; 
+}
+hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
 }
