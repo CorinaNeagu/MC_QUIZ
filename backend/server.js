@@ -5,7 +5,8 @@ const authRoutes = require("./routes/authRoutes"); // Authentication-related rou
 const userRoutes = require("./routes/userRoutes"); // User-related routes (profile, etc.)
 const quizRoutes = require("./routes/quizRoutes");
 const takeQuizRoutes = require("./routes/takeQuizRoutes");
-const scoreRoutes = require("./routes/scoreRoutes")
+const scoreRoutes = require("./routes/scoreRoutes");
+const statsRoutes = require("./routes/statsRoutes");
 const app = express();
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use("/api/user", userRoutes);
 app.use("/api", quizRoutes);
 app.use("/api/takeQuiz", takeQuizRoutes);
 app.use("/api/score", scoreRoutes);
+app.use("/api/stats", statsRoutes);
 
 // Set up the server
 const PORT = process.env.PORT || 5000;

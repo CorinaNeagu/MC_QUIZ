@@ -30,6 +30,7 @@ const DisplayResponses = () => {
         if (data) {
           setResponses(data.responses);
           setDeductionPercentage(data.deduction_percentage || 0);
+          console.log("Fetched responses:", data.responses);
         }
       } catch (err) {
         console.error("Error fetching responses:", err);
@@ -41,13 +42,56 @@ const DisplayResponses = () => {
   }, [attemptId]);
 
   const normalizeAnswers = (answers) => {
+    console.log("Normalizing answers:", answers);
+  
+    // Case 1: If it's a string, split by commas and normalize each answer
     if (typeof answers === 'string') {
-      return [answers.trim().toLowerCase()];
+      return answers.split(',').map(answer => answer.trim().toLowerCase());
     }
-    return answers.map(answer => answer.trim().toLowerCase());
+  
+    // Case 2: If it's an array, normalize each item
+    if (Array.isArray(answers)) {
+      return answers.map(answer => {
+        if (typeof answer === 'string') {
+          return answer.trim().toLowerCase(); // Normalize string
+        } else if (typeof answer === 'object' && answer.answerContent) {
+          // Extract the 'answerContent' property if it's an object
+          return answer.answerContent.trim().toLowerCase(); // Normalize string from the object
+        } else if (typeof answer === 'object') {
+          // Handle other cases for objects (like logging or handling unexpected object structures)
+          console.warn(`Unexpected object structure:`, answer);
+          return ''; // Default fallback
+        } else {
+          console.warn(`Unexpected type in array: ${typeof answer}`);
+          return ''; // Fallback to empty string
+        }
+      });
+    }
+  
+    // Case 3: If it's an object (likely a map or dictionary), handle its values
+    if (typeof answers === 'object' && answers !== null) {
+      return Object.values(answers).map(value => {
+        if (typeof value === 'string') {
+          return value.trim().toLowerCase(); // Normalize string
+        } else if (typeof value === 'object' && value.answerContent) {
+          // Extract 'answerContent' from the object and normalize
+          return value.answerContent.trim().toLowerCase(); // Normalize the string
+        } else {
+          console.warn(`Unexpected value type: ${typeof value}`);
+          return ''; // Fallback to empty string
+        }
+      });
+    }
+  
+    // If none of the cases above are true, log the issue and return an empty array
+    console.error(`Invalid answers type: ${typeof answers}`);
+    return [];
   };
-
+  
+  
+  
   const removeDuplicates = (answers) => {
+    console.log("Removing duplicates from:", answers);
     return [...new Set(answers)];
   };
 
@@ -55,25 +99,40 @@ const DisplayResponses = () => {
     const normalizedUserAnswer = normalizeAnswers(userAnswer);
     const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
   
-    // Check if any normalized user answer matches any correct answer
-    return normalizedUserAnswer.some(answer =>
+    // Return true if the user’s answer matches any of the correct answers
+    const matchedAnswers = normalizedUserAnswer.filter(answer =>
       normalizedCorrectAnswers.includes(answer)
     );
+  
+    return matchedAnswers.length; // Return how many answers match
   };
 
   const calculatePartialPoints = (studentAnswers, correctAnswers, totalPoints) => {
     const normalizedStudentAnswers = normalizeAnswers(studentAnswers);
     const uniqueCorrectAnswers = removeDuplicates(normalizeAnswers(correctAnswers));
+    
+    // Count how many of the student's answers match the correct answers
     const correctSelections = normalizedStudentAnswers.filter(answer =>
       uniqueCorrectAnswers.includes(answer)
     ).length;
-
+  
+    // Total number of unique correct answers
     const correctAnswerCount = uniqueCorrectAnswers.length;
+    
+    // If there are no correct answers, return 0 points
+    if (correctAnswerCount === 0) return 0;
+  
+    // Calculate points per correct answer
     const pointsPerCorrectAnswer = totalPoints / correctAnswerCount;
+  
+    // Return the total points based on how many answers are correct
     return pointsPerCorrectAnswer * correctSelections;
   };
+  
+
 
   const calculateDeduction = (points, wrongAnswersCount) => {
+    console.log("Calculating deduction - Points:", points, "Wrong Answers Count:", wrongAnswersCount);
     if (wrongAnswersCount > 0 && deductionPercentage > 0) {
       const deductionPerWrongAnswer = (deductionPercentage / 100) * points;
       return deductionPerWrongAnswer * wrongAnswersCount;
@@ -82,33 +141,41 @@ const DisplayResponses = () => {
   };
 
   const calculatePointsAwarded = (response) => {
+    // Split student answers into an array and count wrong answers
     const wrongAnswersCount = response.studentAnswer
       .split(', ')
       .filter(answer => !checkAnswerCorrectness(answer, response.correctAnswers)).length;
-
+  
+    console.log("Wrong answers count:", wrongAnswersCount);
+  
+    // Calculate deduction based on the wrong answers
     const deduction = calculateDeduction(response.points, wrongAnswersCount);
+    console.log("Deduction applied:", deduction);
+  
+    // Calculate the partial points awarded based on correct answers
     let awardedPoints = calculatePartialPoints(response.studentAnswer, response.correctAnswers, response.points) - deduction;
-
+  
+    console.log("Points awarded:", awardedPoints);
+  
+    // Ensure the awarded points are not negative
     return awardedPoints > 0 ? awardedPoints : 0;
   };
+  
 
-  // Example: Check the correctness for multiple correct answers
-const getAnswerStatus = (userAnswer, correctAnswers) => {
-  const normalizedUserAnswer = normalizeAnswers(userAnswer);
-  const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
-
-  const matchedAnswers = normalizedUserAnswer.filter(userAnswer =>
-    normalizedCorrectAnswers.includes(userAnswer)
-  );
-
-  if (matchedAnswers.length === 0) {
-    return "Incorrect";
-  } else if (matchedAnswers.length < normalizedCorrectAnswers.length) {
-    return "Partially Correct";
-  } else {
-    return "Correct";
-  }
-};
+  const getAnswerStatus = (userAnswer, correctAnswers) => {
+    const matchedCount = checkAnswerCorrectness(userAnswer, correctAnswers);
+  
+    const normalizedUserAnswer = normalizeAnswers(userAnswer);
+    const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
+  
+    if (matchedCount === 0) {
+      return "Incorrect"; // No matches, fully incorrect
+    } else if (matchedCount === normalizedCorrectAnswers.length) {
+      return "Correct"; // All correct answers selected
+    } else {
+      return "Partially Correct"; // Some correct answers selected
+    }
+  };
 
   const handleBackToScore = () => {
     navigate(`/display-score/${attemptId}`);

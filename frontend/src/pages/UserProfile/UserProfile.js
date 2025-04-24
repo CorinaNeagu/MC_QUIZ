@@ -51,7 +51,7 @@ const UserProfile = () => {
 
   return (
     <div className="user-profile-container">
-       <Sidebar />
+       <Sidebar showBackButton={true} /> 
       <div className="profile-header">
         <h2>User Profile</h2>
       </div>

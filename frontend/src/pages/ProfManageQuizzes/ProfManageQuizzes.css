@@ -141,7 +141,9 @@ html, body {
     border-radius: 12px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
     max-height: 400px; 
-    overflow-y: auto; 
+    overflow-y: auto;
+    overflow-wrap: break-word; 
+    word-wrap: break-word
   }
   
   .answers-container h5 {
@@ -183,12 +185,18 @@ html, body {
     color: green;
     font-weight: bold;
     font-size: 1rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   
   .incorrect-tag {
     color: red;
     font-weight: bold;
     font-size: 1rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   
   .answer-text {
@@ -282,6 +290,10 @@ html, body {
   background-color: #ff3333;
 }
 
+.modal-wrapper {  
+  overflow: hidden; 
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -294,6 +306,8 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden; 
+
 }
 
 .modal-content {
@@ -302,7 +316,7 @@ html, body {
   border-radius: 12px;
   max-height: 80vh;
   width: 90%;
-  overflow-y: auto;
+  overflow: hidden; 
   position: relative;
 }
 
@@ -320,7 +334,7 @@ html, body {
 .modal-questions-container {
   display: flex;
   flex-direction: row;
-  overflow-x: auto;
+  overflow: hidden; 
   gap: 1rem;
   padding-top: 1rem;
 }
@@ -347,6 +361,7 @@ html, body {
 
 .modal-questions-wrapper::-webkit-scrollbar {
   display: none; 
+  overflow: hidden;
 }
 
 .modal-close {
@@ -366,6 +381,7 @@ html, body {
   cursor: pointer;
   padding: 0;
   transition: background-color 0.3s, transform 0.3s;
+  overflow: hidden;
 }
 
 .modal-close:hover {
@@ -377,6 +393,47 @@ html, body {
   outline: none; 
 }
 
+.checkbox-wrapper {
+  display: flex;                
+  align-items:center;    
+  flex-direction: row;        
+  gap: 10px;                   
+  margin-bottom: 20px;          
+  padding-left: 20px;   
+         
+}
 
-  
-  
+.checkbox-input {
+  display: none;               
+}
+
+.checkbox-custom {
+  flex-direction: column;
+  display: flex;
+}
+
+.checkbox-input:checked + .checkbox-custom::before {
+  background-color: #007bff; 
+  border-color: #007bff;     
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+  content: "✓";              
+  position: absolute;
+  left: 5px;
+  top: 2px;                  
+  font-size: 18px;
+  color: white;             
+  transition: transform 0.2s ease; 
+  flex-direction: column;
+}
+
+.checkbox-label {
+  font-size: 1rem;
+  color: #444;
+  cursor: pointer;
+  margin: 0;
+  font-weight: 500;
+  user-select: none;
+  transition: color 0.3s ease;
+}

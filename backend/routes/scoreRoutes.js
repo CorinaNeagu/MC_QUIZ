@@ -191,34 +191,53 @@ router.get('/quiz_attempts/:attempt_id/score', (req, res) => {
     SELECT 
       qa.score AS score,
       qs.deduction_percentage AS deduction_percentage,
-      (
+      ROUND(COALESCE((
         SELECT SUM(a.score)
         FROM Questions q
         JOIN Answers a ON q.question_id = a.question_id
         WHERE q.quiz_id = qa.quiz_id AND a.is_correct = TRUE
-      ) AS max_score,
+      ), 0), 1) AS max_score,
       (
         SELECT COUNT(*) 
         FROM StudentResponses sr
         JOIN Answers a ON sr.answer_id = a.answer_id
         WHERE sr.attempt_id = qa.attempt_id AND a.is_correct = FALSE
-      ) AS wrong_answer_count
+      ) AS wrong_answer_count,
+      (
+        SELECT COUNT(*) 
+        FROM StudentResponses sr
+        JOIN Answers a ON sr.answer_id = a.answer_id
+        WHERE sr.attempt_id = qa.attempt_id AND a.is_correct = TRUE
+      ) AS correct_answer_count
     FROM QuizAttempt qa
     JOIN QuizSettings qs ON qa.quiz_id = qs.quiz_id
     WHERE qa.attempt_id = ?
   `;
 
   db.query(query, [attempt_id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Error fetching score.' });
-    if (results.length === 0) return res.status(404).json({ message: 'Quiz attempt not found.' });
+    if (err) {
+      console.error("SQL Error:", err);
+      return res.status(500).json({ message: 'Error fetching score.' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Quiz attempt not found.' });
+    }
 
-    const { score, deduction_percentage, max_score, wrong_answer_count } = results[0];
+    const { score, deduction_percentage, max_score, wrong_answer_count, correct_answer_count } = results[0];
+
+    // Only apply deduction if there are wrong answers
+    let deduction = 0;
+    if (wrong_answer_count > 0) {
+      deduction = (deduction_percentage / 100) * score;
+    }
 
     res.status(200).json({
       score: parseFloat(score),
       max_score: parseFloat(max_score),
       deduction_percentage: parseFloat(deduction_percentage),
-      wrong_answer_count: parseInt(wrong_answer_count)
+      wrong_answer_count: parseInt(wrong_answer_count),
+      deduction: parseFloat(deduction),  // Return the deduction value
+      correct_answer_count: parseInt(correct_answer_count),
     });
   });
 });
@@ -233,6 +252,7 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
        MAX(a.answer_content) AS student_answer, 
        MAX(a.is_correct) AS student_is_correct,
        GROUP_CONCAT(DISTINCT correct_answers.answer_content) AS correct_answers, -- DISTINCT to remove duplicates
+       GROUP_CONCAT(DISTINCT correct_answers.is_correct) AS correct_is_correct, -- Whether each correct answer is correct
        q.points_per_question AS points
     FROM StudentResponses sr
     JOIN Questions q ON sr.question_id = q.question_id
@@ -241,7 +261,7 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
     AND correct_answers.is_correct = TRUE
     WHERE sr.attempt_id = ?
     GROUP BY sr.question_id, q.question_content, q.points_per_question;
-    `;
+  `;
 
   db.query(query, [attempt_id], (err, results) => {
     if (err) {
@@ -253,16 +273,30 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
       return res.status(404).json({ message: 'No responses found for this attempt.' });
     }
 
-    const responses = results.map(row => ({
-      questionText: row.question_content,
-      studentAnswer: row.student_answer,
-      studentIsCorrect: row.student_is_correct,
-      correctAnswers: row.correct_answers.split(', '), // Convert correct answers string into an array
-      points: row.points,
-    }));
+    // Log the results before processing them
+    console.log("Query Results:", results);
+
+    const responses = results.map(row => {
+      // Convert the correct answers into an array of strings
+      const correctAnswers = row.correct_answers.split(',').map(answer => answer.trim());
+
+      return {
+        questionText: row.question_content,
+        studentAnswer: row.student_answer,
+        studentIsCorrect: row.student_is_correct,
+        correctAnswers: correctAnswers,  // Now it's an array of strings
+        points: row.points,
+      };
+    });
+
+    // Log the processed responses clearly
+    console.log("Processed Responses:", responses);
 
     return res.status(200).json({ responses });
   });
 });
+
+
+
 
 module.exports = router;

@@ -5,8 +5,8 @@ import './DisplayScore.css';
 
 const DisplayScore = () => {
   const { attemptId } = useParams();
-  const navigate = useNavigate(); // Using useNavigate for navigation
-  
+  const navigate = useNavigate();
+
   const [score, setScore] = useState(null);
   const [maxScore, setMaxScore] = useState(null);
   const [deduction, setDeduction] = useState(0);
@@ -14,7 +14,6 @@ const DisplayScore = () => {
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [error, setError] = useState("");
 
-  // Fetch score data and handle calculation
   useEffect(() => {
     const fetchScore = async () => {
       try {
@@ -23,49 +22,39 @@ const DisplayScore = () => {
           alert("You must be logged in to view your score.");
           return;
         }
-  
+
         const { data } = await axios.get(
           `http://localhost:5000/api/score/quiz_attempts/${attemptId}/score`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-  
+
         const {
           score: fetchedScore,
           max_score: fetchedMaxScore,
-          deduction_percentage,
+          deduction,
           wrong_answer_count
         } = data;
-  
-        const deduction = (deduction_percentage / 100) * fetchedScore * wrong_answer_count;
-  
+
         setScore(fetchedScore);
         setMaxScore(fetchedMaxScore);
         setDeduction(deduction);
         setWrongAnswers(wrong_answer_count);
+
+        const cappedScore = Math.min(fetchedScore, fetchedMaxScore);
+        const final = Math.max(cappedScore - deduction, 0);
+        setFinalScore(Math.round(final * 100) / 100);
       } catch (err) {
         console.error("Error fetching score:", err);
         setError("Error loading your score.");
       }
     };
-  
+
     fetchScore();
   }, [attemptId]);
 
-  // Final score calculation
-  useEffect(() => {
-    if (score !== null && deduction !== null && maxScore !== null) {
-      const cappedScore = Math.min(score, maxScore);
-      const finalScoreBeforeDeduction = cappedScore - deduction;
-      const final = Math.round(finalScoreBeforeDeduction * 100) / 100;
-      setFinalScore(Math.max(final, 0));
-    }
-  }, [score, deduction, maxScore]);
-
-  // Calculate Grade out of 100
   const calculateGrade = () => {
-    if (finalScore !== null && maxScore !== null) {
-      const grade = (finalScore / maxScore) * 100;
-      return Math.round(grade);
+    if (finalScore !== null && maxScore !== null && maxScore > 0) {
+      return Math.round((finalScore / maxScore) * 100);
     }
     return 0;
   };
@@ -86,20 +75,18 @@ const DisplayScore = () => {
             Your Score: {finalScore.toFixed(2)} / {maxScore}
           </div>
 
-          {/* Calculate Grade */}
           <div className="grade">
             Grade: {calculateGrade()} / 100
           </div>
 
           {deduction > 0 ? (
-            <p>Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answers</p>
+            <p>Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answer(s)</p>
           ) : (
             <p>No deductions applied!</p>
           )}
 
           <button onClick={handleGoToDashboard}>Go to Dashboard</button>
 
-          {/* Button to show responses */}
           <button className="view-responses-btn" 
                   onClick={() => navigate(`/responses/${attemptId}`)}>
             View My Responses

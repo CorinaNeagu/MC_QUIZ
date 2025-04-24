@@ -15,6 +15,14 @@ const Sidebar = ({ showBackButton }) => {
     navigate('/home'); 
   };
 
+  const handleStatistics = () => {
+    navigate('/stats');
+  };
+
+  const handleGroups = () => {
+    navigate('/groups');
+  };
+
   const handleLogoutClick = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user_id');
@@ -26,20 +34,26 @@ const Sidebar = ({ showBackButton }) => {
       <div className="sidebar">
         <button className="menu-button">☰</button>
         <div className="sidebar-menu">
-          {/* Show the Back to Homepage button only when on the /professor/manage-quizzes page */}
-          {showBackButton && location.pathname === "/professor/manage-quizzes" && (
-            <button onClick={handleGoHome} className="btn-go-home">
-              Back to Homepage
-            </button>
-          )}
+          {showBackButton && (
+              <button onClick={handleGoHome} className="sidebar-item">
+                🏠 Home
+              </button>
+            )}
 
-          {/* Sidebar Menu */}
           <button onClick={handleProfileClick} className="sidebar-item">
-            Profile
+          🪪 Profile
+          </button>
+          <button onClick={handleGroups} className="sidebar-item">
+          🤝 Groups
+          </button>
+          <button onClick={handleStatistics} className="sidebar-item">
+          📈 Statistics
           </button>
           <button onClick={handleLogoutClick} className="sidebar-item">
-            Logout
+          🧧 Logout
           </button>
+          
+
         </div>
       </div>
     </div>

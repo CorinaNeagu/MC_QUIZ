@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Sidebar from "../../components/Sidebar/Sidebar";
+
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
@@ -105,6 +107,8 @@ const CreateQuiz = () => {
 
   return (
     <div className="create-quiz-container">
+            <Sidebar showBackButton={true} /> 
+
       <h2>Create a New Quiz</h2>
       <form onSubmit={handleSubmit} className="create-quiz-form">
 

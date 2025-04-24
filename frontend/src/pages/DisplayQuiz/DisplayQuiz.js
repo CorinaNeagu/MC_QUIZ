@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "./DisplayQuiz.css";
+import Sidebar from "../../components/Sidebar/Sidebar";
 
 const DisplayQuiz = () => {
   const { quizId } = useParams();
@@ -154,6 +155,7 @@ const DisplayQuiz = () => {
 
   return (
     <div className="display-quiz-container">
+      <Sidebar showBackButton={true} /> {/* Pass the showBackButton prop to Sidebar */}
       {quizData ? (
         <>
           <h2>{quizData.title}</h2>

@@ -215,15 +215,6 @@ const ProfManageQuizzes = () => {
     }
   };
 
-
-  const handleScrollLeft = () => {
-    setQuestionScrollIndex((prev) => Math.max(prev - 1, 0));
-  };
-  
-  const handleScrollRight = () => {
-    setQuestionScrollIndex((prev) => Math.min(prev + 1, questions.length - 1));
-  };
-
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -276,15 +267,32 @@ const ProfManageQuizzes = () => {
                           <input type="number" name="deduction_percentage" value={editableSettings.deduction_percentage} onChange={handleSettingChange} />
                         </label>
 
-                        <label>
-                          Retake Allowed:
-                          <input type="checkbox" name="retake_allowed" checked={editableSettings.retake_allowed} onChange={handleSettingChange} />
-                        </label>
+                        <div className="checkbox-wrapper">
+                          <input 
+                          type="checkbox" 
+                          id="retakeAllowed"
+                          name="retake_allowed" 
+                          checked={editableSettings.retake_allowed} 
+                          onChange={handleSettingChange}
+                          className="checkbox-input" 
+                          />
+                        <label htmlFor="retakeAllowed" className="checkbox-custom"></label>
+                        Retake Allowed
+                        </div>
 
-                        <label>
-                          Is Active:
-                          <input type="checkbox" name="is_active" checked={editableSettings.is_active} onChange={handleSettingChange} />
-                        </label>
+                        <div className="checkbox-wrapper">
+                        <input
+                          type="checkbox"
+                          id="isActive" 
+                          name="is_active"
+                          checked={editableSettings.is_active}
+                          onChange={handleSettingChange}
+                          className="checkbox-input"  
+                        />
+                        <label htmlFor="isActive" className="checkbox-custom"></label> 
+                        Is Active
+                      </div>
+
                       </div>
                     ) : (
                       <ul>

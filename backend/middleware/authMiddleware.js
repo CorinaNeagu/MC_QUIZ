@@ -13,6 +13,8 @@ const authenticateJWT = (req, res, next) => {
             return res.status(403).json({ message: "Invalid or expired token" });
         }
 
+        console.log("Decoded JWT Payload:", user); // Log the decoded JWT content
+
         req.user = user; // Attach the decoded token payload to the request object
         next();
     });

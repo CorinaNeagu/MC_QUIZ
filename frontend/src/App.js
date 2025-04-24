@@ -13,6 +13,7 @@ import DisplayQuestion from "./pages/DisplayQuestion/DisplayQuestion";
 import DisplayScore from "./pages/DisplayScore/DisplayScore";
 import DisplayResponses from "./pages/DisplayResponses/DisplayResponses";
 import ProfManageQuizzes from "./pages/ProfManageQuizzes/ProfManageQuizzes";
+import UserStatistics from "./pages/UserStatistics/UserStatistics";
 
 
 function App() {

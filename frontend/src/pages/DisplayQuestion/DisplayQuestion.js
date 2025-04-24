@@ -62,7 +62,14 @@ const DisplayQuestion = () => {
           question.answers = shuffleArray(question.answers);
         });
 
+        // Initialize the answers state with empty arrays for each question
+        const initialAnswers = shuffledQuestions.reduce((acc, question) => {
+          acc[question.question_id] = [];
+          return acc;
+        }, {});
+
         setQuestions(shuffledQuestions);
+        setAnswers(initialAnswers);  // Initialize answers state
         setLoading(false);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -120,35 +127,33 @@ const DisplayQuestion = () => {
         alert("Unauthorized: Please log in again.");
         return;
       }
-
+  
       const formattedAnswers = {};
-
-      // Loop through all the questions and their answers
+  
+      // Collect all the answers in a proper format
       for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
         const sanitizedQuestionId = Number(questionId);
         const sanitizedAnswerIds = selectedAnswerIds.map((answerId) => {
           const sanitizedAnswerId = Number(answerId);
           return isNaN(sanitizedAnswerId) ? null : sanitizedAnswerId;
         }).filter((answerId) => answerId !== null);
-
+  
         // Only include answers that have been selected
         if (sanitizedAnswerIds.length > 0) {
           formattedAnswers[sanitizedQuestionId] = sanitizedAnswerIds;
         }
       }
-
-      // For any unanswered questions, assign them a score of 0
+  
+      // For unanswered questions, assign them a score of 0
       const unansweredQuestions = questions.filter((question) => !formattedAnswers[question.question_id]);
-
-      // Mark unanswered questions with a score of 0
       unansweredQuestions.forEach((question) => {
         formattedAnswers[question.question_id] = [0]; // Assign 0 for unanswered questions
       });
-
+  
       // Calculate time taken for quiz submission
       const endTime = new Date().getTime();
       const timeTaken = Math.floor((endTime - startTime) / 1000);
-
+  
       // Send the quiz answers to the server along with the time taken and other data
       const response = await axios.post(
         `http://localhost:5000/api/score/quiz_attempts/${attemptId}/submit`,
@@ -162,7 +167,7 @@ const DisplayQuestion = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       // Redirect to the display score page after submission
       navigate(`/display-score/${attemptId}`);
     } catch (err) {
@@ -170,7 +175,7 @@ const DisplayQuestion = () => {
       setError("Error submitting the quiz.");
     }
   };
-
+  
   // Handle navigation to next question
   const handleNextQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => {
@@ -192,42 +197,59 @@ const DisplayQuestion = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div>
+    <div className="create-question-container">
       <div className={`timer-box ${timeLeft <= 60 ? "timer-warning" : ""}`}>
         <div className="time">{formatTime(timeLeft)}</div>
       </div>
+  
       <div className="question-container">
         {questions.length > 0 ? (
           <div>
             <h2>Question {currentQuestionIndex + 1} of {questions.length}</h2>
             <p>{questions[currentQuestionIndex].question_content}</p>
-
+  
             <div className="options">
-              {questions[currentQuestionIndex].answers.map((answer) => (
-                <div key={answer.answer_id} className="checkbox-wrapper">
-                  <input
-                    type="checkbox"
-                    id={`answer-${answer.answer_id}`}
-                    checked={answers[questions[currentQuestionIndex].question_id]?.includes(answer.answer_id) || false}
-                    onChange={() => handleAnswerSelect(
-                      questions[currentQuestionIndex].question_id,
-                      answer.answer_id
-                    )}
-                    className="checkbox-input"
-                  />
-                  <label htmlFor={`answer-${answer.answer_id}`} className="checkbox-label">
-                    {answer.answer_content}
-                  </label>
-                </div>
-              ))}
+              {questions[currentQuestionIndex].answers.map((answer) => {
+                const isSelected = answers[questions[currentQuestionIndex].question_id]?.includes(answer.answer_id);
+                return (
+                  <div key={answer.answer_id} className="checkbox-wrapper">
+                    <input
+                      type="checkbox"
+                      id={`answer-${answer.answer_id}`}
+                      checked={isSelected}
+                      onChange={() =>
+                        handleAnswerSelect(questions[currentQuestionIndex].question_id, answer.answer_id)
+                      }
+                      className="checkbox-input"
+                    />
+                    <label
+                      htmlFor={`answer-${answer.answer_id}`}
+                      className={`checkbox-label ${isSelected ? "selected-answer" : ""}`}
+                    >
+                      {answer.answer_content}
+                    </label>
+                  </div>
+                );
+              })}
             </div>
-
+  
             <div className="button-group">
-              <button className="next-btn" onClick={handleNextQuestion} disabled={currentQuestionIndex === questions.length - 1}>
+              <button
+                className="next-btn"
+                onClick={handleNextQuestion}
+                disabled={currentQuestionIndex === questions.length - 1}
+              >
                 Next Question
               </button>
-
-              <button className="submit-btn" onClick={submitQuiz}>
+  
+              <button
+                className="submit-btn"
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to submit the quiz?")) {
+                    submitQuiz();
+                  }
+                }}
+              >
                 Submit Quiz
               </button>
             </div>
@@ -238,6 +260,7 @@ const DisplayQuestion = () => {
       </div>
     </div>
   );
+  
 };
 
 export default DisplayQuestion;
