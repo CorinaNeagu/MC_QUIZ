@@ -288,7 +288,10 @@ const CreateQuestion = () => {
 const handleDiscardChanges = () => {
   setQuestionContent(originalQuestionData?.questionContent);
   setAnswers(originalQuestionData?.answers || []);
-  setEditingQuestionId(null); // Reset editing mode
+  setEditingQuestionId(null); 
+  setQuestionContent("");
+  setIsMultipleChoice(false)
+  setError("")
   setAnswers([
     { answerContent: "", isCorrect: false, score: 0 },
     { answerContent: "", isCorrect: false, score: 0 }
@@ -341,9 +344,12 @@ const handleDiscardChanges = () => {
                 id="multipleChoice"
                 checked={isMultipleChoice}
                 onChange={handleMultipleChoiceChange}
-                className = "yesButton"
+                className="checkbox-input"
               />
-              <label htmlFor="multipleChoice" className="checkbox-label-text">Yes</label>
+              Yes
+              <label htmlFor="multipleChoice" className="checkbox-custom"></label>
+              
+
             </div>
           </div>
 

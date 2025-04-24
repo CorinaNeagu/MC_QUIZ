@@ -342,9 +342,9 @@ const ProfManageQuizzes = () => {
                   <li key={idx}>
                     {a.answer_content}{' '}
                     {a.is_correct ? (
-                      <span className="correct-tag">(Correct)</span>
+                      <span className="correct-tag">(✅️)</span>
                     ) : (
-                      <span className="incorrect-tag">(Incorrect)</span>
+                      <span className="incorrect-tag">(❌)</span>
                     )}
                   </li>
                 ))}

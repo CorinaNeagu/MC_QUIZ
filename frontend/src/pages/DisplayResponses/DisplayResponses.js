@@ -141,41 +141,49 @@ const DisplayResponses = () => {
   };
 
   const calculatePointsAwarded = (response) => {
-    // Split student answers into an array and count wrong answers
-    const wrongAnswersCount = response.studentAnswer
-      .split(', ')
-      .filter(answer => !checkAnswerCorrectness(answer, response.correctAnswers)).length;
+    const userAnswers = normalizeAnswers(response.studentAnswer);
+    const correctAnswers = normalizeAnswers(response.correctAnswers);
   
-    console.log("Wrong answers count:", wrongAnswersCount);
+    // Count how many correct answers the user selected
+    const correctSelections = userAnswers.filter(answer =>
+      correctAnswers.includes(answer)
+    ).length;
   
-    // Calculate deduction based on the wrong answers
-    const deduction = calculateDeduction(response.points, wrongAnswersCount);
-    console.log("Deduction applied:", deduction);
+    // Calculate partial points based on how many correct answers were selected
+    const pointsPerCorrectAnswer = response.points / correctAnswers.length;
+    let awardedPoints = pointsPerCorrectAnswer * correctSelections;
   
-    // Calculate the partial points awarded based on correct answers
-    let awardedPoints = calculatePartialPoints(response.studentAnswer, response.correctAnswers, response.points) - deduction;
+    // Ensure the points are not negative
+    awardedPoints = awardedPoints < 0 ? 0 : awardedPoints;
   
-    console.log("Points awarded:", awardedPoints);
-  
-    // Ensure the awarded points are not negative
-    return awardedPoints > 0 ? awardedPoints : 0;
+    return awardedPoints;
   };
+  
   
 
   const getAnswerStatus = (userAnswer, correctAnswers) => {
-    const matchedCount = checkAnswerCorrectness(userAnswer, correctAnswers);
-  
     const normalizedUserAnswer = normalizeAnswers(userAnswer);
     const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
   
-    if (matchedCount === 0) {
-      return "Incorrect"; // No matches, fully incorrect
-    } else if (matchedCount === normalizedCorrectAnswers.length) {
-      return "Correct"; // All correct answers selected
-    } else {
-      return "Partially Correct"; // Some correct answers selected
+    // Match the student's answers with the correct ones
+    const correctMatches = normalizedUserAnswer.filter(answer =>
+      normalizedCorrectAnswers.includes(answer)
+    );
+  
+    // Case when no answers are correct
+    if (correctMatches.length === 0) {
+      return "Incorrect";
     }
+  
+    // Case when all answers match
+    if (correctMatches.length === normalizedCorrectAnswers.length) {
+      return "Correct";
+    }
+  
+    // Case when some answers match
+    return "Partially Correct";
   };
+  
 
   const handleBackToScore = () => {
     navigate(`/display-score/${attemptId}`);

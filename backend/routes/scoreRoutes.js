@@ -249,10 +249,8 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
 
   const query = `
     SELECT q.question_content, 
-       MAX(a.answer_content) AS student_answer, 
-       MAX(a.is_correct) AS student_is_correct,
-       GROUP_CONCAT(DISTINCT correct_answers.answer_content) AS correct_answers, -- DISTINCT to remove duplicates
-       GROUP_CONCAT(DISTINCT correct_answers.is_correct) AS correct_is_correct, -- Whether each correct answer is correct
+       GROUP_CONCAT(DISTINCT a.answer_content ORDER BY a.answer_content) AS student_answers, -- Collect all student answers as a comma-separated string
+       GROUP_CONCAT(DISTINCT correct_answers.answer_content ORDER BY correct_answers.answer_content) AS correct_answers, -- Collect all correct answers as a comma-separated string
        q.points_per_question AS points
     FROM StudentResponses sr
     JOIN Questions q ON sr.question_id = q.question_id
@@ -277,14 +275,14 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
     console.log("Query Results:", results);
 
     const responses = results.map(row => {
-      // Convert the correct answers into an array of strings
+      // Convert the student answers and correct answers into arrays
+      const studentAnswers = row.student_answers.split(',').map(answer => answer.trim());
       const correctAnswers = row.correct_answers.split(',').map(answer => answer.trim());
 
       return {
         questionText: row.question_content,
-        studentAnswer: row.student_answer,
-        studentIsCorrect: row.student_is_correct,
-        correctAnswers: correctAnswers,  // Now it's an array of strings
+        studentAnswer: studentAnswers,  // Now it's an array of student answers
+        correctAnswers: correctAnswers,  // Now it's an array of correct answers
         points: row.points,
       };
     });
@@ -295,6 +293,7 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
     return res.status(200).json({ responses });
   });
 });
+
 
 
 
