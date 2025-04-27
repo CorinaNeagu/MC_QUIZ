@@ -1,98 +1,37 @@
-.statistics-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #f9f9f9;
-  }
-  
-  .stats-content {
-    width: 100%;
-    max-width: 1200px;
-    margin: 20px auto;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-  }
-  
-  h2 {
-    text-align: center;
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .stats-content p {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 20px;
-  }
-  
-  .stats-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-  }
-  
-  .stats-content table th,
-  .stats-content table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .stats-content table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .stats-content table tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  .stats-content table tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .stats-content .chart-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  
-  .stats-content .chart-container canvas {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  .stats-content .error-message {
-    color: #d9534f;
-    font-size: 1.2rem;
-    text-align: center;
-  }
-  
-  .stats-content .no-data {
-    font-size: 1.5rem;
-    color: #888;
-    text-align: center;
-  }
-  
-  @media (max-width: 768px) {
-    .stats-content {
-      padding: 15px;
-    }
-  
-    h2 {
-      font-size: 1.8rem;
-    }
-  
-    .stats-content table th, 
-    .stats-content table td {
-      padding: 10px;
-    }
-  }
-  
+
+
+
+/* Tooltip and legend styling */
+.recharts-tooltip-wrapper {
+  font-size: 14px;
+  color: #333;
+}
+
+.recharts-legend-item {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Styling for when the Pie chart is animated on page load */
+.PieChartContainer .recharts-pie-chart {
+  transition: transform 1s ease-in-out;
+  transform-origin: center;
+}
+
+/* Styling for the focus effect (when a slice is clicked) */
+.recharts-pie-slice {
+  transition: transform 0.3s ease, stroke-width 0.3s ease;
+}
+
+.recharts-pie-slice:hover {
+  transform: scale(1.1); /* Slightly enlarge on hover */
+}
+
+.recharts-pie-slice:active {
+  transform: scale(1.2); /* Enlarge on click for a more prominent focus effect */
+}
+
+.recharts-pie-slice-focused {
+  stroke: #000;
+  stroke-width: 4px;
+}

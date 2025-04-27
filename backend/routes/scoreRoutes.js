@@ -182,8 +182,6 @@ router.post('/quiz_attempts/:attempt_id/submit', (req, res) => {
 });
 
 
-
-
 router.get('/quiz_attempts/:attempt_id/score', (req, res) => {
   const { attempt_id } = req.params;
 

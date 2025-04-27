@@ -121,6 +121,15 @@ const DisplayQuestion = () => {
 
   // Submit quiz
   const submitQuiz = async () => {
+    const lastQuestionId = questions[questions.length - 1].question_id;
+    const lastQuestionAnswer = answers[lastQuestionId];
+
+    if (!lastQuestionAnswer || lastQuestionAnswer.length === 0) {
+      alert("Please answer the last question before submitting the quiz.");
+      return; // Don't allow submission
+    }
+
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -178,12 +187,22 @@ const DisplayQuestion = () => {
   
   // Handle navigation to next question
   const handleNextQuestion = () => {
-    setCurrentQuestionIndex((prevIndex) => {
-      if (prevIndex < questions.length - 1) {
-        return prevIndex + 1;
-      }
-      return prevIndex;
-    });
+    const currentQuestion = questions[currentQuestionIndex];
+    const selectedAnswers = answers[currentQuestion.question_id];
+
+    // Check if the user has selected an answer
+    if (!selectedAnswers || selectedAnswers.length === 0) {
+      alert("Please select an answer before moving to the next question.");
+      return; // Do not proceed to the next question
+    } else {
+      setError(""); // Clear the error message
+      setCurrentQuestionIndex((prevIndex) => {
+        if (prevIndex < questions.length - 1) {
+          return prevIndex + 1;
+        }
+        return prevIndex;
+      });
+    }
   };
 
   // Format the timer

@@ -34,6 +34,7 @@ function App() {
         <Route path="/display-score/:attemptId" element={<DisplayScore />} />
         <Route path="/responses/:attemptId" element={<DisplayResponses />} />
         <Route path = "/manage-quizzes" element = {<ProfManageQuizzes/>} />
+        <Route path = "/stats" element = {<UserStatistics/>} />
        </Routes>
     </Router>
   );

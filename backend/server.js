@@ -1,4 +1,5 @@
 const express = require("express");
+const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes"); // Authentication-related routes (register, login)
@@ -7,7 +8,7 @@ const quizRoutes = require("./routes/quizRoutes");
 const takeQuizRoutes = require("./routes/takeQuizRoutes");
 const scoreRoutes = require("./routes/scoreRoutes");
 const statsRoutes = require("./routes/statsRoutes");
-const app = express();
+
 
 dotenv.config();
 

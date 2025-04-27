@@ -22,35 +22,40 @@ const DisplayScore = () => {
           alert("You must be logged in to view your score.");
           return;
         }
-
+  
         const { data } = await axios.get(
           `http://localhost:5000/api/score/quiz_attempts/${attemptId}/score`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
+  
         const {
           score: fetchedScore,
           max_score: fetchedMaxScore,
-          deduction,
+          deduction_percentage,
           wrong_answer_count
         } = data;
-
+  
         setScore(fetchedScore);
         setMaxScore(fetchedMaxScore);
-        setDeduction(deduction);
         setWrongAnswers(wrong_answer_count);
-
+  
+        // Assume fixed points per question (adjust as needed)
+        const pointsPerQuestion = 10;
+        const calculatedDeduction = wrong_answer_count * pointsPerQuestion * (deduction_percentage / 100);
+        setDeduction(calculatedDeduction);
+  
         const cappedScore = Math.min(fetchedScore, fetchedMaxScore);
-        const final = Math.max(cappedScore - deduction, 0);
+        const final = Math.max(cappedScore - calculatedDeduction, 0);
         setFinalScore(Math.round(final * 100) / 100);
       } catch (err) {
         console.error("Error fetching score:", err);
         setError("Error loading your score.");
       }
     };
-
+  
     fetchScore();
   }, [attemptId]);
+  
 
   const calculateGrade = () => {
     if (finalScore !== null && maxScore !== null && maxScore > 0) {
