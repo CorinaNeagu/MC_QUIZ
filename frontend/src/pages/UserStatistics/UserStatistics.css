@@ -35,3 +35,86 @@
   stroke: #000;
   stroke-width: 4px;
 }
+
+/* Main modal overlay style */
+.modal-overlay {
+  position: absolute;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  border: 1px solid #ddd;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header style for the modal */
+.modal-overlay h2 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #007bff;
+  text-align: center;
+}
+
+/* Style for the list of quizzes inside the modal */
+.modal-overlay ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.modal-overlay li {
+  padding: 8px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s;
+}
+
+.modal-overlay li:hover {
+  background-color: #f1f1f1;
+}
+
+/* Style for the button to close the modal */
+.modal-overlay button {
+  background-color: lightblue;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.modal-overlay button:hover {
+  background-color: lightblue;
+}
+
+/* Transition effect for the modal popup */
+.modal-overlay-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-overlay-enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-overlay-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-overlay-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+}

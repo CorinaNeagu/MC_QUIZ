@@ -25,12 +25,12 @@ router.get('/pie-chart/quiz-category', authenticateJWT, async (req, res) => {
 
   // SQL query to fetch quiz attempts per category for the logged-in student
   const query = `
-    SELECT c.category_name, COUNT(q.quiz_id) AS quizzes_taken
+    SELECT c.category_name, c.category_id, COUNT(q.quiz_id) AS quizzes_taken
     FROM QuizAttempt qa
     JOIN Quiz q ON qa.quiz_id = q.quiz_id
     JOIN Category c ON q.category_id = c.category_id
     WHERE qa.student_id = ?
-    GROUP BY c.category_name
+    GROUP BY c.category_name, c.category_id
   `;
 
   try {
@@ -54,6 +54,43 @@ router.get('/pie-chart/quiz-category', authenticateJWT, async (req, res) => {
   }
 });
 
+router.get('/quizzes-by-category/:category_id', (req, res) => {
+  const categoryId = req.params.category_id; // Get category_id from the URL parameter
+  console.log("From URL " ,categoryId);
+
+  // SQL query to get quizzes for the selected category
+  const query = `
+    SELECT 
+      q.quiz_id, 
+      q.title AS quiz_title, 
+      c.category_name,
+      c.category_id
+    FROM 
+      Quiz q
+    JOIN 
+      Category c
+    ON 
+      q.category_id = c.category_id
+    WHERE 
+      c.category_id = ?;
+  `;
+
+  // Execute the query with the category ID as a parameter
+  db.query(query, [categoryId], (err, results) => {
+    if (err) {
+      console.error('Error fetching quizzes for category:', err);
+      return res.status(500).json({ message: 'Error fetching quizzes' });
+    }
+
+    console.log("Results from DB:", results);
+    // If results are found, send them as a JSON response
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ message: 'No quizzes found for this category' });
+    }
+  });
+});
 
 // Backend Route to Get Quiz Scores
 router.get('/line-chart/quiz-scores', authenticateJWT, async (req, res) => {
