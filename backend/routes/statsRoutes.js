@@ -17,8 +17,6 @@ function queryAsync(query, values) {
 
 // GET quiz attempts per category for logged-in student
 router.get('/pie-chart/quiz-category', authenticateJWT, async (req, res) => {
-  console.log("🚀 /quiz-category route hit!");
-
   // Get student ID from JWT
   const studentId = req.user.id;  
   console.log("Student ID:", studentId);  // Log the student ID to verify
@@ -92,32 +90,63 @@ router.get('/quizzes-by-category/:category_id', (req, res) => {
   });
 });
 
-// Backend Route to Get Quiz Scores
-router.get('/line-chart/quiz-scores', authenticateJWT, async (req, res) => {
-  console.log("🚀 /quiz-scores route hit!");
+router.get('/pie-chart/grade-distribution', authenticateJWT, async (req, res) => {
+  console.log("🚀 /grade-distribution route hit!");
 
+  // Get student ID from JWT
   const studentId = req.user.id;  
-  console.log("Student ID:", studentId); 
+  console.log("Student ID:", studentId);  // Log the student ID to verify
 
+  // SQL query to fetch quiz attempts and calculate grade distribution
   const query = `
-    SELECT q.quiz_id, q.title, qa.score
-    FROM QuizAttempt qa
-    JOIN Quiz q ON qa.quiz_id = q.quiz_id
-    WHERE qa.student_id = ?
+SELECT
+    qa.attempt_id,               -- Assuming there's a unique ID per attempt
+    qa.quiz_id,
+    q.title,
+    qa.score AS attempt_score,
+    max_scores.max_score,
+    ROUND((qa.score / max_scores.max_score) * 100, 2) AS grade_percentage
+FROM
+    QuizAttempt qa
+JOIN
+    Quiz q ON qa.quiz_id = q.quiz_id
+JOIN (
+    SELECT
+        qz.quiz_id,
+        qs.no_questions * COALESCE(MAX(qst.points_per_question), 1) AS max_score
+    FROM Quiz qz
+    JOIN QuizSettings qs ON qz.quiz_id = qs.quiz_id
+    LEFT JOIN Questions qst ON qz.quiz_id = qst.quiz_id
+    GROUP BY qz.quiz_id, qs.no_questions
+) AS max_scores ON qa.quiz_id = max_scores.quiz_id
+WHERE
+    qa.student_id = ?
+ORDER BY
+    q.title, qa.attempt_id;
+
+
+
   `;
 
   try {
     const results = await queryAsync(query, [studentId]);
+    console.log("📊 Grade Distribution Results:", results);
 
     if (results.length > 0) {
-      res.status(200).json(results);
+      const pieChartData = results.map((quiz) => ({
+        name: quiz.title,
+        value: quiz.grade_percentage
+      }));
+      res.status(200).json(pieChartData);
     } else {
-      res.status(404).json({ message: "No data available" });
+      res.status(404).json({ message: "No grade distribution data available" });
     }
   } catch (err) {
-    console.error("❌ Error fetching quiz scores:", err);
-    res.status(500).json({ message: "Error fetching quiz scores" });
+    console.error("❌ Error fetching grade distribution:", err);
+    res.status(500).json({ message: "Error fetching grade distribution data" });
   }
 });
+
+
 
 module.exports = router;
