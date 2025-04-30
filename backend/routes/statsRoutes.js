@@ -100,7 +100,7 @@ router.get('/pie-chart/grade-distribution', authenticateJWT, async (req, res) =>
   // SQL query to fetch quiz attempts and calculate grade distribution
   const query = `
 SELECT
-    qa.attempt_id,               -- Assuming there's a unique ID per attempt
+    qa.attempt_id,               -- Unique ID per attempt
     qa.quiz_id,
     q.title,
     qa.score AS attempt_score,
@@ -114,17 +114,25 @@ JOIN (
     SELECT
         qz.quiz_id,
         qs.no_questions * COALESCE(MAX(qst.points_per_question), 1) AS max_score
-    FROM Quiz qz
-    JOIN QuizSettings qs ON qz.quiz_id = qs.quiz_id
-    LEFT JOIN Questions qst ON qz.quiz_id = qst.quiz_id
-    GROUP BY qz.quiz_id, qs.no_questions
+    FROM
+        Quiz qz
+    JOIN
+        QuizSettings qs ON qz.quiz_id = qs.quiz_id
+    LEFT JOIN
+        Questions qst ON qz.quiz_id = qst.quiz_id
+    GROUP BY
+        qz.quiz_id, qs.no_questions
 ) AS max_scores ON qa.quiz_id = max_scores.quiz_id
 WHERE
-    qa.student_id = ?
+    qa.student_id = ?  -- Replace with the student ID
+    AND qa.start_time = (
+        SELECT MAX(start_time)
+        FROM QuizAttempt
+        WHERE quiz_id = qa.quiz_id
+        AND student_id = qa.student_id
+    )
 ORDER BY
-    q.title, qa.attempt_id;
-
-
+    q.title;  -- Optional: you can order by quiz title or any other column
 
   `;
 
