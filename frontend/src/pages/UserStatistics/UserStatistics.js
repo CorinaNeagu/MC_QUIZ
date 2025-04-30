@@ -86,49 +86,66 @@ const UserStatistics = () => {
     <div>
       <h1>Quiz Category Statistics</h1>
       <Sidebar showBackButton={true} />
-
-      {/* Display pie chart if data is available */}
+    
       {quizStats.length > 0 ? (
-        <div style={{ height: 400, width: '100%' }}>
-          <PieChart width={400} height={400}>
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={150}
-              fill="#8884d8"
-              isAnimationActive={isAnimationActive}
-              animationDuration={1000}
-              onClick={(data, index, event) => handlePieClick(data, index, event)} // Pass event here
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
+        <div className="chart-container">
+          {/* First Pie Chart Card */}
+          <div className="chart-card">
+            <h2>Chart 1</h2>
+            <PieChart width={300} height={300}>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={100}
+                fill="#8884d8"
+                isAnimationActive={isAnimationActive}
+                animationDuration={1000}
+                onClick={(data, index, event) => handlePieClick(data, index, event)}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-1-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </div>
+    
+          {/* Second Pie Chart Card */}
+          <div className="chart-card">
+            <h2>Chart 2</h2>
+            <PieChart width={300} height={300}>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={100}
+                fill="#82ca9d"
+                isAnimationActive={isAnimationActive}
+                animationDuration={1000}
+                onClick={(data, index, event) => handlePieClick(data, index, event)}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-2-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </div>
         </div>
       ) : (
         <p>No data available</p>
       )}
-
-      {/* Pop-up modal near the mouse pointer */}
+    
+      {/* Modal remains unchanged */}
       {isModalOpen && (
         <div
           className="modal-overlay"
           style={{
-            left: `${modalPosition.x + 10}px`,  // Add a slight offset for better visibility
+            left: `${modalPosition.x + 10}px`,
             top: `${modalPosition.y + 10}px`,
-            position: 'absolute',
-            zIndex: 1000,
-            padding: '10px',
-            background: 'white',
-            borderRadius: '8px',
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)',
-            width: '300px',
-            height: 'auto',
-            overflowY: 'auto',
           }}
         >
           <h2>Quizzes in Category: {selectedCategory}</h2>
@@ -146,6 +163,8 @@ const UserStatistics = () => {
       )}
     </div>
   );
+  
+  
 };
 
 export default UserStatistics;
