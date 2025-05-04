@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Sidebar from "../../components/Sidebar/Sidebar";
 import './DisplayScore.css';
 
 const DisplayScore = () => {
@@ -69,7 +70,12 @@ const DisplayScore = () => {
   };
 
   return (
+    <div className="page-wrapper">
+              <Sidebar showBackButton={true} />
+
     <div className="score-page-container">
+
+
       {error && <p>{error}</p>}
       {finalScore !== null ? (
         <>
@@ -100,6 +106,7 @@ const DisplayScore = () => {
       ) : (
         <p>Loading your score...</p>
       )}
+    </div>
     </div>
   );
 };

@@ -1,0 +1,126 @@
+/* Pie Chart Container */
+.pie-chart-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    height: 400px;  /* Increase the height if needed */
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  /* Pie Chart Styling */
+  .PieChartContainer .recharts-pie-chart {
+    transition: transform 1s ease-in-out;
+    transform-origin: center;
+    width: 100%;
+    height: auto;  /* Ensures the pie chart scales correctly */
+  }
+  
+  /* Pie Slice Hover & Active Effects */
+  .recharts-pie-slice {
+    transition: transform 0.3s ease, stroke-width 0.3s ease, fill-opacity 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Hover Effect for Pie Slices */
+  .recharts-pie-slice:hover {
+    transform: scale(1.1); /* Slightly enlarge on hover */
+    fill-opacity: 0.85;  /* Subtle change in opacity on hover */
+    stroke: #444;  /* Add stroke color for hover effect */
+    stroke-width: 2px;  /* Add slight border on hover */
+  }
+  
+  /* Active Effect for Pie Slices */
+  .recharts-pie-slice:active {
+    transform: scale(1.2); /* Enlarge on click for emphasis */
+    fill-opacity: 1;  /* Make it fully opaque on click */
+  }
+  
+  /* Focused Pie Slice Styling */
+  .recharts-pie-slice-focused {
+    stroke: #007bff;
+    stroke-width: 4px;  /* Enhanced focus border width */
+  }
+  
+  /* Tooltip Styling */
+  .recharts-tooltip-wrapper {
+    font-size: 14px;
+    color: #333;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark background for better contrast */
+    border-radius: 8px;
+    padding: 8px;
+  }
+  
+  .recharts-tooltip-item {
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  /* Label Styling for Pie Slices */
+  .recharts-pie-label {
+    font-size: 14px;
+    font-weight: bold;
+    fill: #333;  /* Dark text for better visibility */
+  }
+  
+  .modal-overlay {
+    position: fixed; /* Floating over screen, not inside layout */
+    top: 0;
+    left: 0;
+    transform: translate(var(--x), var(--y));
+    background: white;
+    padding: 16px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    max-width: 280px;
+    min-width: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    transition: opacity 0.2s ease;
+  }
+  
+  
+  .modal-overlay h2 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .modal-overlay ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+  }
+  
+  .modal-overlay li {
+    background: #f9f9f9;
+    margin-bottom: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  
+  .modal-overlay button {
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  

@@ -1,137 +1,53 @@
+.statistics-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.charts-section {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+}
+
+.chart-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 .chart-card {
-  width: 400px;
-  background: white;
+  flex: 1 1 45%;       /* 2 cards per row on wider screens */
+  max-width: 500px;    /* Prevent oversized cards */
+  min-width: 300px;    /* Prevent cards from getting too small */
+  background: #fff;
+  padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-/* Flex Container for Layout */
-.chart-container {
-  display: flex;
-  gap: 100px;
   justify-content: center;
-  flex-wrap: wrap;
+  box-sizing: border-box;
 }
 
-
-/* Tooltip and legend styling */
-.recharts-tooltip-wrapper {
-  font-size: 14px;
-  color: #333;
-}
-
-.recharts-legend-item {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-/* Styling for when the Pie chart is animated on page load */
-.PieChartContainer .recharts-pie-chart {
-  transition: transform 1s ease-in-out;
-  transform-origin: center;
-}
-
-/* Styling for the focus effect (when a slice is clicked) */
-.recharts-pie-slice {
-  transition: transform 0.3s ease, stroke-width 0.3s ease;
-}
-
-.recharts-pie-slice:hover {
-  transform: scale(1.1); /* Slightly enlarge on hover */
-}
-
-.recharts-pie-slice:active {
-  transform: scale(1.2); /* Enlarge on click for a more prominent focus effect */
-}
-
-.recharts-pie-slice-focused {
-  stroke: #000;
-  stroke-width: 4px;
-}
-
-/* Main modal overlay style */
-.modal-overlay {
-  position: absolute;
-  padding: 15px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
-  transition: all 0.3s ease-in-out;
-  z-index: 1000;
-  font-family: 'Arial', sans-serif;
-  color: #333;
-  border: 1px solid #ddd;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Header style for the modal */
-.modal-overlay h2 {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #007bff;
-  text-align: center;
-}
-
-/* Style for the list of quizzes inside the modal */
-.modal-overlay ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.modal-overlay li {
-  padding: 8px;
-  font-size: 14px;
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.3s;
-}
-
-.modal-overlay li:hover {
-  background-color: #f1f1f1;
-}
-
-/* Style for the button to close the modal */
-.modal-overlay button {
-  background-color: lightblue;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.bar-chart-container {
   width: 100%;
-  margin-top: 15px;
 }
 
-.modal-overlay button:hover {
-  background-color: lightblue;
+.line-chart-container {
+  width: 100%; /* Ensure the chart takes the full width */
+  height: 400px; /* Set a height for the chart */
 }
 
-/* Transition effect for the modal popup */
-.modal-overlay-enter {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-.modal-overlay-enter-active {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.modal-overlay-exit {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.modal-overlay-exit-active {
-  opacity: 0;
-  transform: scale(0.9);
+select {
+  margin-bottom: 20px; /* Space below the dropdown */
+  padding: 8px; /* Padding inside the dropdown */
+  border-radius: 4px; /* Rounded corners for dropdown */
+  border: 1px solid #ccc; /* Light border around the dropdown */
+  width: 100%; /* Make the dropdown take full width */
 }

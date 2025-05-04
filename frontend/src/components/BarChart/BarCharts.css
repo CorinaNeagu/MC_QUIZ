@@ -1,0 +1,69 @@
+/* Container for the Bar Chart */
+.bar-chart-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+/* Bar Chart Title */
+.bar-chart-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Error Message Styling */
+.bar-chart-container p {
+  font-size: 16px;
+  color: #d9534f; /* Red color for error */
+  font-weight: bold;
+}
+
+/* SVG Container for the Bar Chart */
+svg {
+  max-width: 100%;
+  height: 400px; /* Fixed height for the chart */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Style for Each Bar */
+.bar-element {
+  transition: transform 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.bar-element:hover {
+  transform: scale(1.05); /* Slightly scale the bar on hover */
+  fill: #4169E1; /* Change color on hover */
+}
+
+/* Label Below Bars (Category Names) */
+.bar-chart-container text {
+  font-size: 14px;
+  font-weight: 500;
+  fill: #333;
+}
+
+/* Value Above Each Bar */
+.bar-chart-container text:nth-child(3) {
+  font-size: 14px;
+  font-weight: 700;
+  fill: #4B9CD3;
+}
+
+/* Styling for the Bar Chart when no data is available */
+.bar-chart-container .no-data {
+  font-size: 16px;
+  font-weight: bold;
+  color: #999;
+  text-align: center;
+}

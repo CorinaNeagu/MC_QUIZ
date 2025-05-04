@@ -138,7 +138,6 @@ ORDER BY
 
   try {
     const results = await queryAsync(query, [studentId]);
-    console.log("📊 Grade Distribution Results:", results);
 
     if (results.length > 0) {
       const pieChartData = results.map((quiz) => ({
@@ -153,6 +152,125 @@ ORDER BY
     console.error("❌ Error fetching grade distribution:", err);
     res.status(500).json({ message: "Error fetching grade distribution data" });
   }
+});
+
+router.get('/quizzes-in-range', (req, res) => {
+  
+  const { gradeRange } = req.query;  // Get grade range from query parameters
+
+  if (!gradeRange) {
+    return res.status(400).json({ message: 'Grade range is required.' });
+  }
+
+  // Define grade ranges (you can modify this based on your grading system)
+  const gradeRanges = {
+    A: { min: 90, max: 100 },
+    B: { min: 80, max: 89 },
+    C: { min: 70, max: 79 },
+    D: { min: 60, max: 69 },
+    F: { min: 0, max: 59 }
+  };
+
+  // Check if the gradeRange is valid
+  const range = gradeRanges[gradeRange];
+  if (!range) {
+    return res.status(400).json({ message: 'Invalid grade range.' });
+  }
+
+  const { min, max } = range;
+
+  // SQL query to get quizzes within the grade range and include the quiz title and category name
+  const query = `
+    SELECT 
+      q.quiz_id, 
+      q.title AS quiz_title, 
+      c.category_name
+    FROM 
+      Quiz q
+    JOIN 
+      Categories c ON q.category_id = c.category_id
+    WHERE 
+      q.grade BETWEEN ? AND ?;
+  `;
+
+  // Execute the query with grade range as parameters
+  db.query(query, [min, max], (err, results) => {
+    if (err) {
+      console.error('Error fetching quizzes in grade range:', err);
+      return res.status(500).json({ message: 'Error fetching quizzes' });
+    }
+
+    // If results are found, send them as a JSON response
+    if (results.length > 0) {
+      // Send quiz titles along with category names
+      res.json(results);
+    } else {
+      res.status(404).json({ message: 'No quizzes found in this grade range' });
+    }
+  });
+});
+
+router.get('/quizzes-taken-by-user/:quizId', authenticateJWT, (req, res) => {
+  const studentId = req.user.id;  // Extract userId from the token
+
+  console.log('User IDxxx:', studentId);  // Debugging log
+
+  if (!studentId) {
+    return res.status(400).json({ error: 'User ID is missing or invalid' });
+  }
+
+  const query = `
+    SELECT 
+      q.quiz_id, 
+      q.title, 
+      a.start_time, 
+      a.score
+    FROM QuizAttempt a
+    JOIN Quiz q ON a.quiz_id = q.quiz_id
+    WHERE a.student_id = ?
+      AND a.quiz_id = ?
+    ORDER BY a.start_time DESC
+    LIMIT 5;
+  `;
+
+  // Using db.query with parameterized values properly
+  db.query(query, [studentId, req.params.quizId], (err, results) => {
+    if (err) {
+      console.error('Error fetching quizzes:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    console.log('Fetched quizzes with scores:', results);  // Log query results
+    res.json(results);  // Return quizzes taken by the authenticated user along with their scores
+  });
+});
+
+
+// Assuming you have a route handler for '/api/stats/unique-quizzes'
+router.get('/unique-quizzes', authenticateJWT, (req, res) => {
+  const studentId = req.user.id; // Extract userId from the token
+
+  if (!studentId) {
+    return res.status(400).json({ error: 'User ID is missing or invalid' });
+  }
+
+  // Query to fetch unique quiz titles taken by the user
+  const query = `
+    SELECT DISTINCT q.quiz_id, q.title
+    FROM QuizAttempt a
+    JOIN Quiz q ON a.quiz_id = q.quiz_id
+    WHERE a.student_id = ?
+    ORDER BY q.title;
+  `;
+
+  db.query(query, [studentId], (err, results) => {
+    if (err) {
+      console.error('Error fetching quizzes:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.json(results); // Return unique quiz titles and quiz_ids
+  });
 });
 
 

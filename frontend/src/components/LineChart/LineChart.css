@@ -1,0 +1,54 @@
+/* SVG Container for Line Chart */
+.svg-chart-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* SVG Styling */
+  svg {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+  
+  /* Line Chart Styling */
+  .line-chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    max-width: 100%;
+  }
+  
+  /* Tooltip and Legend Styling */
+  .recharts-tooltip-wrapper {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .recharts-legend-item {
+    font-size: 14px; /* Adjust the font size of the legend items */
+    margin-right: 20px; /* Adjust spacing between legend items */
+  }
+  
+  .recharts-legend-wrapper {
+    font-size: 12px; /* Adjust the font size of the legend container */
+  }
+  .chart-card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 8px;
+    background-color: white;
+  }
+  
+  .line-chart-container {
+    width: 100%;
+    height: 400px; /* or any desired height */ 
+    overflow: visible;          /* Let SVG overflow if needed */
+    padding-bottom: 60px;
+  }
+  
+  
