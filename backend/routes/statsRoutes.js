@@ -90,16 +90,30 @@ router.get('/quizzes-by-category/:category_id', (req, res) => {
   });
 });
 
-router.get('/student-category-quizzes/:categoryId',authenticateJWT, (req, res) => {
+router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) => {
   const { categoryId } = req.params;
-  const studentId = req.user.id; // Assuming you're using JWT to get the student_id
-  console.log(studentId);
+  const studentId = req.user.id; // Get student_id from JWT
+  console.log('Student ID:', studentId);  // Log student ID for debugging
+  console.log('Category ID:', categoryId); // Log category ID for debugging
 
   const query = `
-    SELECT c.category_name, q.title, qa.score
+    SELECT 
+      c.category_name, 
+      q.title, 
+      -- Calculate the score out of 100
+      ROUND(
+        (qa.score / (qs.no_questions * qp.points_per_question)) * 100, 
+        2
+      ) AS real_score
     FROM Quiz q
     JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
     JOIN Category c ON q.category_id = c.category_id
+    JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+    JOIN (
+      SELECT quiz_id, MAX(points_per_question) AS points_per_question
+      FROM Questions
+      GROUP BY quiz_id
+    ) qp ON q.quiz_id = qp.quiz_id
     WHERE qa.student_id = ? 
       AND q.category_id = ?
       AND qa.attempt_id = (
@@ -109,16 +123,32 @@ router.get('/student-category-quizzes/:categoryId',authenticateJWT, (req, res) =
       );
   `;
 
+  // Log the query being executed with parameters for debugging
+  console.log('Executing query:', query);
+  console.log('Parameters:', [studentId, categoryId]);
+
   db.query(query, [studentId, categoryId], (err, results) => {
     if (err) {
       console.error('Error fetching student quizzes:', err);
       return res.status(500).json({ message: 'Error fetching quizzes' });
     }
 
-    res.status(200).json(results);
+    // Log the raw query results
+    console.log('Query Results:', results);
+
+    // Transform the results if necessary and log the transformed data
+    const transformedResults = results.map(result => ({
+      category_name: result.category_name,
+      quiz_title: result.title,
+      real_score: result.real_score
+    }));
+
+    console.log('Transformed Results:', transformedResults);
+
+    // Send the transformed results as the response
+    res.status(200).json(transformedResults);
   });
 });
-
 
 router.get('/quizzes-taken-by-user/:quizId', authenticateJWT, (req, res) => {
   const studentId = req.user.id;  // Extract userId from the token
@@ -155,8 +185,6 @@ router.get('/quizzes-taken-by-user/:quizId', authenticateJWT, (req, res) => {
   });
 });
 
-
-// Assuming you have a route handler for '/api/stats/unique-quizzes'
 router.get('/unique-quizzes', authenticateJWT, (req, res) => {
   const studentId = req.user.id; // Extract userId from the token
 
@@ -186,6 +214,8 @@ router.get('/unique-quizzes', authenticateJWT, (req, res) => {
 router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
   const professorId = req.user.id;
   const userType = req.user.userType;
+  console.log('Professor ID:', professorId);
+  console.log('User Type:', userType);
 
   // Only allow professors to access their grade distribution data
   if (userType !== 'professor') {
@@ -194,15 +224,24 @@ router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
 
   // Query to get grade distribution (average scores per quiz)
   const query = `
-    SELECT
-      q.title AS name,
-      ROUND(AVG(qa.score), 2) AS value
-    FROM Quiz q
-    JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
-    WHERE q.professor_id = ?
-    GROUP BY q.title
-    ORDER BY q.title;
+      SELECT
+  q.title AS name,
+  ROUND(AVG((qa.score / (qs.no_questions * qp.points_per_question)) * 100), 2) AS value
+FROM Quiz q
+JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
+JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+JOIN (
+  SELECT quiz_id, MAX(points_per_question) AS points_per_question
+  FROM Questions
+  GROUP BY quiz_id
+) qp ON q.quiz_id = qp.quiz_id
+WHERE q.professor_id = ?
+GROUP BY q.title
+ORDER BY q.title;
   `;
+
+  console.log('Executing query:', query);
+  console.log('Professor ID for query:', professorId);
 
   // Execute the query
   db.query(query, [professorId], (err, result) => {
@@ -210,12 +249,15 @@ router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
       console.error('Error fetching professor grade distribution:', err);
       return res.status(500).json({ error: 'Internal server error' });
     }
+    console.log('Query result:', result);
 
     // Transform the result to match the front-end format
     const rows = result.map(row => ({
       name: row.name,
       value: row.value
     }));
+
+    console.log('Transformed rows:', rows);
 
     // Send the data as a JSON response
     res.json(rows);

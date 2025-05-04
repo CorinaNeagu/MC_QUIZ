@@ -1,122 +1,174 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from 'react-router-dom';
 
 const BarChart = ({ selectedCategory }) => {
-  const [quizData, setQuizData] = useState([]);
+  const [quizData, setQuizData] = useState([]);  // Initialized as empty array
+  const [professorData, setProfessorData] = useState([]);  // Initialized as empty array
+  const [userType, setUserType] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (selectedCategory) {
-      const fetchData = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const decodedToken = jwtDecode(token);
+      const expirationTime = decodedToken.exp * 1000;
+
+      if (expirationTime < Date.now()) {
+        navigate("/");
+      } else {
+        setUserType(decodedToken.userType);
+      }
+    } catch (err) {
+      console.error("Invalid or expired token:", err);
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  // Student-specific data fetch
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('token');
+      
+      if (userType === "student" && selectedCategory) {
         try {
-          const token = localStorage.getItem('token');
-  
-          if (!token) {
-            console.error("No token found.");
-            return;
-          }
-  
           const response = await axios.get(
             `http://localhost:5000/api/stats/student-category-quizzes/${selectedCategory}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`, 
-              },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
-  
-          setQuizData(response.data);
-        } catch (error) {
-          console.error('Error fetching quiz data:', error);
+          console.log("Fetched student quiz data:", response.data);
+          setQuizData(response.data);  // Set quiz data for the student
+        } catch (err) {
+          console.error("Error fetching student quiz data:", err);
         }
-      };
+      } else if (userType === "professor") {
+        try {
+          const response = await axios.get(
+            'http://localhost:5000/api/stats/professor-grade-distribution',
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log("Fetched professor grade distribution:", response.data);
+          setProfessorData(response.data);  // Set professor data
+        } catch (err) {
+          console.error("Error fetching professor grade distribution:", err);
+        }
+      }
+    };
   
-      fetchData();
-    }
-  }, [selectedCategory]);
+    fetchData();
+  }, [userType, selectedCategory]);
   
 
-  // Get the maximum score to set the scaling of the bars
-  const maxScore = Math.max(...quizData.map((quiz) => quiz.score));
+  // Check if loading or error
+  if (loading) return <p>Loading...</p>;
+  if (error) return <div>{error}</div>;
 
-  const chartWidth = 500;
-  const chartHeight = 300;
-  const barWidth = 50;
+  // Log the quizData and professorData just before rendering the chart
+  console.log('quizData:', quizData);
+  console.log('professorData:', professorData);
 
-  const yTicks = [];
-  for (let i = 0; i <= maxScore; i += 10) {
-    yTicks.push(i);
+  // Ensure quizData and professorData are non-empty arrays
+  if (userType === "student" && (!quizData || quizData.length === 0)) {
+    return <div>No quizzes found for the selected category.</div>;
   }
 
-  const topPadding = 30;
+  if (userType === "professor" && (!professorData || professorData.length === 0)) {
+    return <div>No grade distribution data found.</div>;
+  }
 
+  // === Chart Rendering Logic ===
 
-  return (
-    <div className="bar-chart-wrapper">
-      <h3>Quiz Scores for Category: {selectedCategory}</h3>
-      <div className="bar-chart-container">
-
-
-      <svg width={chartWidth} height={chartHeight + topPadding + 50}>
-        {/* Y-axis grid */}
-        {yTicks.map((tick) => {
-          const yPos = topPadding + (chartHeight - (tick / maxScore) * chartHeight);
+  const renderBarChart = (data, labelKey, valueKey) => {
+    const maxValue = Math.max(...data.map(entry => parseFloat(entry[valueKey])), 100);
+    const chartHeight = 300;
+    const barWidth = 60;
+    const barSpacing = 30;
+    const topPadding = 30;
+  
+    return (
+      <svg width={data.length * (barWidth + barSpacing) + 100} height={chartHeight + topPadding + 50}>
+        {[0, 20, 40, 60, 80, 100].map(tick => {
+          const y = topPadding + chartHeight - (tick / maxValue) * chartHeight;
           return (
             <g key={tick}>
-              <line x1="450" y1={yPos} x2="10" y2={yPos} stroke="black" />
-              <text x="25" y={yPos - 5} textAnchor="end" fontSize="12px" fill="black">
-                {tick}
-              </text>
+              <line x1="40" y1={y} x2="1000" y2={y} stroke="#ccc" />
+              <text x="35" y={y - 5} textAnchor="end" fontSize="12">{tick}</text>
             </g>
           );
         })}
-
-        {/* X-axis */}
-        <line
-          x1="0"
-          y1={topPadding + chartHeight}
-          x2={chartWidth}
-          y2={topPadding + chartHeight}
-          stroke="black"
-          strokeWidth="2"
-        />
-
-        {/* Bars */}
-        {quizData.map((quiz, index) => {
-          const barHeight = (quiz.score / maxScore) * chartHeight;
-          const x = index * (barWidth + 20);
+  
+        {data.map((entry, index) => {
+          const barHeight = (parseFloat(entry[valueKey]) / maxValue) * chartHeight;
+          const x = 60 + index * (barWidth + barSpacing);
           return (
-            <g key={quiz.title}>
+            <g key={entry[labelKey]}>
               <rect
-                x={x + 120}
-                y={topPadding + (chartHeight - barHeight)}
+                x={x}
+                y={topPadding + chartHeight - barHeight}
                 width={barWidth}
                 height={barHeight}
-                fill="rgba(75, 192, 192, 0.6)"
+                fill="#4B9CD3"
               />
               <text
-                x={x + 120 + barWidth / 2}
-                y={topPadding + (chartHeight - barHeight) - 5}
+                x={x + barWidth / 2}
+                y={topPadding + chartHeight - barHeight - 5}
                 textAnchor="middle"
-                fill="black"
-                fontSize="12px"
+                fontSize="12"
               >
-                {quiz.score}
+                {entry[valueKey]}
               </text>
               <text
-                x={x + 120 + barWidth / 2}
+                x={x + barWidth / 2}
                 y={topPadding + chartHeight + 15}
                 textAnchor="middle"
-                fill="black"
-                fontSize="12px"
+                fontSize="12"
               >
-                {quiz.title}
+                {entry[labelKey].length > 10 ? entry[labelKey].slice(0, 10) + '…' : entry[labelKey]}
               </text>
             </g>
           );
         })}
       </svg>
+    );
+  };
+  
 
-      </div>
+  return (
+    <div className="bar-chart-wrapper">
+      {/* Render for student */}
+      {userType === "student" && quizData.length > 0 && (
+        <>
+          <h3>Quiz Scores for Category: {selectedCategory}</h3>
+          {renderBarChart(quizData, "quiz_title", "real_score")} 
+        </>
+      )}
+  
+      {userType === "student" && quizData.length === 0 && (
+        <div>No quizzes found for the selected category.</div>  
+      )}
+  
+      {/* Render for professor */}
+      {userType === "professor" && professorData.length > 0 && (
+        <>
+          <h3>Average Grades for Your Quizzes</h3>
+          {renderBarChart(professorData, "name", "value")}  
+        </>
+      )}
+  
+      {userType === "professor" && professorData.length === 0 && (
+        <div>No grade distribution data found.</div>  
+      )}
     </div>
   );
   
