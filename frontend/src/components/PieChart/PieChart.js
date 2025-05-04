@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import axios from 'axios';
+import './PieChart.css';
 
 const COLORS = ['#4169E1', '#00CED1', '#191970', '#4B9CD3', '#ADD8E6'];
 
@@ -52,12 +53,11 @@ const PieChartComponent = () => {
   }, []);
 
   const handlePieClick = async (data, index, event) => {
+
     if (!data || !data.category_id) {
       console.error("Error: category_id is missing from the pie slice data!");
       return;
     }
-
-    // Capture mouse position from the event
     const mouseX = event.clientX;
     const mouseY = event.clientY;
 
@@ -65,7 +65,6 @@ const PieChartComponent = () => {
     setSelectedCategory(data.name);
     setModalPosition({ x: mouseX, y: mouseY });  // Set modal position to mouse coordinates
     setIsModalOpen(true);  // Open the modal
-
     try {
       const response = await axios.get(`http://localhost:5000/api/stats/quizzes-by-category/${selectedCategoryId}`);
       setQuizzesInCategory(response.data);
@@ -75,8 +74,6 @@ const PieChartComponent = () => {
     }
   };
   
-  
-
   return (
     <div className="chart-container">
       {pieChartData.length > 0 ? (
@@ -105,27 +102,34 @@ const PieChartComponent = () => {
         <p>No data available for the pie chart.</p>
       )}
 
-{isModalOpen && (
-        <div
-          className="modal-overlay"
-          style={{
-            left: `${modalPosition.x + 10}px`,
-            top: `${modalPosition.y + 10}px`,
-          }}
-        >
-          <h2>Quizzes in Category: {selectedCategory}</h2>
-          {quizzesInCategory.length > 0 ? (
-            <ul>
-              {quizzesInCategory.map((quiz) => (
-                <li key={quiz.quiz_id}>{quiz.quiz_title}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No quizzes found in this category.</p>
-          )}
-          <button onClick={() => setIsModalOpen(false)}>Close</button>
-        </div>
+    {isModalOpen && (
+    <div
+      className="modal-overlay"
+      style={{ left: `${modalPosition.x + 10}px`, 
+        top: `${modalPosition.y + 10}px`,
+        position: 'absolute',
+        zIndex: 1000,
+        padding: '10px',
+        background: 'white',
+        borderRadius: '8px',
+        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)',
+        width: '300px',
+        height: 'auto',
+        overflowY: 'auto',
+      }}>
+      <h2>Quizzes in Category: {selectedCategory}</h2>
+      {quizzesInCategory.length > 0 ? (
+        <ul>
+          {quizzesInCategory.map((quiz) => (
+            <li key={quiz.quiz_id}>{quiz.quiz_title}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No quizzes found in this category.</p>
       )}
+      <button onClick={() => setIsModalOpen(false)}>Close</button>
+    </div>
+    )}
     </div>
   );
 };

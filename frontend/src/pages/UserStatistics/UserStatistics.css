@@ -12,12 +12,14 @@
 }
 
 .chart-container {
+  position: relative;  /* Allow modal to be positioned relative to this */
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 30px;
   padding: 20px;
   box-sizing: border-box;
+  overflow: visible; /* Ensure no clipping of modal */
 }
 
 .chart-card {

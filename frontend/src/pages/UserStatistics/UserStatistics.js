@@ -28,10 +28,6 @@ const UserStatistics = () => {
     fetchUniqueQuizzes();
   }, []);
   
-  const handleQuizSelect = (id) => {
-    setQuizId(id); // Update the quizId when a quiz is selected
-  };
-
   const handleQuizChange = (event) => {
     setSelectedQuizId(event.target.value);
     setQuizId(event.target.value); // Update quizId for LineChart component
