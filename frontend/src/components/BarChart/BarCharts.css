@@ -1,69 +1,74 @@
-/* Container for the Bar Chart */
-.bar-chart-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+/* Overall wrapper for the bar chart */
+.bar-chart-wrapper {
+  text-align: center;
+  padding: 20px;
+  background-color: #f0faff; /* Light blue background */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 40px;
 }
 
-/* Bar Chart Title */
-.bar-chart-container h2 {
+/* Header for the chart */
+.bar-chart-wrapper h3 {
   font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  color: #4a90e2; /* Cute blue color */
   margin-bottom: 20px;
 }
 
-/* Error Message Styling */
-.bar-chart-container p {
-  font-size: 16px;
-  color: #d9534f; /* Red color for error */
-  font-weight: bold;
-}
-
-/* SVG Container for the Bar Chart */
-svg {
-  max-width: 100%;
-  height: 400px; /* Fixed height for the chart */
-  background-color: #ffffff;
+/* Container for the bar chart itself */
+.bar-chart-container {
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+  max-width: 800px;
+  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Style for Each Bar */
-.bar-element {
-  transition: transform 0.3s ease-in-out;
-  cursor: pointer;
+/* Style for the bars */
+.bar-chart-container svg rect {
+  fill: #4a90e2; /* Bar color */
+  transition: all 0.3s ease;
 }
 
-.bar-element:hover {
-  transform: scale(1.05); /* Slightly scale the bar on hover */
-  fill: #4169E1; /* Change color on hover */
+/* Hover effect for bars */
+.bar-chart-container svg rect:hover {
+  fill: #7ab8e7; /* Lighter blue on hover */
+  transform: scale(1.05);
 }
 
-/* Label Below Bars (Category Names) */
-.bar-chart-container text {
+/* Axis labels and ticks */
+.bar-chart-container svg text {
   font-size: 14px;
-  font-weight: 500;
-  fill: #333;
+  fill: #333; /* Dark gray text */
 }
 
-/* Value Above Each Bar */
-.bar-chart-container text:nth-child(3) {
+.bar-chart-container svg .x-axis,
+.bar-chart-container svg .y-axis {
   font-size: 14px;
-  font-weight: 700;
-  fill: #4B9CD3;
-}
-
-/* Styling for the Bar Chart when no data is available */
-.bar-chart-container .no-data {
-  font-size: 16px;
   font-weight: bold;
-  color: #999;
-  text-align: center;
+  fill: #4a90e2;
+  text-anchor: middle;
+}
+
+/* Y-axis line styling */
+.bar-chart-container svg line {
+  stroke-width: 2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bar-chart-container {
+    padding: 15px;
+  }
+
+  .bar-chart-wrapper h3 {
+    font-size: 20px;
+  }
+
+  .bar-chart-container svg {
+    width: 100%;
+    height: auto;
+  }
 }

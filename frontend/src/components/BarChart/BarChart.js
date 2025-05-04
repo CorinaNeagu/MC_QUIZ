@@ -1,80 +1,125 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const BarChart = () => {
-  const [gradeDistributionData, setGradeDistributionData] = useState([]);
-  const [error, setError] = useState(null);
+const BarChart = ({ selectedCategory }) => {
+  const [quizData, setQuizData] = useState([]);
 
   useEffect(() => {
-    const fetchGradeDistributionData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/stats/pie-chart/grade-distribution', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setGradeDistributionData(response.data);
-      } catch (err) {
-        setError('Error fetching grade distribution data.');
-        console.error(err);
-      }
-    };
+    if (selectedCategory) {
+      const fetchData = async () => {
+        try {
+          const token = localStorage.getItem('token');
+  
+          if (!token) {
+            console.error("No token found.");
+            return;
+          }
+  
+          const response = await axios.get(
+            `http://localhost:5000/api/stats/student-category-quizzes/${selectedCategory}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, 
+              },
+            }
+          );
+  
+          setQuizData(response.data);
+        } catch (error) {
+          console.error('Error fetching quiz data:', error);
+        }
+      };
+  
+      fetchData();
+    }
+  }, [selectedCategory]);
+  
 
-    fetchGradeDistributionData();
-  }, []);
+  // Get the maximum score to set the scaling of the bars
+  const maxScore = Math.max(...quizData.map((quiz) => quiz.score));
 
-  if (gradeDistributionData.length === 0) return null;
+  const chartWidth = 500;
+  const chartHeight = 300;
+  const barWidth = 50;
 
-  const maxValue = Math.max(...gradeDistributionData.map(entry => entry.value));
+  const yTicks = [];
+  for (let i = 0; i <= maxScore; i += 10) {
+    yTicks.push(i);
+  }
 
-  // Calculate dimensions dynamically
-  const barWidth = 80;
-  const gap = 20;
-  const chartHeight = 400;
-  const totalWidth = gradeDistributionData.length * (barWidth + gap);
+  const topPadding = 30;
+
 
   return (
-    <div className="bar-chart-container" style={{ width: '100%', overflowX: 'auto' }}>
-      <h2>Grade Distribution</h2>
-      {error && <p>{error}</p>}
+    <div className="bar-chart-wrapper">
+      <h3>Quiz Scores for Category: {selectedCategory}</h3>
+      <div className="bar-chart-container">
 
-      <svg width="100%" height={chartHeight} viewBox={`0 0 ${totalWidth} ${chartHeight}`}>
-        {gradeDistributionData.map((entry, index) => {
-          const barHeight = (entry.value / maxValue) * (chartHeight - 50); // padding for labels
-          const x = index * (barWidth + gap);
 
+      <svg width={chartWidth} height={chartHeight + topPadding + 50}>
+        {/* Y-axis grid */}
+        {yTicks.map((tick) => {
+          const yPos = topPadding + (chartHeight - (tick / maxScore) * chartHeight);
           return (
-            <g key={index} transform={`translate(${x}, 0)`}>
+            <g key={tick}>
+              <line x1="450" y1={yPos} x2="10" y2={yPos} stroke="black" />
+              <text x="25" y={yPos - 5} textAnchor="end" fontSize="12px" fill="black">
+                {tick}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* X-axis */}
+        <line
+          x1="0"
+          y1={topPadding + chartHeight}
+          x2={chartWidth}
+          y2={topPadding + chartHeight}
+          stroke="black"
+          strokeWidth="2"
+        />
+
+        {/* Bars */}
+        {quizData.map((quiz, index) => {
+          const barHeight = (quiz.score / maxScore) * chartHeight;
+          const x = index * (barWidth + 20);
+          return (
+            <g key={quiz.title}>
               <rect
-                y={chartHeight - barHeight - 30}
+                x={x + 120}
+                y={topPadding + (chartHeight - barHeight)}
                 width={barWidth}
                 height={barHeight}
-                fill="#4B9CD3"
-                className="bar-element"
+                fill="rgba(75, 192, 192, 0.6)"
               />
               <text
-                x={barWidth / 2}
-                y={chartHeight - 5}
+                x={x + 120 + barWidth / 2}
+                y={topPadding + (chartHeight - barHeight) - 5}
                 textAnchor="middle"
-                fontSize="14"
-                fill="#000"
+                fill="black"
+                fontSize="12px"
               >
-                {entry.name}
+                {quiz.score}
               </text>
               <text
-                x={barWidth / 2}
-                y={chartHeight - barHeight - 40}
+                x={x + 120 + barWidth / 2}
+                y={topPadding + chartHeight + 15}
                 textAnchor="middle"
-                fontSize="14"
-                fill="#000"
+                fill="black"
+                fontSize="12px"
               >
-                {entry.value}
+                {quiz.title}
               </text>
             </g>
           );
         })}
       </svg>
+
+      </div>
     </div>
   );
+  
 };
 
 export default BarChart;

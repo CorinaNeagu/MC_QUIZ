@@ -90,125 +90,35 @@ router.get('/quizzes-by-category/:category_id', (req, res) => {
   });
 });
 
-router.get('/pie-chart/grade-distribution', authenticateJWT, async (req, res) => {
-  console.log("🚀 /grade-distribution route hit!");
+router.get('/student-category-quizzes/:categoryId',authenticateJWT, (req, res) => {
+  const { categoryId } = req.params;
+  const studentId = req.user.id; // Assuming you're using JWT to get the student_id
+  console.log(studentId);
 
-  // Get student ID from JWT
-  const studentId = req.user.id;  
-  console.log("Student ID:", studentId);  // Log the student ID to verify
-
-  // SQL query to fetch quiz attempts and calculate grade distribution
   const query = `
-SELECT
-    qa.attempt_id,               -- Unique ID per attempt
-    qa.quiz_id,
-    q.title,
-    qa.score AS attempt_score,
-    max_scores.max_score,
-    ROUND((qa.score / max_scores.max_score) * 100, 2) AS grade_percentage
-FROM
-    QuizAttempt qa
-JOIN
-    Quiz q ON qa.quiz_id = q.quiz_id
-JOIN (
-    SELECT
-        qz.quiz_id,
-        qs.no_questions * COALESCE(MAX(qst.points_per_question), 1) AS max_score
-    FROM
-        Quiz qz
-    JOIN
-        QuizSettings qs ON qz.quiz_id = qs.quiz_id
-    LEFT JOIN
-        Questions qst ON qz.quiz_id = qst.quiz_id
-    GROUP BY
-        qz.quiz_id, qs.no_questions
-) AS max_scores ON qa.quiz_id = max_scores.quiz_id
-WHERE
-    qa.student_id = ?  -- Replace with the student ID
-    AND qa.start_time = (
-        SELECT MAX(start_time)
+    SELECT c.category_name, q.title, qa.score
+    FROM Quiz q
+    JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
+    JOIN Category c ON q.category_id = c.category_id
+    WHERE qa.student_id = ? 
+      AND q.category_id = ?
+      AND qa.attempt_id = (
+        SELECT MAX(attempt_id)
         FROM QuizAttempt
-        WHERE quiz_id = qa.quiz_id
-        AND student_id = qa.student_id
-    )
-ORDER BY
-    q.title;  -- Optional: you can order by quiz title or any other column
-
+        WHERE quiz_id = q.quiz_id AND student_id = qa.student_id
+      );
   `;
 
-  try {
-    const results = await queryAsync(query, [studentId]);
-
-    if (results.length > 0) {
-      const pieChartData = results.map((quiz) => ({
-        name: quiz.title,
-        value: quiz.grade_percentage
-      }));
-      res.status(200).json(pieChartData);
-    } else {
-      res.status(404).json({ message: "No grade distribution data available" });
-    }
-  } catch (err) {
-    console.error("❌ Error fetching grade distribution:", err);
-    res.status(500).json({ message: "Error fetching grade distribution data" });
-  }
-});
-
-router.get('/quizzes-in-range', (req, res) => {
-  
-  const { gradeRange } = req.query;  // Get grade range from query parameters
-
-  if (!gradeRange) {
-    return res.status(400).json({ message: 'Grade range is required.' });
-  }
-
-  // Define grade ranges (you can modify this based on your grading system)
-  const gradeRanges = {
-    A: { min: 90, max: 100 },
-    B: { min: 80, max: 89 },
-    C: { min: 70, max: 79 },
-    D: { min: 60, max: 69 },
-    F: { min: 0, max: 59 }
-  };
-
-  // Check if the gradeRange is valid
-  const range = gradeRanges[gradeRange];
-  if (!range) {
-    return res.status(400).json({ message: 'Invalid grade range.' });
-  }
-
-  const { min, max } = range;
-
-  // SQL query to get quizzes within the grade range and include the quiz title and category name
-  const query = `
-    SELECT 
-      q.quiz_id, 
-      q.title AS quiz_title, 
-      c.category_name
-    FROM 
-      Quiz q
-    JOIN 
-      Categories c ON q.category_id = c.category_id
-    WHERE 
-      q.grade BETWEEN ? AND ?;
-  `;
-
-  // Execute the query with grade range as parameters
-  db.query(query, [min, max], (err, results) => {
+  db.query(query, [studentId, categoryId], (err, results) => {
     if (err) {
-      console.error('Error fetching quizzes in grade range:', err);
+      console.error('Error fetching student quizzes:', err);
       return res.status(500).json({ message: 'Error fetching quizzes' });
     }
 
-    // If results are found, send them as a JSON response
-    if (results.length > 0) {
-      // Send quiz titles along with category names
-      res.json(results);
-    } else {
-      res.status(404).json({ message: 'No quizzes found in this grade range' });
-    }
+    res.status(200).json(results);
   });
 });
+
 
 router.get('/quizzes-taken-by-user/:quizId', authenticateJWT, (req, res) => {
   const studentId = req.user.id;  // Extract userId from the token
@@ -270,6 +180,45 @@ router.get('/unique-quizzes', authenticateJWT, (req, res) => {
     }
 
     res.json(results); // Return unique quiz titles and quiz_ids
+  });
+});
+
+router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
+  const professorId = req.user.id;
+  const userType = req.user.userType;
+
+  // Only allow professors to access their grade distribution data
+  if (userType !== 'professor') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  // Query to get grade distribution (average scores per quiz)
+  const query = `
+    SELECT
+      q.title AS name,
+      ROUND(AVG(qa.score), 2) AS value
+    FROM Quiz q
+    JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
+    WHERE q.professor_id = ?
+    GROUP BY q.title
+    ORDER BY q.title;
+  `;
+
+  // Execute the query
+  db.query(query, [professorId], (err, result) => {
+    if (err) {
+      console.error('Error fetching professor grade distribution:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    // Transform the result to match the front-end format
+    const rows = result.map(row => ({
+      name: row.name,
+      value: row.value
+    }));
+
+    // Send the data as a JSON response
+    res.json(rows);
   });
 });
 
