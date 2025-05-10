@@ -48,6 +48,7 @@ const ProfManageQuizzes = () => {
         headers: { "Authorization": `Bearer ${token}` },
       })
       .then((response) => {
+        console.log("Quizzes Data:", response.data);  // <-- Log the quiz data here
         setQuizzes(response.data);
         setLoading(false);
       })
@@ -233,6 +234,7 @@ const ProfManageQuizzes = () => {
               <div key={quiz.quiz_id} className="quiz-card">
                 <h4>{quiz.title}</h4>
                 <p>Category: {quiz.category_name}</p>
+                <p>Subcategory: {quiz.subcategory_name}</p>
 
                 <button onClick={() => handleQuizClick(quiz.quiz_id)} className="btn-inspect">
                   Inspect Quiz
@@ -342,9 +344,9 @@ const ProfManageQuizzes = () => {
                   <li key={idx}>
                     {a.answer_content}{' '}
                     {a.is_correct ? (
-                      <span className="correct-tag">(✅️)</span>
+                      <span className="correct-tag">✅️</span>
                     ) : (
-                      <span className="incorrect-tag">(❌)</span>
+                      <span className="incorrect-tag">❌</span>
                     )}
                   </li>
                 ))}

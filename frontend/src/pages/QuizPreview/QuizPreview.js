@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import Sidebar from "../../components/Sidebar/Sidebar";
+
 import './QuizPreview.css';
 
 const QuizPreview = () => {
@@ -54,12 +56,11 @@ const QuizPreview = () => {
   // Show loading state while the data is being fetched
   if (loading) return <div>Loading quiz details...</div>;
 
-  const goToHomepage = () => {
-    navigate("/home"); // This will navigate to the homepage ("/")
-  };
 
   return (
     <div className="quiz-preview-container">
+                    <Sidebar showBackButton={true} />
+
       <h2>Quiz Preview</h2>
       {quizDetails.length > 0 ? (
         <ul>
@@ -88,10 +89,6 @@ const QuizPreview = () => {
       ) : (
         <p>No questions found for this quiz.</p>
       )}
-
-      <button onClick={goToHomepage} className="home-button">
-        Go to Homepage
-      </button>
     </div>
   );
 };

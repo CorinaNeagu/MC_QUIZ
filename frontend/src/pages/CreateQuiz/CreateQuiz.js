@@ -9,11 +9,13 @@ const CreateQuiz = () => {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
+  const [subcategory, setSubcategory] = useState("");
   const [timeLimit, setTimeLimit] = useState(0);
   const [retakeAllowed, setRetakeAllowed] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [noQuestions, setNoQuestions] = useState(0);
   const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [deductionPercentage, setDeductionPercentage] = useState(0);
 
 
@@ -24,11 +26,14 @@ const CreateQuiz = () => {
     // Fetch categories from the backend
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/categories");
-        console.log("Fetched Categories:", response.data);
-        setCategories(response.data.categories); 
+         const [catRes, subcatRes] = await Promise.all([
+        axios.get("http://localhost:5000/api/categories"),
+        axios.get("http://localhost:5000/api/subcategories")
+      ]);
+        setCategories(catRes.data.categories);
+        setSubcategories(subcatRes.data.subcategories);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching categories and subcategories:", error);
       }
     };
     fetchCategories();
@@ -70,6 +75,7 @@ const CreateQuiz = () => {
     const formData = {
       title,
       category,
+      subcategory,
       timeLimit: validTimeLimit,
       deductionPercentage: validDeductionPercentage,
       retakeAllowed: retakeAllowed ? 1 : 0,
@@ -105,6 +111,11 @@ const CreateQuiz = () => {
     }
   };
 
+  // Filter subcategories based on selected category
+const filteredSubcategories = subcategories.filter(
+  (subcat) => subcat.category_id === categories.find((cat) => cat.category_name === category)?.category_id
+);
+
   return (
     <div className="create-quiz-container">
             <Sidebar showBackButton={true} /> 
@@ -112,7 +123,6 @@ const CreateQuiz = () => {
       <h2>Create a New Quiz</h2>
       <form onSubmit={handleSubmit} className="create-quiz-form">
 
-        {/* Title */}
         <div className="form-group">
           <label htmlFor="title">Quiz Title</label>
           <input 
@@ -124,7 +134,6 @@ const CreateQuiz = () => {
           />
         </div>
 
-        {/* Category */}
         <div className="form-group">
           <label htmlFor="category">Category</label>
           <select 
@@ -146,7 +155,24 @@ const CreateQuiz = () => {
           </select>
         </div>
 
-        {/* Time Limit */}
+        <div className="form-group">
+          <label htmlFor="subcategory">Subcategory</label>
+          <select 
+            id="subcategory" 
+            value={subcategory} 
+            onChange={(e) => setSubcategory(e.target.value)} 
+            required
+          >
+            <option value="">Select a Subcategory</option>
+            {filteredSubcategories.map((subcat) => (
+              <option key={subcat.subcategory_id} value={subcat.subcategory_id}>
+                {subcat.subcategory_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+
         <div className="form-group">
           <label htmlFor="timeLimit">Time Limit (minutes)</label>
           <input 
@@ -158,7 +184,6 @@ const CreateQuiz = () => {
           />
         </div>
 
-         {/* Deduction Percentage */}
          <div className="form-group">
           <label htmlFor="deductionPercentage">Deduction Percentage</label>
           <input
@@ -176,10 +201,7 @@ const CreateQuiz = () => {
           />
         </div>
 
-       
-
-        {/* Retake Allowed */}
-        <div className="checkbox-wrapper">
+               <div className="checkbox-wrapper">
           <input
             type="checkbox"
             id="retakeAllowed"
@@ -191,7 +213,6 @@ const CreateQuiz = () => {
           Allow Retakes
         </div>
 
-        {/* Is Active */}
         <div className="checkbox-wrapper">
           <input
             type="checkbox"
@@ -204,7 +225,6 @@ const CreateQuiz = () => {
           Activate Quiz
         </div>
 
-        {/* Number of Questions */}
         <div className="form-group">
           <label htmlFor="noQuestions">Number of Questions</label>
           <input 

@@ -34,7 +34,7 @@ router.get('/quiz/:quizId', async (req, res) => {
     try {
         // First query to fetch quiz information and settings
         const quizQuery = `
-            SELECT q.quiz_id, q.title, q.created_at, c.category_name, qs.time_limit, 
+             SELECT q.quiz_id, q.title, q.created_at, c.category_name, qs.time_limit, 
                    qs.deduction_percentage, qs.retake_allowed, qs.is_active, qs.no_questions
             FROM Quiz q
             JOIN Category c ON q.category_id = c.category_id
@@ -80,6 +80,7 @@ router.get('/quiz/:quizId', async (req, res) => {
                             answers: answersResult.filter(answer => answer.question_id === question.question_id)
                         }))
                     };
+                    
 
                     return res.status(200).json(quizData);
                 });
@@ -90,6 +91,7 @@ router.get('/quiz/:quizId', async (req, res) => {
         console.error("Error:", err);
         return res.status(500).json({ message: 'An error occurred while fetching quiz details.' });
     }
+
 });
 
 

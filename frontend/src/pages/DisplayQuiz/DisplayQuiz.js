@@ -161,6 +161,7 @@ const DisplayQuiz = () => {
           <h2>{quizData.title}</h2>
           <div className="quiz-details">
             <p><strong>Category:</strong> {quizData.category_name}</p>
+            <p><strong>Subcategory:</strong> {quizData.subcategory_name}</p> 
             <p><strong>Time Limit:</strong> {quizSettings?.time_limit} minutes</p>
             <p><strong>Deduction Percentage:</strong> {quizSettings?.deduction_percentage}%</p>
             <p><strong>Retake Allowed:</strong> {quizSettings?.retake_allowed ? "Yes" : "No"}</p>

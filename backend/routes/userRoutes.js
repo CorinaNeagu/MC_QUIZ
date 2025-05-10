@@ -48,11 +48,18 @@ router.get('/professor/quizzes', authenticateJWT, (req, res) => {
   
   // Query to fetch quizzes for the professor, with category name
   const query = `
-     SELECT q.quiz_id, q.title, c.category_name, qs.is_active, qs.retake_allowed
-    FROM Quiz q
-    JOIN Category c ON q.category_id = c.category_id
-    JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
-    WHERE q.professor_id = ?;
+     SELECT 
+    q.quiz_id, 
+    q.title, 
+    c.category_name, 
+    s.subcategory_name, 
+    qs.is_active, 
+    qs.retake_allowed
+  FROM Quiz q
+  JOIN Category c ON q.category_id = c.category_id
+  LEFT JOIN Subcategory s ON q.subcategory_id = s.subcategory_id
+  JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+  WHERE q.professor_id = ?;
   `;
   
   db.query(query, [id], (err, result) => {

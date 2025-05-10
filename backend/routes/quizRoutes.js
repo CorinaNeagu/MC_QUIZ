@@ -30,11 +30,26 @@ router.get('/categories', (req, res) => {
     });
   });
 
+  router.get('/subcategories', (req, res) => {
+    // SQL query to fetch all categories
+    const query = 'SELECT * FROM Subcategory';
+  
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error('Error fetching categories:', err);
+        return res.status(500).json({ message: 'Error fetching categories' });
+      }
+  
+      res.status(200).json({ subcategories: results });
+    });
+  });
+
   // Quiz creation endpoint
 router.post('/quizzes', (req, res) => {
   const {
     title,
     category,
+    subcategory,
     timeLimit,
     deductionPercentage,
     retakeAllowed,
@@ -58,10 +73,16 @@ router.post('/quizzes', (req, res) => {
 
     // Insert quiz data into the `Quiz` table
     const insertQuizQuery = `
-      INSERT INTO Quiz (professor_id, title, category_id, created_at)
-      VALUES (?, ?, (SELECT category_id FROM Category WHERE category_name = ?), NOW())
-    `;
-    db.query(insertQuizQuery, [professor_id, title, category], (quizErr, quizResults) => {
+  INSERT INTO Quiz (professor_id, title, category_id, subcategory_id, created_at)
+  VALUES (
+    ?, 
+    ?, 
+    (SELECT category_id FROM Category WHERE category_name = ?), 
+    ?, 
+    NOW()
+  )
+`;
+    db.query(insertQuizQuery, [professor_id, title, category, subcategory], (quizErr, quizResults) => {
       if (quizErr) {
         console.error('Error inserting quiz:', quizErr);
         return res.status(500).json({ message: 'Error creating quiz' });
