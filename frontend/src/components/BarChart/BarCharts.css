@@ -57,6 +57,11 @@
   stroke-width: 2;
 }
 
+svg {
+  display: block;
+  max-width: 100%;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .bar-chart-container {

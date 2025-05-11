@@ -3,12 +3,10 @@ import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
 
-const BarChart = ({ selectedCategory }) => {
-  const [quizData, setQuizData] = useState([]);  // Initialized as empty array
-  const [professorData, setProfessorData] = useState([]);  // Initialized as empty array
+const BarChart = ({ selectedCategory, selectedSubcategory }) => {
+  const [quizData, setQuizData] = useState([]);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,110 +29,123 @@ const BarChart = ({ selectedCategory }) => {
     } catch (err) {
       console.error("Invalid or expired token:", err);
       navigate("/login");
-    } finally {
-      setLoading(false);
     }
   }, [navigate]);
 
-  // Student-specific data fetch
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem('token');
-      
-      if (userType === "student" && selectedCategory) {
-        try {
+
+      if (!token) return;
+
+      try {
+        if (userType === "student" && selectedCategory) {
           const response = await axios.get(
             `http://localhost:5000/api/stats/student-category-quizzes/${selectedCategory}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          console.log("Fetched student quiz data:", response.data);
-          setQuizData(response.data);  // Set quiz data for the student
-        } catch (err) {
-          console.error("Error fetching student quiz data:", err);
-        }
-      } else if (userType === "professor") {
-        try {
+          setQuizData(response.data);
+        } else if (userType === "professor") {
           const response = await axios.get(
             'http://localhost:5000/api/stats/professor-grade-distribution',
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          console.log("Fetched professor grade distribution:", response.data);
-          setProfessorData(response.data);  // Set professor data
-        } catch (err) {
-          console.error("Error fetching professor grade distribution:", err);
+          // Normalizing the response shape
+          const normalized = response.data.map(item => ({
+            quiz_title: item.quiz_title || item.name,
+            real_score: item.real_score || item.value,
+            subcategory_name: item.subcategory_name || 'General'
+          }));
+          setQuizData(normalized);
         }
+      } catch (err) {
+        console.error("Error fetching quiz data:", err);
+      } finally {
+        setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [userType, selectedCategory]);
-  
 
-  // Check if loading or error
-  if (loading) return <p>Loading...</p>;
-  if (error) return <div>{error}</div>;
-
-  // Log the quizData and professorData just before rendering the chart
-  console.log('quizData:', quizData);
-  console.log('professorData:', professorData);
-
-  // Ensure quizData and professorData are non-empty arrays
-  if (userType === "student" && (!quizData || quizData.length === 0)) {
-    return <div>No quizzes found for the selected category.</div>;
-  }
-
-  if (userType === "professor" && (!professorData || professorData.length === 0)) {
-    return <div>No grade distribution data found.</div>;
-  }
-
-  // === Chart Rendering Logic ===
-
-  const renderBarChart = (data, labelKey, valueKey) => {
-    const maxValue = Math.max(...data.map(entry => parseFloat(entry[valueKey])), 100);
+  const renderGroupedBarChart = (data) => {
     const chartHeight = 300;
-    const barWidth = 60;
-    const barSpacing = 30;
     const topPadding = 30;
-  
+    const svgPadding = 60;
+    const barWidth = 30;
+
+    const subcategoryNames = [...new Set(data.map(quiz => quiz.subcategory_name))];
+    const quizzesPerSub = subcategoryNames.map(sub =>
+      data.filter(q => q.subcategory_name === sub)
+    );
+
+    const chartWidth = 800;
+
+    const dynamicSpacing = 10;
+
+    const subcategorySpacing = subcategoryNames.length === 1 ? 0 : 100;
+
+    const maxValue = Math.max(...data.map(quiz => parseFloat(quiz.real_score)), 100);
+
     return (
-      <svg width={data.length * (barWidth + barSpacing) + 100} height={chartHeight + topPadding + 50}>
+      <svg width={chartWidth} height={chartHeight + topPadding + 80}>
         {[0, 20, 40, 60, 80, 100].map(tick => {
           const y = topPadding + chartHeight - (tick / maxValue) * chartHeight;
           return (
             <g key={tick}>
-              <line x1="40" y1={y} x2="1000" y2={y} stroke="#ccc" />
+              <line x1="40" y1={y} x2="400" y2={y} stroke="#ccc" />
               <text x="35" y={y - 5} textAnchor="end" fontSize="12">{tick}</text>
             </g>
           );
         })}
-  
-        {data.map((entry, index) => {
-          const barHeight = (parseFloat(entry[valueKey]) / maxValue) * chartHeight;
-          const x = 60 + index * (barWidth + barSpacing);
+
+        {subcategoryNames.map((subcategory, subcategoryIndex) => {
+          const quizzesInSub = data.filter(quiz => quiz.subcategory_name === subcategory);
+
           return (
-            <g key={entry[labelKey]}>
-              <rect
-                x={x}
-                y={topPadding + chartHeight - barHeight}
-                width={barWidth}
-                height={barHeight}
-                fill="#4B9CD3"
-              />
+            <g key={subcategory}>
+              {quizzesInSub.map((quiz, quizIndex) => {
+                const barHeight = (parseFloat(quiz.real_score) / maxValue) * chartHeight;
+                const x = svgPadding + subcategoryIndex * (subcategorySpacing + quizzesInSub.length * (barWidth + dynamicSpacing)) + (quizIndex + 1) * dynamicSpacing + quizIndex * barWidth;
+
+                return (
+                  <g key={quiz.quiz_id || quiz.quiz_title}>
+                    <rect
+                      x={x}
+                      y={topPadding + chartHeight - barHeight}
+                      width={barWidth}
+                      height={barHeight}
+                      fill="#4B9CD3"
+                    />
+                    <text
+                      x={x + barWidth / 2}
+                      y={topPadding + chartHeight - barHeight - 5}
+                      textAnchor="middle"
+                      fontSize="12"
+                    >
+                      {quiz.real_score}
+                    </text>
+                    <text
+                      x={x + barWidth / 2}
+                      y={topPadding + chartHeight + 15}
+                      textAnchor="middle"
+                      fontSize="12"
+                      title={quiz.quiz_title}
+                    >
+                      {quiz.quiz_title.length > 5 ? quiz.quiz_title.slice(0, 5) + '…' : quiz.quiz_title}
+                    </text>
+                  </g>
+                );
+              })}
+
               <text
-                x={x + barWidth / 2}
-                y={topPadding + chartHeight - barHeight - 5}
+                x={svgPadding + subcategoryIndex * (subcategorySpacing + (quizzesInSub.length * (barWidth + dynamicSpacing))) + (quizzesInSub.length * (barWidth + dynamicSpacing)) / 2}
+                y={topPadding + chartHeight + 35}
                 textAnchor="middle"
-                fontSize="12"
+                fontSize="14"
+                title={subcategory}
               >
-                {entry[valueKey]}
-              </text>
-              <text
-                x={x + barWidth / 2}
-                y={topPadding + chartHeight + 15}
-                textAnchor="middle"
-                fontSize="12"
-              >
-                {entry[labelKey].length > 10 ? entry[labelKey].slice(0, 10) + '…' : entry[labelKey]}
+                {subcategory.length > 15 ? subcategory.slice(0, 15) + '…' : subcategory}
               </text>
             </g>
           );
@@ -142,36 +153,31 @@ const BarChart = ({ selectedCategory }) => {
       </svg>
     );
   };
-  
+
+  if (loading) return <div>Loading chart...</div>;
+
+  const filteredData = selectedSubcategory
+    ? quizData.filter(quiz => quiz.subcategory_name === selectedSubcategory)
+    : quizData;
 
   return (
-    <div className="bar-chart-wrapper">
-      {/* Render for student */}
-      {userType === "student" && quizData.length > 0 && (
-        <>
-          <h3>Quiz Scores for Category: {selectedCategory}</h3>
-          {renderBarChart(quizData, "quiz_title", "real_score")} 
-        </>
-      )}
-  
-      {userType === "student" && quizData.length === 0 && (
-        <div>No quizzes found for the selected category.</div>  
-      )}
-  
-      {/* Render for professor */}
-      {userType === "professor" && professorData.length > 0 && (
-        <>
-          <h3>Average Grades for Your Quizzes</h3>
-          {renderBarChart(professorData, "name", "value")}  
-        </>
-      )}
-  
-      {userType === "professor" && professorData.length === 0 && (
-        <div>No grade distribution data found.</div>  
-      )}
+    <div className="bar-chart-wrapper" style={{ width: '100%' }}>
+      <div style={{ minWidth: '1000px' }}>
+        {filteredData.length > 0 ? (
+          <>
+            <h3>
+              {userType === "student"
+                ? `Quiz Scores for Category: ${selectedCategory}`
+                : "Average Grades for Your Quizzes"}
+            </h3>
+            {renderGroupedBarChart(filteredData)}
+          </>
+        ) : (
+          <div>No data found.</div>
+        )}
+      </div>
     </div>
   );
-  
 };
 
 export default BarChart;

@@ -14,6 +14,7 @@ import DisplayScore from "./pages/DisplayScore/DisplayScore";
 import DisplayResponses from "./pages/DisplayResponses/DisplayResponses";
 import ProfManageQuizzes from "./pages/ProfManageQuizzes/ProfManageQuizzes";
 import UserStatistics from "./pages/UserStatistics/UserStatistics";
+import Groups from "./pages/Groups/Groups";
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/responses/:attemptId" element={<DisplayResponses />} />
         <Route path = "/manage-quizzes" element = {<ProfManageQuizzes/>} />
         <Route path = "/stats" element = {<UserStatistics/>} />
+        <Route path = "/groups" element = {<Groups/>} />
        </Routes>
     </Router>
   );

@@ -91,11 +91,35 @@ h3 {
 button {
   padding: 10px 20px;
   margin-top: 20px;
-  background-color: #28a745;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.button-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.button-grid button {
+  width: 500px;
+  height: 50px;
+  font-size: 20px;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-grid button:hover {
+  background-color: #0056b3;
 }
 
 button:hover {

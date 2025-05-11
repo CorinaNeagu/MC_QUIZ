@@ -158,8 +158,10 @@ const HomePage = () => {
         <div className="professor-content">
           <h2>Professor Dashboard</h2>
           <p>Welcome, professor! Here you can manage quizzes, view your students' progress, and update your profile.</p>
-          <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
-          <button onClick={() => navigate("/create-quiz")}>Create Quiz</button>
+          <div className="button-grid">
+            <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
+            <button onClick={() => navigate("/create-quiz")}>Create Quiz</button>
+          </div>
         </div>
       ) : (
         <div>Loading...</div>

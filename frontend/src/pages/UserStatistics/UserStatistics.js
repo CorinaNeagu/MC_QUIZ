@@ -14,6 +14,8 @@ const UserStatistics = () => {
   const [selectedQuizId, setSelectedQuizId] = useState("Select a quiz");
   const [categories, setCategories] = useState([]); // State to store categories
   const [selectedCategory, setSelectedCategory] = useState(''); // State to store selected category
+  const[subcategories, setSubcategories] = useState([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(''); 
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -63,6 +65,26 @@ const UserStatistics = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+  const fetchSubcategoriesFromQuizzes = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (selectedCategory) {
+        const response = await axios.get(
+          `http://localhost:5000/api/stats/student-category-quizzes/${selectedCategory}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const subcategories = [...new Set(response.data.map(q => q.subcategory_name))];
+        setSubcategories(subcategories);
+      }
+    } catch (error) {
+      console.error("Error fetching subcategories:", error);
+    }
+  };
+
+  fetchSubcategoriesFromQuizzes();
+}, [selectedCategory]);
+
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
   };
@@ -85,8 +107,9 @@ const UserStatistics = () => {
               <PieChartComponent />
             </div>
 
-            <div className="chart-card">
+          <div className="chart-card">
               <h2>Select a Category</h2>
+              
               <select onChange={handleCategoryChange} value={selectedCategory}>
                 <option value="">Select a Category</option>
                 {categories.map(category => (
@@ -95,9 +118,29 @@ const UserStatistics = () => {
                   </option>
                 ))}
               </select>
-              {selectedCategory ? <BarChart selectedCategory={selectedCategory} /> : <p>Select a category to see quizzes</p>}
-            </div>
 
+            <select
+              id="subcategorySelect"
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+            >
+              <option value="">All Subcategories</option>
+              {subcategories.map((sub, idx) => (
+                <option key={idx} value={sub}>{sub}</option>
+              ))}
+            </select>
+
+
+            {selectedCategory ? (
+              <BarChart
+                selectedCategory={selectedCategory}
+                selectedSubcategory={selectedSubcategory}
+              />
+            ) : (
+              <p>Select a category to see quizzes</p>
+            )}         
+          </div>
+           
             <div className="chart-card">
               <h2>Quiz Score Trends</h2>
               <select onChange={handleQuizChange} value={selectedQuizId}>
@@ -114,8 +157,14 @@ const UserStatistics = () => {
           </div>
         ) : userType === "professor" ? (
           <div className="chart-container">
-            <h2>Professor Statistics</h2>
-            <p>You will soon see grade distributions and analytics for your quizzes here.</p>
+
+            <div className="chart-card">
+              <BarChart selectedCategory={selectedCategory} /> {/* Pass selectedCategory */}
+            </div>
+
+            <div className="chart-card">
+              <BarChart selectedCategory={selectedCategory} /> {/* Pass selectedCategory */}
+            </div>
 
             <div className="chart-card">
               <BarChart selectedCategory={selectedCategory} /> {/* Pass selectedCategory */}

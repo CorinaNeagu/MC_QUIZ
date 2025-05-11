@@ -99,6 +99,8 @@ router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) 
   const query = `
     SELECT 
       c.category_name, 
+      sc.subcategory_name,
+      sc.subcategory_id,
       q.title, 
       -- Calculate the score out of 100
       ROUND(
@@ -108,6 +110,7 @@ router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) 
     FROM Quiz q
     JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
     JOIN Category c ON q.category_id = c.category_id
+    JOIN Subcategory sc ON q.subcategory_id = sc.subcategory_id
     JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
     JOIN (
       SELECT quiz_id, MAX(points_per_question) AS points_per_question
@@ -140,7 +143,9 @@ router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) 
     const transformedResults = results.map(result => ({
       category_name: result.category_name,
       quiz_title: result.title,
-      real_score: result.real_score
+      real_score: result.real_score,
+      subcategory_id: result.subcategory_id,
+      subcategory_name: result.subcategory_name
     }));
 
     console.log('Transformed Results:', transformedResults);
@@ -225,19 +230,22 @@ router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
   // Query to get grade distribution (average scores per quiz)
   const query = `
       SELECT
-  q.title AS name,
-  ROUND(AVG((qa.score / (qs.no_questions * qp.points_per_question)) * 100), 2) AS value
-FROM Quiz q
-JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
-JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
-JOIN (
-  SELECT quiz_id, MAX(points_per_question) AS points_per_question
-  FROM Questions
-  GROUP BY quiz_id
-) qp ON q.quiz_id = qp.quiz_id
-WHERE q.professor_id = ?
-GROUP BY q.title
-ORDER BY q.title;
+        q.title AS name,
+        s.subcategory_name,
+        ROUND(AVG((qa.score / (qs.no_questions * qp.points_per_question)) * 100), 2) AS value
+      FROM Quiz q
+      JOIN Subcategory s ON q.subcategory_id = s.subcategory_id
+      JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
+      JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+      JOIN (
+        SELECT quiz_id, MAX(points_per_question) AS points_per_question
+        FROM Questions
+        GROUP BY quiz_id
+      ) qp ON q.quiz_id = qp.quiz_id
+      WHERE q.professor_id = ?
+      GROUP BY q.title, s.subcategory_name
+      ORDER BY q.title;
+
   `;
 
   console.log('Executing query:', query);
