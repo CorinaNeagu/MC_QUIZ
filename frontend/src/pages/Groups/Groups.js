@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
 import Sidebar from "../../components/Sidebar/Sidebar";
+import Modal from '../../components/Modal/Modal'; // Import Modal component
+
 import "./Groups.css";
 
 const Groups = () => {
+  const navigate = useNavigate();
+
   const [groups, setGroups] = useState([]);
   const [newGroupName, setNewGroupName] = useState('');
   const [error, setError] = useState(null);
@@ -12,13 +18,18 @@ const Groups = () => {
   const [groupCodeToJoin, setGroupCodeToJoin] = useState('');
   const [joinError, setJoinError] = useState('');
   const [joinSuccess, setJoinSuccess] = useState('');
-  const [quizzes, setQuizzes] = useState([]);
-  const [filteredQuizzes, setFilteredQuizzes] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [groupMembers, setGroupMembers] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
-  // Fetch groups based on user type (professor or student)
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [modalGroupId, setModalGroupId] = useState(null);
+  const [modalMode, setModalMode] = useState('choose'); // 'choose' or 'create'
+  const [selectedQuizId, setSelectedQuizId] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [quizzes, setQuizzes] = useState([]);
+  const [assignedQuizzes, setAssignedQuizzes] = useState([]);
+
+  // Fetch user type and groups based on it (professor or student)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -26,39 +37,46 @@ const Groups = () => {
       setUserType(decodedToken.userType);
     }
 
-    console.log("User Type from JWT:", userType);  // Log userType to check if it's set correctly
     fetchGroups();  // Load groups based on user type
   }, [userType]);
 
+   useEffect(() => {
+    if (userType === 'professor') {
+      fetchQuizzes();  // Fetch quizzes only for professors
+    }
+  }, [userType]);
 
-
-  const fetchGroups = async () => {
+   const fetchQuizzes = async () => {
     try {
       const token = localStorage.getItem('token');
-      
-      // Only fetch groups if the user is a professor
+      const res = await axios.get('http://localhost:5000/api/user/professor/quizzes', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuizzes(res.data);  // Set quizzes data
+    } catch (err) {
+      console.error('Error fetching quizzes:', err);
+    }
+  };
+
+  const fetchGroups = async () => {
+    const token = localStorage.getItem('token');
+
+    try {
       if (userType === 'professor') {
         const res = await axios.get('http://localhost:5000/api/groups/professor-groups', {
           headers: { Authorization: `Bearer ${token}` }
         });
-
-        console.log("Groups fetched for professor:", res.data);  // Log groups fetched for professor
-        setGroups(res.data);  // Update the groups state with the data
+        setGroups(res.data);
       } else if (userType === 'student') {
-            // Fetch groups for student
-            const res = await axios.get('http://localhost:5000/api/groups/student-groups', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setGroups(res.data);  // Update the groups state with the data
+        const res = await axios.get('http://localhost:5000/api/groups/student-groups', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setGroups(res.data);
       }
     } catch (err) {
       setError('Failed to load groups.');
       console.error("Error loading groups:", err);
     }
-  };
-
-  const generateGroupCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
   };
 
   const handleCreateGroup = async () => {
@@ -86,7 +104,7 @@ const Groups = () => {
       fetchGroups();
     } catch (err) {
       setError('Error creating group. Try a different name.');
-      console.error("Error creating group:", err);  // Log the error if group creation fails
+      console.error("Error creating group:", err);
     }
   };
 
@@ -109,17 +127,10 @@ const Groups = () => {
 
       setJoinSuccess('Successfully joined the group!');
       setGroupCodeToJoin('');
-      fetchGroups(); // Optionally refresh the group list
+      fetchGroups();
     } catch (err) {
-      if (err.response && err.response.status === 400) {
-        setJoinError('You have already joined this group.');
-        console.warn('Student already in group — handled gracefully.');
-      } else if (err.response && err.response.status === 404) {
-        setJoinError('Group not found.');
-      } else {
-        setJoinError('Invalid group code or error joining the group.');
-        console.error('Unexpected join group error:', err);
-      }
+      setJoinError('Invalid group code or error joining the group.');
+      console.error('Error joining group:', err);
     }
   };
 
@@ -129,81 +140,153 @@ const Groups = () => {
       const res = await axios.get(`http://localhost:5000/api/groups/group-members/${groupId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
-      console.log("Group Members:", res.data);  // Log group members for the selected group
-      setSelectedGroupId(groupId);
       setGroupMembers(res.data);
+      setSelectedGroupId(groupId);
     } catch (err) {
-      console.error("Error fetching group members:", err);
       setGroupMembers([]);
+      console.error("Error fetching group members:", err);
     }
   };
 
-  useEffect(() => {
-    console.log("Groups state:", groups);  // Log groups state to check if it's populated
-  }, [groups]);
+  const fetchAssignedQuizzes = async (groupId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`http://localhost:5000/api/groups/student-assigned-quizzes/${groupId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAssignedQuizzes(res.data);
+    } catch (err) {
+      setAssignedQuizzes([]);
+      console.error('Error fetching assigned quizzes:', err);
+    }
+  };
 
- return (
-  <div className="groups-page">
-    <Sidebar showBackButton={true} />
+  const openAssignModal = (groupId) => {
+    setModalGroupId(groupId);
+    setShowAssignModal(true);
+  };
 
-    {userType === 'professor' ? (
-      <>
-        <div className="create-group">
-          <input
-            type="text"
-            placeholder="New group name"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-          />
-          <button onClick={handleCreateGroup}>Create Group</button>
-        </div>
+  const closeAssignModal = () => {
+    setSelectedQuizId(null);
+    setDeadline('');
+    setShowAssignModal(false);
+    setModalGroupId(null);
+  };
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+  const handleAssignQuiz = async () => {
+  if (!modalGroupId || !selectedQuizId || !deadline) {
+    alert("Please select a quiz and provide a deadline before assigning.");
+    return;
+  }
 
-        <div className="group-list">
-          {groups.length === 0 ? (
-            <p>No groups available.</p>
-          ) : (
-            <ul>
-              {groups.map((group) => (
-                <li key={group.group_id}>
-                  <strong>{group.group_name}</strong> — Code: <code>{group.group_code}</code>
-                  <button onClick={() => handleDisplayStudents(group.group_id)}>
-                    Display Students
-                  </button>
-                  {selectedGroupId === group.group_id && groupMembers.length > 0 && (
-                    <ul>
-                      {groupMembers.map((student) => (
-                        <li key={student.student_id}>
-                          {student.username} — {student.email}
-                        </li>
-                      ))}
-                    </ul>
+  try {
+    const token = localStorage.getItem('token');
+
+    await axios.post(
+      'http://localhost:5000/api/groups/assign-quiz',
+      {
+        quiz_id: selectedQuizId,
+        group_id: modalGroupId,
+        deadline, // Send as-is since input type="datetime-local" already provides ISO-ish format
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert('Quiz assigned successfully.');
+    closeAssignModal(); // Close modal after success
+  } catch (err) {
+    if (
+      err.response &&
+      err.response.status === 400 &&
+      err.response.data.message.includes('already')
+    ) {
+      alert('This quiz has already been assigned to this group.');
+    } else {
+      console.error('Error assigning quiz:', err);
+      alert('Failed to assign quiz.');
+    }
+  }
+};
+
+
+  const handleTakeQuiz = (quizId) => {
+    navigate(`/quiz/${quizId}`);
+  };
+
+  // Generate group code
+  const generateGroupCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
+  };
+
+  return (
+    <div className="groups-page">
+      <Sidebar showBackButton={true} />
+
+      {/* For professor */}
+      {userType === 'professor' && (
+        <>
+          <div className="create-group">
+            <input
+              type="text"
+              placeholder="New group name"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+            />
+            <button onClick={handleCreateGroup}>Create Group</button>
+          </div>
+
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {success && <p style={{ color: 'green' }}>{success}</p>}
+
+          <div className="group-cards">
+            {groups.length === 0 ? (
+              <p>No groups available.</p>
+            ) : (
+              groups.map((group) => (
+                <div key={group.group_id} className="group-card">
+                  <h3>{group.group_name}</h3>
+                  <p>Group Code: <code>{group.group_code}</code></p>
+                  <button onClick={() => handleDisplayStudents(group.group_id)}>Display Students</button>
+                  <button onClick={() => openAssignModal(group.group_id)}>Assign Quiz</button>
+
+                  {selectedGroupId === group.group_id && (
+                    <>
+                      {groupMembers.length > 0 ? (
+                        <ul>
+                          {groupMembers.map((student) => (
+                            <li key={student.student_id}>
+                              {student.username} — {student.email}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No students in this group yet.</p>
+                      )}
+                    </>
                   )}
-                  {selectedGroupId === group.group_id && groupMembers.length === 0 && (
-                    <p>No students in this group yet.</p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </>
-    ) : (
-      <>
-        {userType === 'student' && (
-                <div className="join-group">
-                    <input
-                        type="text"
-                        placeholder="Enter group code"
-                        value={groupCodeToJoin}
-                        onChange={(e) => setGroupCodeToJoin(e.target.value)}
-                    />
-                    <button onClick={handleJoinGroup}>Join Group</button>
                 </div>
-         )} 
+              ))
+            )}
+          </div>
+        </>
+      )}
+
+      {/* For student */}
+      {userType === 'student' && (
+        <>
+          <div className="join-group">
+            <input
+              type="text"
+              placeholder="Enter group code"
+              value={groupCodeToJoin}
+              onChange={(e) => setGroupCodeToJoin(e.target.value)}
+            />
+            <button onClick={handleJoinGroup}>Join Group</button>
+          </div>
 
           <div className="group-cards">
             {groups.length === 0 ? (
@@ -213,19 +296,47 @@ const Groups = () => {
                 <div key={group.group_id} className="group-card">
                   <h3>{group.group_name}</h3>
                   <p>Group Code: {group.group_code}</p>
+                  <button onClick={() => fetchAssignedQuizzes(group.group_id)}>View Assigned Quizzes</button>
                 </div>
               ))
             )}
           </div>
-       
 
-        
+          <h2>Assigned Quizzes</h2>
+          {assignedQuizzes.length === 0 ? (
+            <p>You have not been assigned any quizzes yet.</p>
+          ) : (
+            <div className="assigned-quizzes">
+              {assignedQuizzes.map((quiz) => (
+                <div key={quiz.quiz_id} className="quiz-card">
+                  <h3>{quiz.title}</h3>
+                  <p><strong>Category:</strong> {quiz.category_name}</p>
+                  <p><strong>Subcategory:</strong> {quiz.subcategory_name || 'No Subcategory'}</p>
+                  <p><strong>Deadline:</strong> {quiz.deadline ? new Date(quiz.deadline).toLocaleString() : 'No Deadline'}</p>
+                  <button onClick={() => handleTakeQuiz(quiz.quiz_id)}>Take Quiz</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
 
-       
-      </>
-    )}
-  </div>
-);
+      {/* Modal for assigning quizzes */}
+      <Modal
+        showAssignModal={showAssignModal}
+        closeAssignModal={closeAssignModal}
+        modalGroupId={modalGroupId}
+        setSelectedQuizId={setSelectedQuizId}
+        selectedQuizId={selectedQuizId}
+        deadline={deadline}
+        setDeadline={setDeadline}
+        setModalMode={setModalMode}
+        modalMode={modalMode}
+        quizzes={quizzes}
+        handleAssignQuiz={handleAssignQuiz}
+      />
+    </div>
+  );
 };
 
 export default Groups;

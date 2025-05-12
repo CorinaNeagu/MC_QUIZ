@@ -4,6 +4,9 @@ const authenticateJWT = require("../middleware/authMiddleware");
 const db = require("../db");
 
 router.get('/professor-groups', authenticateJWT, (req, res) => {
+   if (req.user.userType !== 'professor') {
+    return res.status(403).json({ message: 'Forbidden: Professors only' });
+  }
   console.log("Authenticated user:", req.user);  // Log user object
   if (req.user.userType !== 'professor') {
     return res.status(403).json({ error: 'Unauthorized' });
@@ -139,6 +142,74 @@ router.get('/student-groups', authenticateJWT, (req, res) => {
     res.json(results); // Return the list of groups the student is a part of
   });
 });
+
+router.post('/assign-quiz', (req, res) => {
+  const { quiz_id, group_id, deadline } = req.body;
+
+  if (!quiz_id || !group_id || !deadline) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  const checkQuery = `SELECT * FROM groupQuiz WHERE quiz_id = ? AND group_id = ?`;
+  db.query(checkQuery, [quiz_id, group_id], (err, results) => {
+    if (err) {
+      console.error('Error checking existing assignment:', err);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    if (results.length > 0) {
+      return res.status(400).json({ message: 'This quiz has already been assigned to this group.' });
+    }
+
+    const insertQuery = `INSERT INTO groupQuiz (quiz_id, group_id, deadline) VALUES (?, ?, ?)`;
+    db.query(insertQuery, [quiz_id, group_id, deadline], (err, result) => {
+      if (err) {
+        console.error('Error assigning quiz:', err);
+        return res.status(500).json({ message: 'Error assigning quiz' });
+      }
+
+      return res.status(200).json({ message: 'Quiz assigned successfully' });
+    });
+  });
+});
+
+router.get('/student-assigned-quizzes/:groupId', authenticateJWT, (req, res) => {
+  const studentId = req.user.id;
+  const groupId = req.params.groupId;
+
+  db.query(
+        `SELECT 
+      q.quiz_id, 
+      q.title, 
+      c.category_name,  -- Join category table for category_name
+      s.subcategory_name,  -- Join subcategory table for subcategory_name
+      gq.deadline 
+    FROM groupQuiz AS gq
+    JOIN quiz AS q ON gq.quiz_id = q.quiz_id
+    JOIN studyGroup AS g ON g.group_id = gq.group_id
+    JOIN groupMembers AS gm ON gm.group_id = g.group_id
+    JOIN category AS c ON q.category_id = c.category_id  -- Join category table
+    JOIN subcategory AS s ON q.subcategory_id = s.subcategory_id  -- Join subcategory table
+    WHERE gm.student_id = ? AND g.group_id = ?
+`,
+    [studentId, groupId],
+    (err, results) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        return res.status(500).json({ message: 'Error fetching assigned quizzes', error: err.message });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'No quizzes found for this group' });
+      }
+
+      res.json(results);
+    }
+  );
+});
+
+
+
 
 
 
