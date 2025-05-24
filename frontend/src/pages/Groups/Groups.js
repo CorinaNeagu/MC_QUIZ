@@ -187,7 +187,7 @@ const Groups = () => {
       {
         quiz_id: selectedQuizId,
         group_id: modalGroupId,
-        deadline, // Send as-is since input type="datetime-local" already provides ISO-ish format
+        deadline, 
       },
       {
         headers: {
@@ -197,7 +197,7 @@ const Groups = () => {
     );
 
     alert('Quiz assigned successfully.');
-    closeAssignModal(); // Close modal after success
+    closeAssignModal(); 
   } catch (err) {
     if (
       err.response &&
@@ -226,7 +226,6 @@ const Groups = () => {
     <div className="groups-page">
       <Sidebar showBackButton={true} />
 
-      {/* For professor */}
       {userType === 'professor' && (
         <>
           <div className="create-group">
@@ -275,7 +274,6 @@ const Groups = () => {
         </>
       )}
 
-      {/* For student */}
       {userType === 'student' && (
         <>
           <div className="join-group">
@@ -302,7 +300,7 @@ const Groups = () => {
             )}
           </div>
 
-          <h2>Assigned Quizzes</h2>
+         <h2>Assigned Quizzes</h2>
           {assignedQuizzes.length === 0 ? (
             <p>You have not been assigned any quizzes yet.</p>
           ) : (
@@ -321,7 +319,6 @@ const Groups = () => {
         </>
       )}
 
-      {/* Modal for assigning quizzes */}
       <Modal
         showAssignModal={showAssignModal}
         closeAssignModal={closeAssignModal}

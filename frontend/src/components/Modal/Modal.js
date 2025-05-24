@@ -1,7 +1,7 @@
-// Modal.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './Modal.css';  
 
 const Modal = ({
   showAssignModal,
@@ -27,7 +27,7 @@ const Modal = ({
       }
 
       try {
-        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode the token to get user info
+        const decodedToken = JSON.parse(atob(token.split('.')[1])); 
         const userType = decodedToken.userType;
 
         if (userType !== 'professor') {
@@ -35,18 +35,18 @@ const Modal = ({
           return; // Don't fetch quizzes if the user is not a professor
         }
 
-        // Proceed to fetch quizzes if the user is a professor
+        // Fetch quizzes if the user is a professor
         const res = await axios.get('http://localhost:5000/api/user/professor/quizzes', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        quizzes = res.data; // Set quizzes to state
+        quizzes = res.data; 
       } catch (err) {
         console.error('Error fetching quizzes:', err);
       }
     };
 
     if (modalMode === 'choose') {
-      fetchQuizzes(); // Only fetch quizzes if modalMode is 'choose'
+      fetchQuizzes(); 
     }
   }, [modalMode]);
 
