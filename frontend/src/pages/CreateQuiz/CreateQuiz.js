@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../../components/Sidebar/Sidebar";
 
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const modalGroupId = location.state?.assignToGroupId;
+  console.log('Assigning quiz to group:', modalGroupId);
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -102,6 +105,7 @@ const CreateQuiz = () => {
             noQuestions: validNoQuestions,
             category, // Pass selected category
             quizId,
+            assignToGroupId: modalGroupId,
           },
         });
       }

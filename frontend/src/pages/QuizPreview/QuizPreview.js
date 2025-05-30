@@ -7,12 +7,15 @@ import './QuizPreview.css';
 
 const QuizPreview = () => {
   const location = useLocation();
-  const { quizId } = location.state; // Get quizId from the state passed via navigate
+  const { quizId, assignToGroupId } = location.state; // Get quizId from the state passed via navigate
   const navigate = useNavigate(); // Initialize useNavigate
 
   const [quizDetails, setQuizDetails] = useState([]); // Store quiz details
   const [error, setError] = useState(""); // Error state
   const [loading, setLoading] = useState(true); // Loading state
+
+  const [deadline, setDeadline] = useState(""); // New deadline state
+  const [assigning, setAssigning] = useState(false); // Loading state for assign
 
   useEffect(() => {
     // Fetch the quiz details (questions and answers)
@@ -49,6 +52,42 @@ const QuizPreview = () => {
 
     fetchQuizDetails();
   }, [quizId]);
+
+   const assignQuizToGroup = async () => {
+    if (!assignToGroupId) {
+      alert("No group selected to assign the quiz.");
+      return;
+    }
+    if (!deadline) {
+      alert("Please select a deadline before assigning the quiz.");
+      return;
+    }
+
+    setAssigning(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:5000/api/groups/assign-quiz",
+        {
+          quiz_id: quizId,
+          group_id: assignToGroupId,
+          deadline,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(res.data.message || "Quiz assigned successfully!");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to assign quiz.");
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   // If there is an error, display it
   if (error) return <div>{error}</div>;
@@ -89,6 +128,26 @@ const QuizPreview = () => {
       ) : (
         <p>No questions found for this quiz.</p>
       )}
+
+       <div style={{ marginTop: "20px" }}>
+        <label>
+          Select Deadline:{" "}
+          <input
+            type="date"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            min={new Date().toISOString().split("T")[0]} // today or later
+          />
+        </label>
+      </div>
+
+      <button
+        onClick={assignQuizToGroup}
+        disabled={assigning}
+        style={{ marginTop: "15px", padding: "10px 20px" }}
+      >
+        {assigning ? "Assigning..." : "Assign Quiz to Group"}
+      </button>
     </div>
   );
 };

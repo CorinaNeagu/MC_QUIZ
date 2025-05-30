@@ -7,7 +7,8 @@ const CreateQuestion = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { quizId, professor_id, noQuestions, category } = location.state;
+  const { quizId, professor_id, noQuestions, category} = location.state;
+  const modalGroupId = location.state?.assignToGroupId;
 
   const [questionContent, setQuestionContent] = useState("");
   const [isMultipleChoice, setIsMultipleChoice] = useState(false);
@@ -303,7 +304,7 @@ const handleDiscardChanges = () => {
       alert(`You must add exactly ${noQuestions} question(s) before submitting.`);
       return;
     }
-    navigate("/quizPreview", { state: { quizId } });
+    navigate("/quizPreview", { state: { assignToGroupId: modalGroupId, quizId } });
   };
 
   const canAddMore = questions.length < noQuestions;

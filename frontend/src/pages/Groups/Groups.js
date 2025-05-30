@@ -222,9 +222,23 @@ const Groups = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
   };
 
-    const handleGroupDetails = (groupId) => {
-    navigate(`/groups/${groupId}/details`);
-  };
+  const handleGroupDetails = async (groupId) => {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await axios.get(`http://localhost:5000/api/groups/student-assigned-quizzes/${groupId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data.length === 0) {
+      alert('This group has not been assigned any quizzes yet.');
+    } else {
+      navigate(`/groups/${groupId}/details`);
+    }
+  } catch (err) {
+    console.error('Error fetching assigned quizzes for group details:', err);
+    alert('No quizzes assigned to this group yet.');
+  }
+};
 
   return (
     <div className="groups-page">

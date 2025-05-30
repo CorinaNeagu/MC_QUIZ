@@ -99,7 +99,10 @@ const Modal = ({
             </div>
           ) : (
             <div className="create-quiz">
-              <button onClick={() => navigate('/create-quiz')}>Go to Create Quiz</button>
+              <button onClick={() => navigate('/create-quiz', 
+                { state: { assignToGroupId: modalGroupId } })}>
+                Go to Create Quiz
+              </button>
             </div>
           )}
 

@@ -316,10 +316,8 @@ const ProfManageQuizzes = () => {
           </div>
         )}
 
-        {/* Modal for inspecting questions */}
 <Modal show={showInspectModal} onClose={() => setShowInspectModal(false)}>
   {/* Modal Content */}
-    <button className="modal-close" onClick={() => setShowInspectModal(false)}>×</button>
   <h3>Questions for Quiz: {selectedQuizId}</h3>
 
   {questions.length === 0 ? (
