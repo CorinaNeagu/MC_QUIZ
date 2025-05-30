@@ -222,6 +222,10 @@ const Groups = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
   };
 
+    const handleGroupDetails = (groupId) => {
+    navigate(`/groups/${groupId}/details`);
+  };
+
   return (
     <div className="groups-page">
       <Sidebar showBackButton={true} />
@@ -251,6 +255,7 @@ const Groups = () => {
                   <p>Group Code: <code>{group.group_code}</code></p>
                   <button onClick={() => handleDisplayStudents(group.group_id)}>Display Students</button>
                   <button onClick={() => openAssignModal(group.group_id)}>Assign Quiz</button>
+                  <button onClick={() => handleGroupDetails(group.group_id)}>Group Details</button>
 
                   {selectedGroupId === group.group_id && (
                     <>

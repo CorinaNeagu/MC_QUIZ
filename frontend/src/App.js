@@ -15,6 +15,7 @@ import DisplayResponses from "./pages/DisplayResponses/DisplayResponses";
 import ProfManageQuizzes from "./pages/ProfManageQuizzes/ProfManageQuizzes";
 import UserStatistics from "./pages/UserStatistics/UserStatistics";
 import Groups from "./pages/Groups/Groups";
+import GroupDetails from "./pages/GroupDetails/GroupDetails"
 
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <Route path = "/manage-quizzes" element = {<ProfManageQuizzes/>} />
         <Route path = "/stats" element = {<UserStatistics/>} />
         <Route path = "/groups" element = {<Groups/>} />
+        <Route path = "/groups/:groupId/details" element = { <GroupDetails/>} />
        </Routes>
     </Router>
   );

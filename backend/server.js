@@ -9,6 +9,7 @@ const takeQuizRoutes = require("./routes/takeQuizRoutes");
 const scoreRoutes = require("./routes/scoreRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const groupRoutes = require("./routes/groupRoutes");
+const groupDetails = require("./routes/groupDetails");
 
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use("/api/takeQuiz", takeQuizRoutes);
 app.use("/api/score", scoreRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/group/details", groupDetails);
 
 // Set up the server
 const PORT = process.env.PORT || 5000;
