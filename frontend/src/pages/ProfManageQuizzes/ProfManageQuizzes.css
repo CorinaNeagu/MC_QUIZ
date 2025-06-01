@@ -17,6 +17,24 @@ html, body {
     box-sizing: border-box;
   }
 
+.manage-quizzes-container,
+.scrollable-content,
+.questions-container,
+.modal-questions-wrapper {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+  scroll-behavior: smooth;
+}
+
+.manage-quizzes-container::-webkit-scrollbar,
+.scrollable-content::-webkit-scrollbar,
+.questions-container::-webkit-scrollbar,
+.modal-questions-wrapper::-webkit-scrollbar {
+  display: none;
+    
+}
+
+
   .scrollable-content {
     overflow-y: auto;
     flex: 1;

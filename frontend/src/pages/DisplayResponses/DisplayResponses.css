@@ -18,7 +18,8 @@ body, html {
   opacity: 0;
   transform: translateY(30px);
   animation: fadeInUp 0.6s ease-out forwards;
-  background-color: #f9f9f9; 
+  scrollbar-width: none; 
+  -ms-overflow-style: none;  
 }
 
 .question-container {
@@ -34,7 +35,6 @@ body, html {
   border-bottom: none;
 }
 
-/* Styling the question text */
 .question-text {
   font-size: 1.4em;
   font-weight: 600;

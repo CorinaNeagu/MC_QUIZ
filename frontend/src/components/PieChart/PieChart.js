@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import axios from 'axios';
+import ModalPieChart from '../ModalPieChart/ModalPieChart';  // Import the new modal component
 import './PieChart.css';
 
 const COLORS = ['#4169E1', '#00CED1', '#191970', '#4B9CD3', '#ADD8E6'];
@@ -32,14 +33,12 @@ const PieChartComponent = () => {
         if (response.data && Array.isArray(response.data)) {
           setQuizStats(response.data);
 
-          // Prepare the data for Pie chart
           const chartData = response.data.map((stat) => ({
             name: stat.category_name,
             value: stat.quizzes_taken,
             category_id: stat.category_id,
           }));
-          console.log(chartData);
-          setPieChartData(chartData);  // Store the data for pie chart
+          setPieChartData(chartData);
         } else {
           setError('No data available.');
         }
@@ -53,7 +52,6 @@ const PieChartComponent = () => {
   }, []);
 
   const handlePieClick = async (data, index, event) => {
-
     if (!data || !data.category_id) {
       console.error("Error: category_id is missing from the pie slice data!");
       return;
@@ -63,8 +61,9 @@ const PieChartComponent = () => {
 
     const selectedCategoryId = data.category_id;
     setSelectedCategory(data.name);
-    setModalPosition({ x: mouseX, y: mouseY });  // Set modal position to mouse coordinates
-    setIsModalOpen(true);  // Open the modal
+    setModalPosition({ x: mouseX, y: mouseY });
+    setIsModalOpen(true);
+
     try {
       const response = await axios.get(`http://localhost:5000/api/stats/quizzes-by-category/${selectedCategoryId}`);
       setQuizzesInCategory(response.data);
@@ -73,7 +72,7 @@ const PieChartComponent = () => {
       console.error(err);
     }
   };
-  
+
   return (
     <div className="chart-container">
       {pieChartData.length > 0 ? (
@@ -81,7 +80,7 @@ const PieChartComponent = () => {
           <h2>Quiz Categories</h2>
           <PieChart width={300} height={300}>
             <Pie
-              data={pieChartData}  // Use pieChartData here
+              data={pieChartData}
               dataKey="value"
               nameKey="name"
               outerRadius={100}
@@ -102,36 +101,17 @@ const PieChartComponent = () => {
         <p>No data available for the pie chart.</p>
       )}
 
-    {isModalOpen && (
-    <div
-      className="modal-overlay"
-      style={{ left: `${modalPosition.x + 10}px`, 
-        top: `${modalPosition.y + 10}px`,
-        position: 'absolute',
-        zIndex: 1000,
-        padding: '10px',
-        background: 'white',
-        borderRadius: '8px',
-        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)',
-        width: '300px',
-        height: 'auto',
-        overflowY: 'auto',
-      }}>
-      <h2>Quizzes in Category: {selectedCategory}</h2>
-      {quizzesInCategory.length > 0 ? (
-        <ul>
-          {quizzesInCategory.map((quiz) => (
-            <li key={quiz.quiz_id}>{quiz.quiz_title}</li>
-          ))}
-        </ul>
-      ) : (
-        <p>No quizzes found in this category.</p>
-      )}
-      <button onClick={() => setIsModalOpen(false)}>Close</button>
-    </div>
-    )}
-    </div>
-  );
-};
+      {isModalOpen && (
+          <ModalPieChart
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            position={modalPosition}
+            selectedCategory={selectedCategory}
+            quizzesInCategory={quizzesInCategory}
+          />
+        )}
+          </div>
+        );
+      };
 
 export default PieChartComponent;

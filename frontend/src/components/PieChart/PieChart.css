@@ -1,54 +1,44 @@
-/* Pie Chart Container */
 .pie-chart-container {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
-  height: 400px; /* Increase the height if needed */
+  height: 400px; 
   max-width: 100%;
   margin: 0 auto;
 }
 
-/* Pie Chart Styling */
 .PieChartContainer .recharts-pie-chart {
   transition: transform 1s ease-in-out;
   transform-origin: center;
   width: 100%;
-  height: 100%; /* Ensure the pie chart scales correctly */
+  height: 100%; 
 }
 
-/* Pie Slice Hover & Active Effects */
 .recharts-pie-slice {
   transition: transform 0.3s ease, stroke-width 0.3s ease, fill-opacity 0.3s ease;
   cursor: pointer;
 }
 
-/* Hover Effect for Pie Slices */
 .recharts-pie-slice:hover {
-  transform: scale(1.1); /* Slightly enlarge on hover */
-  fill-opacity: 0.85; /* Subtle change in opacity on hover */
-  stroke: #444; /* Add stroke color for hover effect */
-  stroke-width: 2px; /* Add slight border on hover */
+  transform: scale(1.1); 
+  fill-opacity: 0.85; 
+  stroke-width: 2px; 
 }
 
-/* Active Effect for Pie Slices */
 .recharts-pie-slice:active {
-  transform: scale(1.2); /* Enlarge on click for emphasis */
-  fill-opacity: 1; /* Make it fully opaque on click */
+  transform: scale(1.2); 
+  fill-opacity: 1; 
 }
 
-/* Focused Pie Slice Styling */
 .recharts-pie-slice-focused {
   stroke: #007bff;
-  stroke-width: 4px; /* Enhanced focus border width */
+  stroke-width: 4px; 
 }
 
-/* Tooltip Styling */
 .recharts-tooltip-wrapper {
   font-size: 14px;
-  color: #333;
-  background-color: rgba(0, 0, 0, 0.7); /* Dark background for better contrast */
   border-radius: 8px;
   padding: 8px;
 }
@@ -58,91 +48,11 @@
   font-weight: bold;
 }
 
-/* Label Styling for Pie Slices */
 .recharts-pie-label {
   font-size: 14px;
   font-weight: bold;
-  fill: #333; /* Dark text for better visibility */
 }
 
-/* Modal Styling */
-.modal-overlay {
-  position: absolute;
-  padding: 15px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
-  transition: all 0.3s ease-in-out;
-  z-index: 1000;
-  font-family: 'Arial', sans-serif;
-  color: #333;
-  border: 1px solid #ddd;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
- 
-.modal-overlay h2 {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #007bff;
-  text-align: center;
-}
-
-.modal-overlay ul {
-  list-style-type: none;
-  padding: 0;
-}
- 
-.modal-overlay li {
-  padding: 8px;
-  font-size: 14px;
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.3s;
-}
-
-.modal-overlay li:hover {
-  background-color: #f1f1f1;
-}
-
-.modal-overlay button {
-  background-color: lightblue;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
-  margin-top: 15px;
-}
-
-.modal-overlay button:hover {
-  background-color: lightblue;
-}
- 
-.modal-overlay-enter {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-.modal-overlay-enter-active {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.modal-overlay-exit {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.modal-overlay-exit-active {
-  opacity: 0;
-  transform: scale(0.9);
-}
 
 @keyframes fadeIn {
   from {

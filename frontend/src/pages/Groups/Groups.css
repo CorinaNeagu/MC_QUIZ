@@ -1,26 +1,35 @@
 .join-group {
-  position: fixed; 
-  top: 0; 
-  left: 1; 
-  width: 50%; 
-  padding: 10px 30px; 
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  padding: 10px 30px;
   font-size: 16px;
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  z-index: 1000; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 15px;
-  margin-top: 20px
+  z-index: 1000;
+  background-color: #f9f9f9;
+  border-radius: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .join-group input {
-  padding: 10px;
+  flex-grow: 1;
+  padding: 10px 15px;
   font-size: 16px;
-  width: 1000px; 
   border: 1px solid #ccc;
-  border-radius: 25px; 
+  border-radius: 25px;
   height: 40px;
-  margin-right: 10px
+  margin-right: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.join-group input:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 .join-group button {
@@ -29,12 +38,17 @@
   background-color: #007bff;
   color: white;
   border: none;
-  border: 1px solid #ccc;
   border-radius: 25px;
   height: 40px;
+  padding: 0 20px;
   display: flex;
-  margin-right: 10px
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
 
+.join-group button:hover {
+  background-color: #0056b3;
 }
 .groups-page {
   padding-top: 80px; 
@@ -122,6 +136,7 @@
   color: #555;
 }
 
+.view-assigned,
 .quiz-card button {
   background-color: #007bff;
   color: white;

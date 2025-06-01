@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import Sidebar from "../../components/Sidebar/Sidebar";
-import Modal from '../../components/Modal/Modal'; // Import Modal component
+import Modal from '../../components/Modal/Modal'; 
 
 import "./Groups.css";
 
@@ -28,6 +28,7 @@ const Groups = () => {
   const [deadline, setDeadline] = useState('');
   const [quizzes, setQuizzes] = useState([]);
   const [assignedQuizzes, setAssignedQuizzes] = useState([]);
+  const [activeGroupForQuizzes, setActiveGroupForQuizzes] = React.useState(null);
 
   // Fetch user type and groups based on it (professor or student)
   useEffect(() => {
@@ -240,119 +241,154 @@ const Groups = () => {
   }
 };
 
+const handleViewAssignedQuizzes = (groupId) => {
+  fetchAssignedQuizzes(groupId);
+  setActiveGroupForQuizzes(groupId);
+};
+
   return (
-    <div className="groups-page">
-      <Sidebar showBackButton={true} />
+  <div className="groups-page">
+    <Sidebar showBackButton={true} />
 
-      {userType === 'professor' && (
-        <>
-          <div className="create-group">
-            <input
-              type="text"
-              placeholder="New group name"
-              value={newGroupName}
-              onChange={(e) => setNewGroupName(e.target.value)}
-            />
-            <button onClick={handleCreateGroup}>Create Group</button>
-          </div>
+    {userType === 'professor' && (
+      <>
+        <div className="create-group">
+          <input
+            type="text"
+            placeholder="New group name"
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+          />
+          <button onClick={handleCreateGroup}>Create Group</button>
+        </div>
 
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          {success && <p style={{ color: 'green' }}>{success}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {success && <p style={{ color: 'green' }}>{success}</p>}
 
-          <div className="group-cards">
-            {groups.length === 0 ? (
-              <p>No groups available.</p>
-            ) : (
-              groups.map((group) => (
-                <div key={group.group_id} className="group-card">
-                  <h3>{group.group_name}</h3>
-                  <p>Group Code: <code>{group.group_code}</code></p>
-                  <button onClick={() => handleDisplayStudents(group.group_id)}>Display Students</button>
-                  <button onClick={() => openAssignModal(group.group_id)}>Assign Quiz</button>
-                  <button onClick={() => handleGroupDetails(group.group_id)}>Group Details</button>
-
-                  {selectedGroupId === group.group_id && (
-                    <>
-                      {groupMembers.length > 0 ? (
-                        <ul>
-                          {groupMembers.map((student) => (
-                            <li key={student.student_id}>
-                              {student.username} — {student.email}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>No students in this group yet.</p>
-                      )}
-                    </>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </>
-      )}
-
-      {userType === 'student' && (
-        <>
-          <div className="join-group">
-            <input
-              type="text"
-              placeholder="Enter group code"
-              value={groupCodeToJoin}
-              onChange={(e) => setGroupCodeToJoin(e.target.value)}
-            />
-            <button onClick={handleJoinGroup}>Join Group</button>
-          </div>
-
-          <div className="group-cards">
-            {groups.length === 0 ? (
-              <p>You are not a part of any group yet.</p>
-            ) : (
-              groups.map((group) => (
-                <div key={group.group_id} className="group-card">
-                  <h3>{group.group_name}</h3>
-                  <p>Group Code: {group.group_code}</p>
-                  <button onClick={() => fetchAssignedQuizzes(group.group_id)}>View Assigned Quizzes</button>
-                </div>
-              ))
-            )}
-          </div>
-
-         <h2>Assigned Quizzes</h2>
-          {assignedQuizzes.length === 0 ? (
-            <p>You have not been assigned any quizzes yet.</p>
+        <div className="group-cards">
+          {groups.length === 0 ? (
+            <p>No groups available.</p>
           ) : (
-            <div className="assigned-quizzes">
-              {assignedQuizzes.map((quiz) => (
-                <div key={quiz.quiz_id} className="quiz-card">
-                  <h3>{quiz.title}</h3>
-                  <p><strong>Category:</strong> {quiz.category_name}</p>
-                  <p><strong>Subcategory:</strong> {quiz.subcategory_name || 'No Subcategory'}</p>
-                  <p><strong>Deadline:</strong> {quiz.deadline ? new Date(quiz.deadline).toLocaleString() : 'No Deadline'}</p>
-                  <button onClick={() => handleTakeQuiz(quiz.quiz_id)}>Take Quiz</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+            groups.map((group) => (
+              <div key={group.group_id} className="group-card">
+                <h3>{group.group_name}</h3>
+                <p>
+                  Group Code: <code>{group.group_code}</code>
+                </p>
+                <button onClick={() => handleDisplayStudents(group.group_id)}>
+                  Display Students
+                </button>
+                <button onClick={() => openAssignModal(group.group_id)}>
+                  Assign Quiz
+                </button>
+                <button onClick={() => handleGroupDetails(group.group_id)}>
+                  Group Details
+                </button>
 
-      <Modal
-        showAssignModal={showAssignModal}
-        closeAssignModal={closeAssignModal}
-        modalGroupId={modalGroupId}
-        setSelectedQuizId={setSelectedQuizId}
-        selectedQuizId={selectedQuizId}
-        deadline={deadline}
-        setDeadline={setDeadline}
-        setModalMode={setModalMode}
-        modalMode={modalMode}
-        quizzes={quizzes}
-        handleAssignQuiz={handleAssignQuiz}
-      />
-    </div>
-  );
+                {selectedGroupId === group.group_id && (
+                  <>
+                    {groupMembers.length > 0 ? (
+                      <ul>
+                        {groupMembers.map((student) => (
+                          <li key={student.student_id}>
+                            {student.username} — {student.email}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No students in this group yet.</p>
+                    )}
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </>
+    )}
+
+    {userType === 'student' && (
+      <>
+        <div className="join-group">
+          <input
+            type="text"
+            placeholder="Enter group code"
+            value={groupCodeToJoin}
+            onChange={(e) => setGroupCodeToJoin(e.target.value)}
+          />
+          <button onClick={handleJoinGroup}>Join Group</button>
+        </div>
+
+        <div className="group-cards">
+          {groups.length === 0 ? (
+            <p>You are not a part of any group yet.</p>
+          ) : (
+            groups.map((group) => (
+              <div key={group.group_id} className="group-card">
+                <h3>{group.group_name}</h3>
+                <p>Group Code: {group.group_code}</p>
+                <button
+                  className="view-assigned"
+                  onClick={() => handleViewAssignedQuizzes(group.group_id)}
+                >
+                  View Assigned Quizzes
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+        {activeGroupForQuizzes && (
+          <>
+            <h2>Assigned Quizzes</h2>
+            {assignedQuizzes.length === 0 ? (
+              <p>You have not been assigned any quizzes yet for this group.</p>
+            ) : (
+              <div className="assigned-quizzes">
+                {assignedQuizzes.map((quiz) => (
+                  <div key={quiz.quiz_id} className="quiz-card">
+                    <h3>{quiz.title}</h3>
+                    <p>
+                      <strong>Category:</strong> {quiz.category_name}
+                    </p>
+                    <p>
+                      <strong>Subcategory:</strong>{' '}
+                      {quiz.subcategory_name || 'No Subcategory'}
+                    </p>
+                    <p>
+                      <strong>Deadline:</strong>{' '}
+                      {quiz.deadline
+                        ? new Date(quiz.deadline).toLocaleString()
+                        : 'No Deadline'}
+                    </p>
+                    <button onClick={() => handleTakeQuiz(quiz.quiz_id)}>
+                      Take Quiz
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </>
+    )}
+
+    <Modal
+      showAssignModal={showAssignModal}
+      closeAssignModal={closeAssignModal}
+      modalGroupId={modalGroupId}
+      setSelectedQuizId={setSelectedQuizId}
+      selectedQuizId={selectedQuizId}
+      deadline={deadline}
+      setDeadline={setDeadline}
+      setModalMode={setModalMode}
+      modalMode={modalMode}
+      quizzes={quizzes}
+      handleAssignQuiz={handleAssignQuiz}
+    />
+  </div>
+);
+
 };
 
 export default Groups;

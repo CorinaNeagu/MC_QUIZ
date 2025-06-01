@@ -133,10 +133,10 @@ const QuizPreview = () => {
         <label>
           Select Deadline:{" "}
           <input
-            type="date"
+            type="datetime-local"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            min={new Date().toISOString().split("T")[0]} // today or later
+             min={new Date().toISOString().slice(0,16)} 
           />
         </label>
       </div>

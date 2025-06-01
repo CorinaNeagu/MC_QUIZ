@@ -219,33 +219,40 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
             console.log(`QuizSettings deleted for quizId: ${quizId}`);
   
             // Step 5: Delete questions
+            // Step 5: Delete questions
             db.query("DELETE FROM Questions WHERE quiz_id = ?", [quizId], (err, result) => {
               if (err) {
                 console.error(`Error deleting questions: ${err.message}`);
                 return res.status(500).json({ message: "Error deleting questions.", error: err.message });
               }
               console.log(`Questions deleted for quizId: ${quizId}`);
-  
-              // Step 6: Finally, delete the quiz itself
-              db.query("DELETE FROM Quiz WHERE quiz_id = ?", [quizId], (err, result) => {
-                if (err) {
-                  console.error(`Error deleting quiz: ${err.message}`);
-                  return res.status(500).json({ message: "Error deleting quiz.", error: err.message });
-                }
-  
-                // If no rows were affected, quiz wasn't found
-                if (result.affectedRows === 0) {
-                  console.log(`No quiz found with quizId: ${quizId}`);
-                  return res.status(404).json({ message: "Quiz not found." });
-                }
-  
-                console.log(`Quiz with quizId ${quizId} deleted successfully.`);
-  
-                // Final success response
-                return res.status(200).json({
-                  message: "Quiz and its related student responses, answers, questions, and settings deleted successfully."
-                });
 
+              // Step 6: Delete from groupquiz referencing this quiz
+              db.query("DELETE FROM groupquiz WHERE quiz_id = ?", [quizId], (err, result) => {
+                if (err) {
+                  console.error(`Error deleting from groupquiz: ${err.message}`);
+                  return res.status(500).json({ message: "Error deleting from groupquiz.", error: err.message });
+                }
+                console.log(`Groupquiz entries deleted for quizId: ${quizId}`);
+
+                // Step 7: Finally, delete the quiz itself
+                db.query("DELETE FROM Quiz WHERE quiz_id = ?", [quizId], (err, result) => {
+                  if (err) {
+                    console.error(`Error deleting quiz: ${err.message}`);
+                    return res.status(500).json({ message: "Error deleting quiz.", error: err.message });
+                  }
+
+                  if (result.affectedRows === 0) {
+                    console.log(`No quiz found with quizId: ${quizId}`);
+                    return res.status(404).json({ message: "Quiz not found." });
+                  }
+
+                  console.log(`Quiz with quizId ${quizId} deleted successfully.`);
+
+                  return res.status(200).json({
+                    message: "Quiz and its related data deleted successfully."
+                  });
+                });
               });
             });
           });
