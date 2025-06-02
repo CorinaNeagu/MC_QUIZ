@@ -1,20 +1,22 @@
 import React from 'react';
 import './ModalGroupDetails.css';
 
-const ModalGroupDetails = ({ isOpen, onClose, title, children }) => {
+const ModalGroupDetails = ({ isOpen, onClose, title, children, footer }) => {
   if (!isOpen) return null;
 
+  // Prevent modal content clicks from closing the modal
   const handleContentClick = (e) => {
-    e.stopPropagation();  
+    e.stopPropagation();
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container" onClick={handleContentClick}>
-        <div className="modal-header">
+        <header className="modal-header">
           <h2>{title}</h2>
-        </div>
-        <div>{children}</div>
+        </header>
+        <main className="modal-content">{children}</main>
+        {footer && <footer className="modal-footer">{footer}</footer>}
       </div>
     </div>
   );

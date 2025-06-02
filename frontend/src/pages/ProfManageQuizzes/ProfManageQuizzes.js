@@ -3,19 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './ProfManageQuizzes.css';
 import Sidebar from "../../components/Sidebar/Sidebar";
-
-// Modal Component (inline for now, feel free to extract it)
-const Modal = ({ show, onClose, children }) => {
-  if (!show) return null;
-
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>
-  );
-};
+import ModalManageQuiz from '../../components/Modal/ModalManageQuiz';
 
 const ProfManageQuizzes = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -25,13 +13,12 @@ const ProfManageQuizzes = () => {
   const [answers, setAnswers] = useState({});
   const [answersVisible, setAnswersVisible] = useState({});
   const [selectedQuizId, setSelectedQuizId] = useState(null);
-  const [quizSettings, setQuizSettings] = useState({});
   const [activeQuizId, setActiveQuizId] = useState(null);
   const [selectedQuizSettings, setSelectedQuizSettings] = useState({});
   const [editSettingsQuizId, setEditSettingsQuizId] = useState(null);
   const [editableSettings, setEditableSettings] = useState({});
   const [showInspectModal, setShowInspectModal] = useState(false);
-  const [questionScrollIndex, setQuestionScrollIndex] = useState(0);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -110,26 +97,37 @@ const ProfManageQuizzes = () => {
   };
 
   const handleSeeDetails = async (quizId) => {
-    if (activeQuizId === quizId) {
-      setActiveQuizId(null);
-      return;
-    }
+  if (activeQuizId === quizId) {
+    setActiveQuizId(null); // Close modal
+    return;
+  }
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      setSelectedQuizSettings((prev) => ({
-        ...prev,
-        [quizId]: response.data
-      }));
-      setActiveQuizId(quizId);
-    } catch (error) {
-      console.error("Failed to fetch quiz settings:", error);
-    }
-  };
+    setSelectedQuizSettings((prev) => ({
+      ...prev,
+      [quizId]: response.data,
+    }));
+
+    setEditableSettings({
+      title: quizzes.find(q => q.quiz_id === quizId)?.title || '',
+      time_limit: response.data.time_limit,
+      deduction_percentage: response.data.deduction_percentage,
+      retake_allowed: response.data.retake_allowed,
+      is_active: response.data.is_active,
+    });
+
+    setEditSettingsQuizId(quizId); 
+    setActiveQuizId(quizId);       
+  } catch (error) {
+    console.error("Failed to fetch quiz settings:", error);
+  }
+};
+
 
   const handleToggleEdit = (quizId) => {
     if (editSettingsQuizId === quizId) {
@@ -241,122 +239,35 @@ const ProfManageQuizzes = () => {
                 </button>
 
                 <button onClick={() => handleSeeDetails(quiz.quiz_id)} className="btn-see-details">
-                  {activeQuizId === quiz.quiz_id ? "Hide Details" : "See Details"}
+                  {activeQuizId === quiz.quiz_id ? "Hide Details" : "Edit Details"}
                 </button>
 
                 <button onClick={() => handleDeleteQuiz(quiz.quiz_id)} className="btn-delete-quiz">
                   Delete Quiz
                 </button>
-
-                {activeQuizId === quiz.quiz_id && selectedQuizSettings[quiz.quiz_id] && (
-                  <div className="quiz-settings">
-                    <h5>Quiz Settings:</h5>
-
-                    {editSettingsQuizId === quiz.quiz_id ? (
-                      <div className="settings-form">
-                        <label>
-                          Title:
-                          <input type="text" name="title" value={editableSettings.title} onChange={handleSettingChange} />
-                        </label>
-
-                        <label>
-                          Time Limit:
-                          <input type="number" name="time_limit" value={editableSettings.time_limit} onChange={handleSettingChange} />
-                        </label>
-
-                        <label>
-                          Deduction Percentage:
-                          <input type="number" name="deduction_percentage" value={editableSettings.deduction_percentage} onChange={handleSettingChange} />
-                        </label>
-
-                        <div className="checkbox-wrapper">
-                          <input 
-                          type="checkbox" 
-                          id="retakeAllowed"
-                          name="retake_allowed" 
-                          checked={editableSettings.retake_allowed} 
-                          onChange={handleSettingChange}
-                          className="checkbox-input" 
-                          />
-                        <label htmlFor="retakeAllowed" className="checkbox-custom"></label>
-                        Retake Allowed
-                        </div>
-
-                        <div className="checkbox-wrapper">
-                        <input
-                          type="checkbox"
-                          id="isActive" 
-                          name="is_active"
-                          checked={editableSettings.is_active}
-                          onChange={handleSettingChange}
-                          className="checkbox-input"  
-                        />
-                        <label htmlFor="isActive" className="checkbox-custom"></label> 
-                        Is Active
-                      </div>
-
-                      </div>
-                    ) : (
-                      <ul>
-                        <li><strong>Title:</strong> {quiz.title}</li>
-                        <li><strong>Time Limit:</strong> {selectedQuizSettings[quiz.quiz_id].time_limit} minutes</li>
-                        <li><strong>Deduction Percentage:</strong> {selectedQuizSettings[quiz.quiz_id].deduction_percentage}%</li>
-                        <li><strong>Retake Allowed:</strong> {selectedQuizSettings[quiz.quiz_id].retake_allowed ? "Yes" : "No"}</li>
-                        <li><strong>Is Active:</strong> {selectedQuizSettings[quiz.quiz_id].is_active ? "Yes" : "No"}</li>
-                      </ul>
-                    )}
-
-                    <button onClick={() => handleToggleEdit(quiz.quiz_id)} className="btn-edit-settings">
-                      {editSettingsQuizId === quiz.quiz_id ? "Save Settings" : "Change Settings"}
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         )}
 
-<Modal show={showInspectModal} onClose={() => setShowInspectModal(false)}>
-  {/* Modal Content */}
-  <h3>Questions for Quiz: {selectedQuizId}</h3>
+      <ModalManageQuiz
+        showInspectModal={showInspectModal}
+        onCloseInspect={() => setShowInspectModal(false)}
+        selectedQuizId={selectedQuizId}
+        questions={questions}
+        answers={answers}
+        answersVisible={answersVisible}
+        toggleAnswersVisibility={toggleAnswersVisibility}
 
-  {questions.length === 0 ? (
-    <p>No questions found.</p>
-  ) : (
-    <div className="modal-questions-wrapper">
-      {questions.map((question) => (
-        <div key={question.question_id} className="question-card">
-          <h4>{question.question_content}</h4>
-          <button
-            onClick={() => toggleAnswersVisibility(question.question_id)}
-            className="btn-fetch-answers"
-          >
-            {answersVisible[question.question_id] ? "Hide Answers" : "Fetch Answers"}
-          </button>
-
-          {answersVisible[question.question_id] && answers[question.question_id] && (
-            <div className="answers-container">
-              <h5>Answers:</h5>
-              <ul className="answers-list">
-                {answers[question.question_id].map((a, idx) => (
-                  <li key={idx}>
-                    {a.answer_content}{' '}
-                    {a.is_correct ? (
-                      <span className="correct-tag">✅️</span>
-                    ) : (
-                      <span className="incorrect-tag">❌</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  )}
-</Modal>
-
+        showSettingsModal={activeQuizId !== null}
+        onCloseSettings={() => setActiveQuizId(null)}
+        selectedQuizSettings={selectedQuizSettings[activeQuizId] || {}}
+        editableSettings={editSettingsQuizId === activeQuizId ? editableSettings : null}
+        handleSettingChange={handleSettingChange}
+        handleToggleEdit={handleToggleEdit}
+        handleSaveSettings={handleSaveSettings}
+        quiz={quizzes.find((q) => q.quiz_id === activeQuizId)}
+      />
       </div>
     </div>
   );

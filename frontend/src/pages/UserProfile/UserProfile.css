@@ -155,40 +155,10 @@ h2 {
   color: #007bff;
 }
 
-@media (max-width: 800px) {
-  .profile-table {
-    width: 100%;
-    padding: 10px;
-    margin-top: 40px;
-  }
-
-  .profile-table th,
-  .profile-table td {
-    padding: 12px;
-    font-size: 1rem;
-  }
-
-  .questions-list {
-    padding: 25px;
-    max-width: 100%;
-  }
-
-  .question-item {
-    padding: 15px;
-  }
-
-  .question-item strong {
-    font-size: 1.1rem;
-  }
-
-  .question-item p {
-    font-size: 1rem;
-  }
-}
 
 @media (max-width: 600px) {
   .user-profile-container {
-    padding: 20px;
+    padding: 15px 10px;
   }
 
   h2 {
@@ -197,21 +167,85 @@ h2 {
   }
 
   .profile-table {
-    margin-top: 30px;
-    padding: 15px;
+    padding: 10px;
+    margin-top: 25px;
+    border-radius: 8px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
   }
 
   .profile-table th,
   .profile-table td {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    padding: 10px 8px;
   }
 
   .questions-list {
     padding: 20px;
-    margin-top: 30px;
+    margin-top: 25px;
+    max-height: calc(100vh - 180px);
   }
 
   .question-item {
     padding: 12px;
+    border-radius: 8px;
+  }
+
+  .question-item strong {
+    font-size: 1rem;
+  }
+
+  .question-item p {
+    font-size: 0.95rem;
+  }
+
+  .question-item button {
+    font-size: 1rem;
+    padding: 8px 12px;
+  }
+
+  .answers-list {
+    padding: 15px;
+  }
+
+  .answers-list h4 {
+    font-size: 1rem;
+  }
+
+  .answers-list p {
+    font-size: 1rem;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 400px) {
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .profile-table th,
+  .profile-table td {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+
+  .question-item strong {
+    font-size: 0.95rem;
+  }
+
+  .question-item p {
+    font-size: 0.9rem;
+  }
+
+  .question-item button {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+
+  .answers-list h4 {
+    font-size: 0.95rem;
+  }
+
+  .answers-list p {
+    font-size: 0.95rem;
   }
 }

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import ModalGroupDetails from '../../components/Modal/ModalGroupDetails'
 import Sidebar from '../../components/Sidebar/Sidebar'
+import './GroupDetails.css';
 
 const GroupDetails = () => {
   const { groupId } = useParams();
@@ -25,14 +26,16 @@ const GroupDetails = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const url = `http://localhost:5000/api/group/details/student-assigned-quizzes/${groupId}`;
-        const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `http://localhost:5000/api/group/details/student-assigned-quizzes/${groupId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setQuizzes(response.data);
-        setLoading(false);
-      } catch (err) {
+      } catch {
         setError("Failed to load assigned quizzes");
+      } finally {
         setLoading(false);
       }
     };
@@ -49,14 +52,16 @@ const GroupDetails = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const url = `http://localhost:5000/api/group/details/quiz-attempts/${groupId}/${quiz.quiz_id}`;
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `http://localhost:5000/api/group/details/quiz-attempts/${groupId}/${quiz.quiz_id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setAttempts(response.data);
-      setAttemptsLoading(false);
-    } catch (err) {
+    } catch {
       setAttemptsError("Failed to load quiz attempts");
+    } finally {
       setAttemptsLoading(false);
     }
   };
@@ -69,32 +74,46 @@ const GroupDetails = () => {
   };
 
   if (loading) return <p>Loading assigned quizzes...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (error) return <p className="error-text">{error}</p>;
   if (quizzes.length === 0) return <p>No quizzes assigned for this group.</p>;
 
   return (
-    <div>
+    <div className="group-details-page">
+      <Sidebar showBackButton />
+
       <h3>Assigned Quizzes</h3>
 
-       <Sidebar showBackButton={true} />
-      <ul>
+      <ul className="quiz-list assigned-quizzes">
         {quizzes.map(({ quiz_id, title, category_name, subcategory_name, deadline }) => (
-          <li key={quiz_id} style={{ marginBottom: "1em" }}>
-            <strong>{title}</strong> <em>({category_name} - {subcategory_name || 'No subcategory'})</em>
-            <br />
-            Deadline: {new Date(deadline).toLocaleDateString()}
-            <br />
+          <li key={quiz_id} className="quiz-item quiz-card">
+            <h3>{title}</h3>
+            <p>
+              <strong>Category:</strong> {category_name}
+            </p>
+            <p>
+              <strong>Subcategory:</strong> {subcategory_name || "No subcategory"}
+            </p>
+            <p>
+              <strong>Deadline:</strong> {new Date(deadline).toLocaleDateString()}
+            </p>
             <button onClick={() => openModal({ quiz_id, title })}>See more</button>
           </li>
         ))}
       </ul>
 
-      <ModalGroupDetails isOpen={isModalOpen} onClose={closeModal} title={selectedQuiz?.title}>
+
+      <ModalGroupDetails
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={selectedQuiz?.title}
+      >
         {attemptsLoading && <p>Loading attempts...</p>}
-        {attemptsError && <p style={{ color: "red" }}>{attemptsError}</p>}
-        {!attemptsLoading && !attemptsError && attempts.length === 0 && <p>No attempts found.</p>}
+        {attemptsError && <p className="error-text">{attemptsError}</p>}
+        {!attemptsLoading && !attemptsError && attempts.length === 0 && (
+          <p>No attempts found.</p>
+        )}
         {!attemptsLoading && attempts.length > 0 && (
-          <table border="1" cellPadding="5" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="attempts-table">
             <thead>
               <tr>
                 <th>Student</th>

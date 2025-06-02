@@ -167,3 +167,99 @@ button:hover {
   border-radius: 25px;
   font-size: 16px;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .homepage-container {
+    padding-top: 40px;
+    height: auto; /* allow height to grow */
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  h3 {
+    font-size: 20px;
+  }
+
+  .quiz-card-container {
+    grid-template-columns: 1fr; /* single column for small screens */
+    gap: 15px;
+    padding-top: 10px;
+  }
+
+  .quiz-card {
+    padding: 15px;
+  }
+
+  .quiz-card h4 {
+    font-size: 18px;
+  }
+
+  .quiz-card p {
+    font-size: 13px;
+  }
+
+  .start-quiz-btn {
+    width: 100%;
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  /* Button adjustments */
+  button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+
+  .button-grid {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .button-grid button {
+    width: 100%;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  .filters-container {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .search-bar-container, .category-filter {
+    width: 100%;
+  }
+
+  .search-bar {
+    font-size: 14px;
+    padding-left: 35px;
+  }
+
+  .category-select {
+    font-size: 14px;
+  }
+}
+
+/* Extra small phones (portrait less than 400px) */
+@media (max-width: 400px) {
+  h3 {
+    font-size: 18px;
+  }
+
+  .quiz-card h4 {
+    font-size: 16px;
+  }
+
+  .quiz-card p {
+    font-size: 12px;
+  }
+
+  .button-grid button {
+    font-size: 16px;
+    height: 40px;
+  }
+}
+

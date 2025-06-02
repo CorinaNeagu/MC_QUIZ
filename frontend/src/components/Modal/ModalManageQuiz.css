@@ -1,0 +1,236 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-backdrop.settings-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.modal-content-inspect {
+  max-width: 95vw;
+  width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-questions-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.question-card {
+  background: #f0f4ff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #333;
+  transition: transform 0.2s ease;
+}
+
+.question-card:hover {
+  transform: translateY(-2px);
+}
+
+.btn-fetch-answers {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 123, 255, 0.25);
+  margin-top: 0.75rem;
+  align-self: flex-start;
+}
+
+.btn-fetch-answers:hover {
+  background-color: #0056b3;
+  box-shadow: 0 5px 12px rgba(0, 86, 179, 0.3);
+}
+
+.answers-container {
+  margin-top: 15px;
+  background-color: #f7faff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.answers-container h5 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.answers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answers-list li {
+  background-color: #ffffff;
+  padding: 10px 12px;
+  border-radius: 6px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  font-size: 0.95rem;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.answers-list li:hover {
+  background-color: #f0f8ff;
+}
+
+.correct-tag {
+  color: green;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.incorrect-tag {
+  color: red;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.settings-form .form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 1rem;
+  color: black;
+  width: 100%;
+
+}
+
+.settings-form input[type="text"],
+.settings-form input[type="number"] {
+  margin-top: 6px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  width: 100%;
+}
+
+.settings-form input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+  outline: none;
+}
+
+/* Checkbox Label Row */
+.settings-form label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  align-self: center;
+}
+
+.settings-form label {
+  flex-direction: row;
+  align-items: center;
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+
+/* Save Settings Button */
+.settings-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.settings-form button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 6px 14px rgba(0, 86, 179, 0.5);
+}
+
+/* Static Quiz Settings Display */
+.modal-content > ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.modal-content > ul li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-content > ul li strong {
+  color: #007bff;
+}

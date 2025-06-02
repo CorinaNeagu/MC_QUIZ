@@ -43,3 +43,27 @@ body {
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.6); 
   }
   
+  /* Responsive landing page */
+@media (max-width: 768px) {
+  .landing-page-buttons {
+    margin-top: 20px;
+  }
+
+  .landing-page-buttons button {
+    font-size: 16px;
+    padding: 12px 24px;
+    margin: 10px 8px;
+    width: 80vw; /* almost full width on mobile */
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 400px) {
+  .landing-page-buttons button {
+    font-size: 14px;
+    padding: 10px 20px;
+    margin: 8px 6px;
+    width: 90vw;
+    max-width: 280px;
+  }
+}

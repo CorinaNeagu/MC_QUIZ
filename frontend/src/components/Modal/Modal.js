@@ -105,8 +105,6 @@ const Modal = ({
               </button>
             </div>
           )}
-
-          <button onClick={closeAssignModal} className="close-btn">Close</button>
         </div>
       </div>
     )

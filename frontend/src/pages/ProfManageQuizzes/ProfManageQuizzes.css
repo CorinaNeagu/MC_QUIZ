@@ -17,23 +17,22 @@ html, body {
     box-sizing: border-box;
   }
 
-.manage-quizzes-container,
-.scrollable-content,
-.questions-container,
-.modal-questions-wrapper {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE 10+ */
-  scroll-behavior: smooth;
-}
+  .manage-quizzes-container,
+  .scrollable-content,
+  .questions-container,
+  .modal-questions-wrapper {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+    scroll-behavior: smooth;
+  }
 
-.manage-quizzes-container::-webkit-scrollbar,
-.scrollable-content::-webkit-scrollbar,
-.questions-container::-webkit-scrollbar,
-.modal-questions-wrapper::-webkit-scrollbar {
-  display: none;
-    
-}
-
+  .manage-quizzes-container::-webkit-scrollbar,
+  .scrollable-content::-webkit-scrollbar,
+  .questions-container::-webkit-scrollbar,
+  .modal-questions-wrapper::-webkit-scrollbar {
+    display: none;
+      
+  }
 
   .scrollable-content {
     overflow-y: auto;
@@ -89,137 +88,6 @@ html, body {
     background-color: lightblue;
   }
   
-  .questions-container {
-    margin-top: 40px;
-    margin-left: 200px;
-    margin-right: 200px;
-    padding: 30px;
-    background-color: #fdfdfd;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-    max-height: 70vh; 
-    overflow-y: auto;
-  }
-  
-  .questions-heading {
-    font-size: 1.8rem;
-    margin-bottom: 30px;
-    text-align: center;
-    color: #333;
-  }
-
-  .question-list {
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: 25px; 
-    justify-content: flex-start; 
-  }
-  
-  
-.question-card {
-    background-color: #ffffff;
-    border: 1px solid #e8e8e8;
-    border-radius: 16px;
-    padding: 20px;
-    width: 320px; 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
-    transition: transform 0.3s ease;
-    flex-shrink: 0; 
-  }
-  
-  .question-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .question-content h4 {
-    font-size: 1.2rem;
-    color: #444;
-    margin-bottom: 15px;
-  }
-  
-  .btn-fetch-answers {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    transition: background-color 0.3s ease;
-  }
-  
-  .btn-fetch-answers:hover {
-    background-color: #0056b3;
-  }
-  
-  .answers-container {
-    margin-top: 20px;
-    background-color: #f7faff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    max-height: 400px; 
-    overflow-y: auto;
-    overflow-wrap: break-word; 
-    word-wrap: break-word
-  }
-  
-  .answers-container h5 {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    color: #333;
-  }
-  
-  .answers-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px; 
-  }
-  
-  .answers-list li {
-    background-color: #f9f9f9;
-    padding: 12px;
-    border-radius: 5px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    font-size: 1rem;
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .answers-list li::before {
-    content: none; 
-  }
-  
-  .answers-list li:hover {
-    background-color: #f0f8ff;
-  }
-  
-  .correct-tag {
-    color: green;
-    font-weight: bold;
-    font-size: 1rem;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  
-  .incorrect-tag {
-    color: red;
-    font-weight: bold;
-    font-size: 1rem;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  
-  .answer-text {
-    flex: 1;
-  }
   
 .btn-go-home {
     position: fixed; 
@@ -308,150 +176,3 @@ html, body {
   background-color: #ff3333;
 }
 
-.modal-wrapper {  
-  overflow: hidden; 
-}
-
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 999;
-  padding: 150px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden; 
-
-}
-
-.modal-content {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  max-height: 80vh;
-  width: 90%;
-  overflow: hidden; 
-  position: relative;
-}
-
-.modal-close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 1.1rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #333;
-}
-
-.modal-questions-container {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden; 
-  gap: 1rem;
-  padding-top: 1rem;
-}
-
-.modal-questions-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  max-height: 70vh;
-  overflow-y: auto;
-  padding: 1rem;/* Firefox */
-}
-
-.question-card {
-  flex: 1 1 300px;
-  max-width: 300px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-.modal-questions-wrapper::-webkit-scrollbar {
-  display: none; 
-  overflow: hidden;
-}
-
-.modal-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 18px; 
-  color: #333;
-  background-color: #f1f1f1; 
-  border: none;
-  border-radius: 50%; 
-  width: 30px; 
-  height: 30px; 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  padding: 0;
-  transition: background-color 0.3s, transform 0.3s;
-  overflow: hidden;
-}
-
-.modal-close:hover {
-  background-color: rgba(255, 0, 0, 0.827); 
-  transform: scale(1.1); 
-}
-
-.modal-close:focus {
-  outline: none; 
-}
-
-.checkbox-wrapper {
-  display: flex;                
-  align-items:center;    
-  flex-direction: row;        
-  gap: 10px;                   
-  margin-bottom: 20px;          
-  padding-left: 20px;   
-         
-}
-
-.checkbox-input {
-  display: none;               
-}
-
-.checkbox-custom {
-  flex-direction: column;
-  display: flex;
-}
-
-.checkbox-input:checked + .checkbox-custom::before {
-  background-color: #007bff; 
-  border-color: #007bff;     
-}
-
-.checkbox-input:checked + .checkbox-custom::after {
-  content: "✓";              
-  position: absolute;
-  left: 5px;
-  top: 2px;                  
-  font-size: 18px;
-  color: white;             
-  transition: transform 0.2s ease; 
-  flex-direction: column;
-}
-
-.checkbox-label {
-  font-size: 1rem;
-  color: #444;
-  cursor: pointer;
-  margin: 0;
-  font-weight: 500;
-  user-select: none;
-  transition: color 0.3s ease;
-}

@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Modal from '../../components/Modal/Modal'; 
+import ModalGroupDetails from '../../components/Modal/ModalGroupDetails';
 
 import "./Groups.css";
 
@@ -275,31 +276,18 @@ const handleViewAssignedQuizzes = (groupId) => {
                 <p>
                   Group Code: <code>{group.group_code}</code>
                 </p>
-                <button onClick={() => handleDisplayStudents(group.group_id)}>
+                <button className = "btn-display-students"
+                        onClick={() => handleDisplayStudents(group.group_id)}>
                   Display Students
                 </button>
-                <button onClick={() => openAssignModal(group.group_id)}>
+                <button className="btn-assign-quiz"
+                        onClick={() => openAssignModal(group.group_id)}>
                   Assign Quiz
                 </button>
-                <button onClick={() => handleGroupDetails(group.group_id)}>
+                <button className = "btn-group-details"
+                        onClick={() => handleGroupDetails(group.group_id)}>
                   Group Details
                 </button>
-
-                {selectedGroupId === group.group_id && (
-                  <>
-                    {groupMembers.length > 0 ? (
-                      <ul>
-                        {groupMembers.map((student) => (
-                          <li key={student.student_id}>
-                            {student.username} — {student.email}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>No students in this group yet.</p>
-                    )}
-                  </>
-                )}
               </div>
             ))
           )}
@@ -386,6 +374,36 @@ const handleViewAssignedQuizzes = (groupId) => {
       quizzes={quizzes}
       handleAssignQuiz={handleAssignQuiz}
     />
+
+    <ModalGroupDetails
+      isOpen={selectedGroupId !== null}
+      onClose={() => {
+        setSelectedGroupId(null);
+        setGroupMembers([]);
+      }}
+      title={`Students in Group: ${groups.find(g => g.group_id === selectedGroupId)?.group_name || ''}`}
+      footer={
+        <button onClick={() => {
+          setSelectedGroupId(null);
+          setGroupMembers([]);
+        }}>
+          Close
+        </button>
+      }
+    >
+      {groupMembers.length > 0 ? (
+        <ul>
+          {groupMembers.map((student) => (
+            <li key={student.student_id}>
+              {student.username} — {student.email}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No students in this group yet.</p>
+      )}
+</ModalGroupDetails>
+
   </div>
 );
 

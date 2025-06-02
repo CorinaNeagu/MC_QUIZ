@@ -1,0 +1,46 @@
+.group-details-page {
+  padding: 2rem;
+}
+
+.quiz-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.quiz-item {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1rem;
+  padding: 20px;
+}
+
+.quiz-item button {
+  margin-top: 0.5rem;
+  padding: 8px 16px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.quiz-item button:hover {
+  background-color: #0056b3;
+}
+
+.error-text {
+  color: red;
+}
+
+.attempts-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attempts-table th,
+.attempts-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
