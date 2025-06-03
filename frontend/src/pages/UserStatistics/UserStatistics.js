@@ -6,6 +6,7 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import PieChartComponent from "../../components/PieChart/PieChart";
 import BarChart from '../../components/BarChart/BarChart';
 import LineChart from '../../components/LineChart/LineChart';
+import BarChartPerformance from '../../components/BarChart/BarChartPerformance';
 
 const UserStatistics = () => {
   const [userType, setUserType] = useState(null);
@@ -163,7 +164,8 @@ const UserStatistics = () => {
             </div>
 
             <div className="chart-card">
-              <BarChart selectedCategory={selectedCategory} /> {/* Pass selectedCategory */}
+              <h2>Comparative Performance Chart</h2>
+                    <BarChartPerformance />
             </div>
 
             <div className="chart-card">

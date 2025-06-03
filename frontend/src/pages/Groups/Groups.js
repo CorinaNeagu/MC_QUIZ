@@ -5,6 +5,7 @@ import axios from 'axios';
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Modal from '../../components/Modal/Modal'; 
 import ModalGroupDetails from '../../components/Modal/ModalGroupDetails';
+import { ErrorMessage, SuccessMessage } from '../../components/Message/Message';
 
 import "./Groups.css";
 
@@ -24,7 +25,7 @@ const Groups = () => {
 
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [modalGroupId, setModalGroupId] = useState(null);
-  const [modalMode, setModalMode] = useState('choose'); // 'choose' or 'create'
+  const [modalMode, setModalMode] = useState('choose'); 
   const [selectedQuizId, setSelectedQuizId] = useState('');
   const [deadline, setDeadline] = useState('');
   const [quizzes, setQuizzes] = useState([]);
@@ -35,7 +36,7 @@ const Groups = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decoding JWT to access user info
+      const decodedToken = JSON.parse(atob(token.split('.')[1])); //decode jwt
       setUserType(decodedToken.userType);
     }
 
@@ -82,33 +83,43 @@ const Groups = () => {
   };
 
   const handleCreateGroup = async () => {
-    setError('');
-    setSuccess('');
+  setError('');
+  setSuccess('');
 
-    if (!newGroupName.trim()) {
-      setError('Group name cannot be empty.');
-      return;
-    }
+  if (!newGroupName.trim()) {
+    setError('Group name cannot be empty.');
+    return;
+  }
 
-    try {
-      const token = localStorage.getItem("token");
-      const groupCode = generateGroupCode();
+  // Check for duplicate group name (case-insensitive)
+  const duplicate = groups.some(
+    (group) => group.group_name.toLowerCase() === newGroupName.trim().toLowerCase()
+  );
+  if (duplicate) {
+    setError('A group with this name already exists. Please choose a different name.');
+    return;
+  }
 
-      const res = await axios.post('http://localhost:5000/api/groups/create-group', {
-        group_name: newGroupName,
-        group_code: groupCode,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  try {
+    const token = localStorage.getItem("token");
+    const groupCode = generateGroupCode();
 
-      setSuccess(`Group "${newGroupName}" created with code: ${groupCode}`);
-      setNewGroupName('');
-      fetchGroups();
-    } catch (err) {
-      setError('Error creating group. Try a different name.');
-      console.error("Error creating group:", err);
-    }
-  };
+    const res = await axios.post('http://localhost:5000/api/groups/create-group', {
+      group_name: newGroupName,
+      group_code: groupCode,
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setSuccess(`Group "${newGroupName}" created with code: ${groupCode}`);
+    setNewGroupName('');
+    fetchGroups();
+  } catch (err) {
+    setError('Error creating group. Try a different name.');
+    console.error("Error creating group:", err);
+  }
+};
+
 
   const handleJoinGroup = async () => {
     setJoinError('');
@@ -163,10 +174,26 @@ const Groups = () => {
     }
   };
 
-  const openAssignModal = (groupId) => {
+  const openAssignModal = async (groupId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`http://localhost:5000/api/groups/group-members/${groupId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data.length === 0) {
+      alert('Cannot assign a quiz to a group with no members.');
+      return;
+    }
+
     setModalGroupId(groupId);
     setShowAssignModal(true);
-  };
+  } catch (err) {
+    console.error("Error checking group members before assigning quiz:", err);
+    alert('Failed to verify group members. Please try again.');
+  }
+};
+
 
   const closeAssignModal = () => {
     setSelectedQuizId(null);
@@ -221,31 +248,63 @@ const Groups = () => {
 
   // Generate group code
   const generateGroupCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
+      return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
   };
 
-  const handleGroupDetails = async (groupId) => {
-  try {
-    const token = localStorage.getItem('token');
-    const res = await axios.get(`http://localhost:5000/api/groups/student-assigned-quizzes/${groupId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const handleGroupDetails = async (groupId) => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`http://localhost:5000/api/groups/student-assigned-quizzes/${groupId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    if (res.data.length === 0) {
-      alert('This group has not been assigned any quizzes yet.');
-    } else {
-      navigate(`/groups/${groupId}/details`);
+        if (res.data.length === 0) {
+          alert('This group has not been assigned any quizzes yet.');
+        } else {
+          navigate(`/groups/${groupId}/details`);
+        }
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          alert('This group has not been assigned any quizzes yet.');
+        } else {
+          console.error('Error fetching assigned quizzes for group details:', err);
+          alert('Failed to load quizzes for this group.');
+        }
+      }
+    };
+
+    const handleViewAssignedQuizzes = (groupId) => {
+      fetchAssignedQuizzes(groupId);
+      setActiveGroupForQuizzes(groupId);
+    };
+
+   const handleDeleteGroup = async (groupId) => {
+    if (!groupId) {
+      alert('No group selected for deletion.');
+      return;
     }
-  } catch (err) {
-    console.error('Error fetching assigned quizzes for group details:', err);
-    alert('No quizzes assigned to this group yet.');
-  }
-};
 
-const handleViewAssignedQuizzes = (groupId) => {
-  fetchAssignedQuizzes(groupId);
-  setActiveGroupForQuizzes(groupId);
-};
+    if (!window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+      return;
+    }
+
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`http://localhost:5000/api/groups/delete-group/${groupId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        alert('Group deleted successfully.');
+        setSelectedGroupId(null);
+        setGroupMembers([]);
+        fetchGroups();
+      } catch (err) {
+        console.error('Error deleting group:', err);
+        alert('Failed to delete group. Please try again.');
+      }
+    };
+
+
 
   return (
   <div className="groups-page">
@@ -263,8 +322,8 @@ const handleViewAssignedQuizzes = (groupId) => {
           <button onClick={handleCreateGroup}>Create Group</button>
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+        {error && <ErrorMessage message={error} />}
+        {success && <SuccessMessage message={success} />}
 
         <div className="group-cards">
           {groups.length === 0 ? (
@@ -287,6 +346,11 @@ const handleViewAssignedQuizzes = (groupId) => {
                 <button className = "btn-group-details"
                         onClick={() => handleGroupDetails(group.group_id)}>
                   Group Details
+                </button>
+                <button className = "btn-delete"
+                  onClick={() => handleDeleteGroup(group.group_id)}
+                >
+                  Delete Group
                 </button>
               </div>
             ))
@@ -334,6 +398,7 @@ const handleViewAssignedQuizzes = (groupId) => {
             ) : (
               <div className="assigned-quizzes">
                 {assignedQuizzes.map((quiz) => (
+
                   <div key={quiz.quiz_id} className="quiz-card">
                     <h3>{quiz.title}</h3>
                     <p>
@@ -349,8 +414,16 @@ const handleViewAssignedQuizzes = (groupId) => {
                         ? new Date(quiz.deadline).toLocaleString()
                         : 'No Deadline'}
                     </p>
-                    <button onClick={() => handleTakeQuiz(quiz.quiz_id)}>
-                      Take Quiz
+                    <button
+                      onClick={() => handleTakeQuiz(quiz.quiz_id)}
+                      disabled={quiz.deadline && new Date(quiz.deadline) < new Date()}
+                      className={`btn-take-quiz ${
+                        quiz.deadline && new Date(quiz.deadline) < new Date() ? 'disabled' : ''
+                      }`}
+                    >
+                      {quiz.deadline && new Date(quiz.deadline) < new Date()
+                        ? 'Deadline Passed'
+                        : 'Take Quiz'}
                     </button>
                   </div>
                 ))}
@@ -382,15 +455,15 @@ const handleViewAssignedQuizzes = (groupId) => {
         setGroupMembers([]);
       }}
       title={`Students in Group: ${groups.find(g => g.group_id === selectedGroupId)?.group_name || ''}`}
-      footer={
-        <button onClick={() => {
-          setSelectedGroupId(null);
-          setGroupMembers([]);
-        }}>
-          Close
-        </button>
-      }
-    >
+     footer={
+          <button onClick={() => {
+            setSelectedGroupId(null);
+            setGroupMembers([]);
+          }}>
+            Close
+          </button>
+        }
+        >
       {groupMembers.length > 0 ? (
         <ul>
           {groupMembers.map((student) => (

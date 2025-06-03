@@ -16,8 +16,21 @@
   padding: 20px;
 }
 
-.quiz-item button {
-  margin-top: 0.5rem;
+.quiz-item.quiz-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; /* Optional if you set a fixed height on all cards */
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+
+.btn-more {
+  margin-top: auto;
+  margin-bottom: 0.5rem;
+  align-self: flex-start;
   padding: 8px 16px;
   background-color: #007bff;
   border: none;

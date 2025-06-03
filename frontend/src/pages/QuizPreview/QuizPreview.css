@@ -151,7 +151,6 @@
   box-shadow: 0 8px 22px rgba(44, 123, 229, 0.7);
 }
 
-/* Responsive */
 
 @media (max-width: 800px) {
   .quiz-preview-container h2 {

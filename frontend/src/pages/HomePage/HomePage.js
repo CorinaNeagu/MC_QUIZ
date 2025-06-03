@@ -145,7 +145,7 @@
                     <button
                       className="start-quiz-btn"
                       onClick={() => startQuiz(quiz.quiz_id)}
-                      disabled={quiz.retake_allowed === 0}  // Disable if retake is not allowed (i.e., retake_allowed = 0)
+                      disabled={quiz.retake_allowed === 0}  
                     >
                       Start Quiz
                     </button>
@@ -160,7 +160,7 @@
             <p>Welcome, professor! Here you can manage quizzes, view your students' progress, and update your profile.</p>
             <div className="button-grid">
               <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
-              <button onClick={() => navigate("/groups")}>Display Groups</button> {/* Changed */}
+              <button onClick={() => navigate("/groups")}>Display Groups</button> 
             </div>
           </div>
         ) : (

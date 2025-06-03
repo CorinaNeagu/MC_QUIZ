@@ -272,6 +272,50 @@ router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
   });
 });
 
+//Comparative performance
+router.get('/professor/quiz-scores/:quizId', authenticateJWT, async (req, res) => {
+  const professorId = req.user.id;
+  const userType = req.user.userType;
+  const { quizId } = req.params;
+
+  if (userType !== 'professor') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const query = `
+   SELECT 
+  s.username AS student_name,
+  ROUND((qa.score / (qs.no_questions * qp.points_per_question)) * 100, 2) AS score_percentage
+FROM Quiz q
+JOIN QuizAttempt qa ON q.quiz_id = qa.quiz_id
+JOIN Student s ON qa.student_id = s.student_id
+JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+JOIN (
+  SELECT quiz_id, MAX(points_per_question) AS points_per_question
+  FROM Questions
+  GROUP BY quiz_id
+) qp ON q.quiz_id = qp.quiz_id
+WHERE q.quiz_id = ?
+  AND q.professor_id = ?
+  AND qa.attempt_id = (
+    SELECT MAX(attempt_id)
+    FROM QuizAttempt
+    WHERE quiz_id = q.quiz_id AND student_id = qa.student_id
+  )
+ORDER BY score_percentage DESC;
+
+  `;
+
+  try {
+    const results = await queryAsync(query, [quizId, professorId]);
+    res.status(200).json(results);
+  } catch (err) {
+    console.error('Error fetching student scores for quiz:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 
 module.exports = router;

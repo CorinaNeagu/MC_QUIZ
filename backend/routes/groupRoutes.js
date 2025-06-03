@@ -200,17 +200,68 @@ router.get('/student-assigned-quizzes/:groupId', authenticateJWT, (req, res) => 
       }
 
       if (results.length === 0) {
-        return res.status(404).json({ message: 'No quizzes found for this group' });
+          return res.json([]); // return 200 with empty array      }
+      }
+      if (err) {
+        console.error('Error executing query:', err);
+        return res.status(500).json({ message: 'Error fetching assigned quizzes', error: err.message });
       }
 
-      res.json(results);
+      res.json(results); // Always return 200, even if empty
+          }
+        );
+      });
+
+router.delete('/delete-group/:groupId', authenticateJWT, (req, res) => {
+  if (req.user.userType !== 'professor') {
+    return res.status(403).json({ message: 'Forbidden: Professors only' });
+  }
+
+  const groupId = req.params.groupId;
+  const professorId = req.user.id;
+
+  // First check if the group exists and belongs to this professor
+  db.query(
+    'SELECT * FROM studyGroup WHERE group_id = ? AND professor_id = ?',
+    [groupId, professorId],
+    (err, results) => {
+      if (err) {
+        console.error('Error querying group:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Group not found or not owned by professor' });
+      }
+
+      // Delete group members first
+      db.query('DELETE FROM groupMembers WHERE group_id = ?', [groupId], (err2) => {
+        if (err2) {
+          console.error('Error deleting group members:', err2);
+          return res.status(500).json({ message: 'Error deleting group members' });
+        }
+
+        // Delete group quizzes next
+        db.query('DELETE FROM groupquiz WHERE group_id = ?', [groupId], (err3) => {
+          if (err3) {
+            console.error('Error deleting group quizzes:', err3);
+            return res.status(500).json({ message: 'Error deleting group quizzes' });
+          }
+
+          // Now delete the group itself
+          db.query('DELETE FROM studyGroup WHERE group_id = ?', [groupId], (err4) => {
+            if (err4) {
+              console.error('Error deleting group:', err4);
+              return res.status(500).json({ message: 'Error deleting group' });
+            }
+
+            res.json({ message: 'Group deleted successfully' });
+          });
+        });
+      });
     }
   );
 });
-
-
-
-
 
 
 

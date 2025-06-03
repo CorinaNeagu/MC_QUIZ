@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';  // Import useLocation hook
+import { useLocation } from 'react-router-dom';  
 import './Sidebar.css';
 
 const Sidebar = ({ showBackButton }) => {
-  const navigate = useNavigate(); // Navigate hook
-  const location = useLocation(); // Get the current route
+  const navigate = useNavigate(); 
+  const location = useLocation(); 
 
   const handleProfileClick = () => {
     navigate('/profile');

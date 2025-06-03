@@ -178,7 +178,6 @@
   outline: none;
 }
 
-/* Checkbox Label Row */
 .settings-form label input[type="checkbox"] {
   width: 18px;
   height: 18px;
@@ -194,7 +193,6 @@
   font-size: 1.05rem;
 }
 
-/* Save Settings Button */
 .settings-form button {
   background-color: #007bff;
   color: white;
@@ -214,7 +212,6 @@
   box-shadow: 0 6px 14px rgba(0, 86, 179, 0.5);
 }
 
-/* Static Quiz Settings Display */
 .modal-content > ul {
   list-style: none;
   padding: 0;

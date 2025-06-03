@@ -96,7 +96,10 @@ const GroupDetails = () => {
             <p>
               <strong>Deadline:</strong> {new Date(deadline).toLocaleDateString()}
             </p>
-            <button onClick={() => openModal({ quiz_id, title })}>See more</button>
+            <button className = "btn-more" 
+                    onClick={() => openModal({ quiz_id, title })}>
+              See more
+            </button>
           </li>
         ))}
       </ul>

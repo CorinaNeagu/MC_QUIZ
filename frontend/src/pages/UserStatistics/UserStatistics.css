@@ -50,3 +50,74 @@ select {
   border: 1px solid #ccc; 
   width: 100%; 
 }
+
+@media (max-width: 768px) {
+  .statistics-container {
+    flex-direction: column;
+    height: fit-content;
+    padding-left: 20px;
+    padding-right: 15px;
+    padding-top: 60px;
+  }
+
+  .charts-section {
+    padding: 100px 0;
+    width: 100%;
+  }
+
+  .chart-container {
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 200px;
+  }
+
+  .chart-card {
+    padding: 15px;
+    padding-left: 100px;
+    padding-right: 100 px;
+    width: 100%;
+    max-width: 100%;
+    min-width: unset;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .chart-card h4 {
+    font-size: 18px;
+  }
+
+  .chart-card p {
+    font-size: 13px;
+  }
+
+  .line-chart-container {
+    width: 100%;
+    height: 300px;
+  }
+
+  select {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 400px) {
+  .chart-card h4 {
+    font-size: 16px;
+  }
+
+  .chart-card p {
+    font-size: 12px;
+  }
+
+  .line-chart-container {
+    height: 250px;
+  }
+
+  select {
+    font-size: 13px;
+    padding: 8px;
+  }
+}

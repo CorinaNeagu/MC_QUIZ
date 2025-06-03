@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import './DisplayResponses.css';
+import Sidebar from "../../components/Sidebar/Sidebar";
 
 const DisplayResponses = () => {
   const { attemptId } = useParams();
@@ -190,11 +191,17 @@ const DisplayResponses = () => {
   };
 
   return (
+    <div>
+      <Sidebar showBackButton />
     <div className="responses-container">
       {error && <p>{error}</p>}
       {responses.length > 0 ? (
         <div>
           <h2>Your Responses</h2>
+          <button className = "btn-back" 
+                  onClick={handleBackToScore}>
+          ❮❮ Back to Score
+          </button>
           <ul className="responses-list">
             {responses.map((response, index) => (
               <li key={index} className="response-item">
@@ -231,12 +238,14 @@ const DisplayResponses = () => {
               </li>
             ))}
           </ul>
-          <button onClick={handleBackToScore}>Back to Score</button>
+          
         </div>
       ) : (
         <p>Loading responses...</p>
       )}
     </div>
+        </div>
+
   );
 };
 

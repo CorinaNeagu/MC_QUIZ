@@ -168,11 +168,10 @@ button:hover {
   font-size: 16px;
 }
 
-/* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .homepage-container {
     padding-top: 40px;
-    height: auto; /* allow height to grow */
+    height: auto; 
     padding-left: 15px;
     padding-right: 15px;
   }
@@ -182,7 +181,7 @@ button:hover {
   }
 
   .quiz-card-container {
-    grid-template-columns: 1fr; /* single column for small screens */
+    grid-template-columns: 1fr; 
     gap: 15px;
     padding-top: 10px;
   }
@@ -205,7 +204,6 @@ button:hover {
     padding: 10px;
   }
 
-  /* Button adjustments */
   button {
     padding: 10px 15px;
     font-size: 14px;
@@ -243,7 +241,6 @@ button:hover {
   }
 }
 
-/* Extra small phones (portrait less than 400px) */
 @media (max-width: 400px) {
   h3 {
     font-size: 18px;
