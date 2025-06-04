@@ -168,6 +168,31 @@ button:hover {
   font-size: 16px;
 }
 
+.welcome-message {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;      
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 2px solid #3498db; 
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
+}
+
+.welcome-message:hover {
+  transform: scale(1.05);
+}
+
+.homepage-header {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* space between image, heading, and sidebar */
+  padding: 20px;
+}
+
+
+
+
 @media (max-width: 768px) {
   .homepage-container {
     padding-top: 40px;

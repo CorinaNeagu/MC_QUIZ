@@ -7,9 +7,6 @@ const Sidebar = ({ showBackButton }) => {
   const navigate = useNavigate(); 
   const location = useLocation(); 
 
-  const handleProfileClick = () => {
-    navigate('/profile');
-  };
 
   const handleGoHome = () => {
     navigate('/home'); 
@@ -39,10 +36,6 @@ const Sidebar = ({ showBackButton }) => {
                 🏠 Home
               </button>
             )}
-
-          <button onClick={handleProfileClick} className="sidebar-item">
-          🪪 Profile
-          </button>
           <button onClick={handleGroups} className="sidebar-item">
           🤝 Groups
           </button>

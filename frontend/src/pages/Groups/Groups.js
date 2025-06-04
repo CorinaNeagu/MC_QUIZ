@@ -196,7 +196,7 @@ const Groups = () => {
 
 
   const closeAssignModal = () => {
-    setSelectedQuizId(null);
+    setSelectedQuizId('');
     setDeadline('');
     setShowAssignModal(false);
     setModalGroupId(null);

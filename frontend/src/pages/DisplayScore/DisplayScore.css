@@ -3,107 +3,112 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  width: 100%;
-}
+  padding: 20px;}
+
 .score-page-container {
   text-align: center;
-  padding: 50px;
-  border-radius: 30px; 
+  padding: 40px;
+  border-radius: 25px;
   max-width: 600px;
-  margin: 50px auto;
+  width: 100%;
+  margin: 40px auto;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
   opacity: 0;
   transform: translateY(30px);
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-  
+.score-page-container h1 {
+  font-size: 3em;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.score-page-container p {
+  font-size: 1.6em;
+  color: #555;
+  font-weight: 500;
+  margin-bottom: 30px;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-in-out 0.4s forwards;
+}
+
+.score-page-container .score-value {
+  font-size: 3em;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 30px;
+}
+
+.score-page-container button {
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  height: 40px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.score-page-container button:hover {  
+  transform: scale(1.05);
+  background-color: #0056b3;
+}
+
+.score-page-container button:focus {
+  outline: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .score-page-container {
+    padding: 25px;
+  }
+
   .score-page-container h1 {
-    font-size: 3.5em;
-    color: #333;
-    margin-bottom: 20px;
-    font-weight: 700;
-    text-transform: uppercase;
-    border-radius: 15px; 
+    font-size: 2.2em;
   }
-  
+
   .score-page-container p {
-    font-size: 2.5em;
-    color: #555;
-    font-weight: 500;
-    margin-bottom: 40px;
-    opacity: 0;
-    animation: fadeIn 0.8s ease-in-out 0.4s forwards;
+    font-size: 1.3em;
   }
-  
+
   .score-page-container .score-value {
-    font-size: 3em;
-    font-weight: bold;
-    color: #007bff;
-    margin-bottom: 30px;
+    font-size: 2.4em;
   }
-  
+
   .score-page-container button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.4em;
-    border-radius: 50px; 
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0 5px 10px rgba(0, 123, 255, 0.2);
-    transform: scale(1);
-    animation: fadeIn 0.8s ease-in-out 0.6s forwards;
-    opacity: 0;
+    font-size: 1em;
+    padding: 12px 28px;
   }
-  
-  .score-page-container button:hover {
-    background-color: #0056b3;
-    transform: scale(1.1);
-    box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
-  }
-  
-  .score-page-container button:focus {
-    outline: none;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .score-page-container {
-      padding: 30px;
-    }
-  
-    .score-page-container h1 {
-      font-size: 2.5em;
-    }
-  
-    .score-page-container p {
-      font-size: 2em;
-    }
-  
-    .score-page-container button {
-      font-size: 1.2em;
-      padding: 12px 25px;
-    }
-  }
-  
-  
+}

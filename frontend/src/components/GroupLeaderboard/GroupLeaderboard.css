@@ -1,0 +1,145 @@
+.leaderboard-container {
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 1000px;
+  margin: 40px auto;
+  font-family: 'Inter', sans-serif;
+    scrollbar-width: none; 
+  -ms-overflow-style: none;   
+}
+
+.leaderboard-container h2 {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.controls {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Dropdowns and checkbox */
+.select-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.select-container label {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 6px;
+}
+
+.select-container select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  min-width: 200px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  align-self: center;
+}
+
+.chart-wrapper {
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 40px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+svg rect {
+  fill: #4a90e2;
+  transition: all 0.3s ease;
+}
+
+svg rect:hover {
+  fill: #7ab8e7;
+  transform: scaleY(1.05);
+}
+
+svg text {
+  fill: #2d3748;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.message {
+  text-align: center;
+  color: #718096;
+  font-size: 16px;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .select-container select {
+    min-width: 100%;
+  }
+
+  .leaderboard-container {
+    padding: 20px;
+  }
+
+  .leaderboard-container h2 {
+    font-size: 24px;
+  }
+}
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}

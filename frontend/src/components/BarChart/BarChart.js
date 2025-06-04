@@ -89,7 +89,7 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
           const y = topPadding + chartHeight - (tick / maxValue) * chartHeight;
           return (
             <g key={tick}>
-              <line x1="40" y1={y} x2="400" y2={y} stroke="#ccc" />
+              <line x1="40" y1={y} x2="1500" y2={y} stroke="#ccc" />
               <text x="35" y={y - 5} textAnchor="end" fontSize="12">
                 {tick}
               </text>
@@ -167,30 +167,6 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
             </g>
           );
         })}
-
-        {/* Tooltip */}
-        {tooltip.visible && (
-          <foreignObject
-            x={tooltip.x + 10}
-            y={tooltip.y - 30}
-            width={150}
-            height={40}
-            style={{ pointerEvents: "none" }}
-          >
-            <div
-              style={{
-                background: "rgba(0,0,0,0.75)",
-                color: "white",
-                padding: "5px 10px",
-                borderRadius: 4,
-                fontSize: 12,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {tooltip.content}
-            </div>
-          </foreignObject>
-        )}
       </svg>
     );
   };
@@ -202,8 +178,8 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
     : quizData;
 
   return (
-    <div className="bar-chart-wrapper" style={{ width: "100%" }}>
-      <div style={{ minWidth: "1000px" }}>
+    <div className="bar-chart-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+      <div style={{ minWidth: "1000px", overflow: "visible" }}>
         {filteredData.length > 0 ? (
           <>
             <h3>

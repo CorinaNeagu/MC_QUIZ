@@ -5,8 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import Sidebar from "../../components/Sidebar/Sidebar";
 import PieChartComponent from "../../components/PieChart/PieChart";
 import BarChart from '../../components/BarChart/BarChart';
-import LineChart from '../../components/LineChart/LineChart';
-import BarChartPerformance from '../../components/BarChart/BarChartPerformance';
+import BarChartProf from '../../components/BarChart/BarChartProf';
 
 const UserStatistics = () => {
   const [userType, setUserType] = useState(null);
@@ -109,6 +108,7 @@ const UserStatistics = () => {
             </div>
 
           <div className="chart-card">
+
               <h2>Select a Category</h2>
               
               <select onChange={handleCategoryChange} value={selectedCategory}>
@@ -139,23 +139,9 @@ const UserStatistics = () => {
               />
             ) : (
               <p>Select a category to see quizzes</p>
-            )}         
+            )}    
           </div>
-           
-            <div className="chart-card">
-              <h2>Quiz Score Trends</h2>
-              <select onChange={handleQuizChange} value={selectedQuizId}>
-                <option value="">Select a Quiz</option>
-                {quizzes.map(quiz => (
-                  <option key={quiz.quiz_id} value={quiz.quiz_id}>
-                    {quiz.title}
-                  </option>
-                ))}
-              </select>
-              {quizId ? <LineChart quizId={quizId} /> : <p>Select a quiz to see trends</p>}
-            </div>
-
-          </div>
+           </div>
         ) : userType === "professor" ? (
           <div className="chart-container">
 
@@ -165,7 +151,7 @@ const UserStatistics = () => {
 
             <div className="chart-card">
               <h2>Comparative Performance Chart</h2>
-                    <BarChartPerformance />
+                    <BarChartProf />
             </div>
 
             <div className="chart-card">
@@ -177,6 +163,7 @@ const UserStatistics = () => {
         )}
       </div>
     </div>
+  
   );
 };
 

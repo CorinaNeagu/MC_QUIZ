@@ -80,7 +80,6 @@ const DisplayScore = () => {
       {finalScore !== null ? (
         <>
           <h1>Quiz Completed</h1>
-          <p>Great job! You've completed the quiz.</p>
 
           <div className="score-value">
             Your Score: {finalScore.toFixed(2)} / {maxScore}

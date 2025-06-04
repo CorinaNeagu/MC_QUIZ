@@ -2,7 +2,7 @@
 .bar-chart-wrapper {
   text-align: center;
   padding: 20px;
-  background-color: #f0faff; /* Light blue background */
+  background-color: #f0faff !important;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   margin-top: 40px;
@@ -32,9 +32,8 @@
   transition: all 0.3s ease;
 }
 
-/* Hover effect for bars */
 .bar-chart-container svg rect:hover {
-  fill: #7ab8e7; /* Lighter blue on hover */
+  fill: #7ab8e7; 
   transform: scale(1.05);
 }
 

@@ -162,7 +162,7 @@ html, body {
 }
 
 .btn-delete-quiz {
-  background-color: #ff4d4d;
+  background-color: red !important;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -173,6 +173,6 @@ html, body {
 }
 
 .btn-delete-quiz:hover {
-  background-color: #ff3333;
+  background-color: rgb(229, 43, 43) !important;
 }
 

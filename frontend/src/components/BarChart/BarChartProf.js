@@ -137,7 +137,7 @@ const SVGBarChart = ({ data, width = 800, height = 400, barColor = "#4B9CD3" }) 
 
 
 
-const BarChartPerformance = () => {
+const BarChartProf = () => {
   const [quizList, setQuizList] = useState([]);
   const [selectedQuizId, setSelectedQuizId] = useState(null);
   const [performanceData, setPerformanceData] = useState([]);
@@ -241,4 +241,4 @@ const BarChartPerformance = () => {
   );
 };
 
-export default BarChartPerformance;
+export default BarChartProf;

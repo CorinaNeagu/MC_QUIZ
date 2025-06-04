@@ -5,7 +5,7 @@ import "./UserProfile.css";
 import Sidebar from "../../components/Sidebar/Sidebar";
 
 
-const UserProfile = () => {
+const UserProfile = ({ embedded = false }) => {
   const [userProfile, setUserProfile] = useState({
     username: "",
     email: "",
@@ -13,49 +13,42 @@ const UserProfile = () => {
     userType: "",
   });
 
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({}); 
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (!token) {
-      navigate("/login"); // Redirect to login if there's no token
+    if (!token && !embedded) {
+      navigate("/login");
     } else {
-      // Fetch user profile data from the backend
       fetch("http://localhost:5000/api/user/profile", {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       })
         .then((response) => response.json())
         .then((data) => {
-          if (data.error) {
-            console.error("Error fetching profile:", data.error);
-          } else {
+          if (!data.error) {
             setUserProfile({
               username: data.username,
               email: data.email,
               created_at: data.created_at,
               userType: data.userType,
             });
+          } else {
+            console.error("Error fetching profile:", data.error);
           }
         })
         .catch((error) => console.error("Error fetching profile:", error));
     }
-  }, [navigate]);
+  }, [navigate, embedded]);
 
   const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
 
-  return (
-    <div className="user-profile-container">
-       <Sidebar showBackButton={true} /> 
-      <div className="profile-header">
-        <h2>User Profile</h2>
-      </div>
-      {/* User Details Table */}
+    return (
+    <div className={`user-profile-container ${embedded ? "embedded" : ""}`}>
+      {!embedded && <h2>User Profile</h2>}
       <div className="profile-table">
         <table>
           <thead>
@@ -83,7 +76,7 @@ const UserProfile = () => {
             </tr>
           </tbody>
         </table>
-      </div>     
+      </div>
     </div>
   );
 

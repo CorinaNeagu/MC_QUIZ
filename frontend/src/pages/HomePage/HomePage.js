@@ -1,173 +1,116 @@
-  import React, { useEffect, useState } from "react";
-  import { useNavigate } from "react-router-dom";
-  import { jwtDecode } from "jwt-decode";
-  import axios from "axios";
-  import "./HomePage.css";  
-  import Sidebar from "../../components/Sidebar/Sidebar";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import "./HomePage.css";
+import Sidebar from "../../components/Sidebar/Sidebar";
+import UserProfile from "../UserProfile/UserProfile";
 
-  const HomePage = () => {
-    const [userType, setUserType] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [quizzes, setQuizzes] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState("");
-    const [filteredQuizzes, setFilteredQuizzes] = useState([]);
-    const navigate = useNavigate();
 
-    useEffect(() => {
-      const token = localStorage.getItem("token");
+const HomePage = () => {
+  const [userType, setUserType] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
 
-      if (!token) {
-        navigate("/login"); // Redirect to login if there's no token
-        return;
-      }
+  const [userProfile, setUserProfile] = useState({
+    username: "",
+    email: "",
+    created_at: "",
+    userType: "",
+  });
 
-      try {
-        const decodedToken = jwtDecode(token);
-        const expirationTime = decodedToken.exp * 1000;
+  const navigate = useNavigate();
 
-        if (expirationTime < Date.now()) {
-          navigate("/login"); // If token is expired, navigate to login
-        } else {
-          setUserType(decodedToken.userType); // Set the user type
-        }
-      } catch (err) {
-        console.error("Invalid or expired token:", err);
-        navigate("/login"); // Redirect to login if the token is invalid
-      } finally {
-        setLoading(false); // Set loading to false after the process is complete
-      }
-    }, [navigate]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-    // Fetch quizzes and categories if user is a student
-    useEffect(() => {
-      if (userType === "student") {
-        axios
-          .get("http://localhost:5000/api/display/quizzes")
-          .then((response) => {
-            setQuizzes(response.data);
-            setFilteredQuizzes(response.data);
-          })
-          .catch((error) => {
-            console.error("Error fetching quizzes:", error);
-          });
-
-        // Fetch categories for the dropdown filter
-        axios
-          .get("http://localhost:5000/api/categories")
-          .then((response) => {
-            setCategories(response.data.categories);
-          })
-          .catch((error) => {
-            console.error("Error fetching categories:", error);
-          });
-      }
-    }, [userType]);
-
-    // Handle category filter change
-    const handleCategoryChange = (e) => {
-      const categoryId = e.target.value;
-      setSelectedCategory(categoryId);
-
-      const filtered = quizzes.filter((quiz) =>
-        categoryId ? quiz.category_id === parseInt(categoryId) : true
-      );
-      setFilteredQuizzes(filtered);
-    };
-
-    // Handle search bar change
-    const handleSearchChange = (e) => {
-      const query = e.target.value.toLowerCase();
-
-      const filtered = quizzes.filter((quiz) =>
-        quiz.title.toLowerCase().includes(query)
-      );
-      setFilteredQuizzes(filtered);
-    };
-
-    // Redirect to quiz display page
-    const startQuiz = (quizId) => {
-      navigate(`/quiz/${quizId}`);
-    };
-
-    if (loading) {
-      return <div>Loading...</div>;
+    if (!token) {
+      navigate("/login");
+      return;
     }
 
-    return (
-      <div className="homepage-container">
-        <div className="homepage-header">
-          <h1>Welcome to Your Dashboard</h1>
-          <Sidebar />
-        </div>
-    
-        {userType === "student" ? (
-          <div className="student-content">
-            <h3>Available Quizzes</h3>
-    
-            <div className="filters-container">
-              <div className="search-bar-container">
-                <input
-                  type="text"
-                  placeholder="Search quizzes by title..."
-                  onChange={handleSearchChange}
-                  className="search-bar"
-                />
-                <i className="fas fa-search search-icon"></i>
-              </div>
-    
-              <div className="category-filter">
-                <select
-                  onChange={handleCategoryChange}
-                  value={selectedCategory}
-                  className="category-select"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category.category_id} value={category.category_id}>
-                      {category.category_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-    
-            {filteredQuizzes.length === 0 ? (
-              <p>No quizzes available at the moment.</p>
-            ) : (
-              <div className="quiz-card-container">
-                {filteredQuizzes.map((quiz) => (
-                  <div key={quiz.quiz_id} className="quiz-card">
-                    <h4>{quiz.title}</h4>
-                    <p>Category: {quiz.category_name}</p>
-                    
-                    {/* Conditionally render the "Start Quiz" button */}
-                    <button
-                      className="start-quiz-btn"
-                      onClick={() => startQuiz(quiz.quiz_id)}
-                      disabled={quiz.retake_allowed === 0}  
-                    >
-                      Start Quiz
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : userType === "professor" ? (
-          <div className="professor-content">
-            <h2>Professor Dashboard</h2>
-            <p>Welcome, professor! Here you can manage quizzes, view your students' progress, and update your profile.</p>
-            <div className="button-grid">
-              <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
-              <button onClick={() => navigate("/groups")}>Display Groups</button> 
-            </div>
-          </div>
-        ) : (
-          <div>Loading...</div>
-        )}
-      </div>
-    );
-  };
+    try {
+      const decodedToken = jwtDecode(token);
+      const expirationTime = decodedToken.exp * 1000;
 
-  export default HomePage;
+      if (expirationTime < Date.now()) {
+        navigate("/login");
+      } else {
+        setUserType(decodedToken.userType);
+
+        // Fetch user profile data
+        fetch("http://localhost:5000/api/user/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              console.error("Error fetching profile:", data.error);
+            } else {
+              setUserProfile({
+                username: data.username,
+                email: data.email,
+                created_at: data.created_at,
+                userType: data.userType,
+              });
+            }
+          })
+          .catch((error) => console.error("Error fetching profile:", error));
+      }
+    } catch (err) {
+      console.error("Invalid or expired token:", err);
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="homepage-container">
+      <div className="homepage-header">
+        
+        <Sidebar />
+      </div>
+
+      {userType === "student" ? (
+        <div className="student-content">
+          <h2 className="welcome-message"> 👋 Welcome, {userProfile.username}! </h2>
+
+          <button onClick={() => setShowProfile((prev) => !prev)}>
+            {showProfile ? "Hide Profile" : "Show Profile"}
+          </button>
+          {showProfile && <UserProfile embedded={true} />}
+        </div>
+      ) : userType === "professor" ? (
+        <div className="professor-content">
+          <h2>Professor Dashboard</h2>
+          <p className="welcome-message"> 👋 Welcome, {userProfile.username}!</p>
+
+          <div className="button-grid">
+            <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
+            <button onClick={() => navigate("/groups")}>Display Groups</button>
+            
+          </div>
+
+          <button onClick={() => setShowProfile((prev) => !prev)}>
+            {showProfile ? "Hide Profile" : "Show Profile"}
+          </button>
+          {showProfile && <UserProfile embedded={true} />}
+        </div>
+      ) : (
+        <div>Loading...</div>
+      )}
+    </div>
+  );
+};
+
+export default HomePage;
