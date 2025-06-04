@@ -188,6 +188,54 @@ router.post('/takeQuiz/submit-quiz', (req, res) => {
     });
   });
 
+ router.get('/student-assigned-quizzes/:groupId', authenticateJWT, (req, res) => {
+  const studentId = req.user.id;
+  const groupId = req.params.groupId;
+
+  if (!studentId) {
+    return res.status(401).json({ message: 'Unauthorized: studentId missing' });
+  }
+
+  if (!groupId) {
+    return res.status(400).json({ message: 'Group ID is required' });
+  }
+
+  const query = `
+    SELECT 
+  q.quiz_id, 
+  q.title, 
+  c.category_name AS category_name,
+  sc.subcategory_name AS subcategory_name,
+  gq.deadline, 
+  qs.retake_allowed,
+  CASE
+    WHEN qs.retake_allowed = 0 AND EXISTS (
+      SELECT 1 FROM QuizAttempt qa 
+      WHERE qa.quiz_id = q.quiz_id AND qa.student_id = ?
+    ) THEN TRUE
+    ELSE FALSE
+  END AS alreadyTaken
+FROM groupQuiz gq
+JOIN Quiz q ON gq.quiz_id = q.quiz_id
+JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+JOIN groupMembers gm ON gm.group_id = gq.group_id AND gm.student_id = ?
+LEFT JOIN Category c ON q.category_id = c.category_id
+LEFT JOIN Subcategory sc ON q.subcategory_id = sc.subcategory_id
+WHERE gq.group_id = ?;
+
+  `;
+
+  const params = [studentId, studentId, groupId];
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      console.error('Error fetching assigned quizzes:', error);
+      return res.status(500).json({ message: 'Server error fetching assigned quizzes' });
+    }
+    res.json(results);
+  });
+});
+
 
 
 

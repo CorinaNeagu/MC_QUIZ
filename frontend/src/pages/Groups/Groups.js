@@ -32,6 +32,8 @@ const Groups = () => {
   const [assignedQuizzes, setAssignedQuizzes] = useState([]);
   const [activeGroupForQuizzes, setActiveGroupForQuizzes] = React.useState(null);
 
+  const [loading, setLoading] = useState(true);
+
   // Fetch user type and groups based on it (professor or student)
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -48,6 +50,33 @@ const Groups = () => {
       fetchQuizzes();  // Fetch quizzes only for professors
     }
   }, [userType]);
+
+
+  useEffect(() => {
+  const token = localStorage.getItem('token');
+  console.log('Token:', token);
+
+  if (!activeGroupForQuizzes || !token) {
+    return; // nothing to fetch
+  }
+
+  setLoading(true);
+  axios.get(`http://localhost:5000/api/takeQuiz/student-assigned-quizzes/${activeGroupForQuizzes}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then(response => {
+    setAssignedQuizzes(response.data);
+    setLoading(false);
+  })
+  .catch(err => {
+    setError('Failed to load quizzes');
+    setLoading(false);
+    console.error(err);
+  });
+
+}, [activeGroupForQuizzes]);
 
    const fetchQuizzes = async () => {
     try {
@@ -305,6 +334,8 @@ const Groups = () => {
     };
 
 
+console.log("Assigned Quizzes:", assignedQuizzes);
+
 
   return (
   <div className="groups-page">
@@ -398,6 +429,7 @@ const Groups = () => {
             ) : (
               <div className="assigned-quizzes">
                 {assignedQuizzes.map((quiz) => (
+                   
 
                   <div key={quiz.quiz_id} className="quiz-card">
                     <h3>{quiz.title}</h3>
@@ -416,15 +448,24 @@ const Groups = () => {
                     </p>
                     <button
                       onClick={() => handleTakeQuiz(quiz.quiz_id)}
-                      disabled={quiz.deadline && new Date(quiz.deadline) < new Date()}
+                      disabled={
+                        (quiz.deadline && new Date(quiz.deadline) < new Date()) || 
+                        (quiz.alreadyTaken && !quiz.retake_allowed)
+                      }
                       className={`btn-take-quiz ${
-                        quiz.deadline && new Date(quiz.deadline) < new Date() ? 'disabled' : ''
+                        (quiz.deadline && new Date(quiz.deadline) < new Date()) ||
+                        (quiz.alreadyTaken && !quiz.retake_allowed)
+                          ? 'disabled'
+                          : ''
                       }`}
-                    >
-                      {quiz.deadline && new Date(quiz.deadline) < new Date()
-                        ? 'Deadline Passed'
-                        : 'Take Quiz'}
-                    </button>
+                    >                     
+                  {quiz.deadline && new Date(quiz.deadline) < new Date()
+                    ? 'Deadline Passed'
+                    : quiz.alreadyTaken && !quiz.retake_allowed
+                    ? 'Quiz Already Taken'
+                    : 'Take Quiz'}
+                </button>
+
                   </div>
                 ))}
               </div>

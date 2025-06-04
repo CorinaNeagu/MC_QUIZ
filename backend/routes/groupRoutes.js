@@ -177,40 +177,33 @@ router.get('/student-assigned-quizzes/:groupId', authenticateJWT, (req, res) => 
   const studentId = req.user.id;
   const groupId = req.params.groupId;
 
-  db.query(
-        `SELECT 
+  const query = `
+    SELECT 
       q.quiz_id, 
       q.title, 
-      c.category_name,  -- Join category table for category_name
-      s.subcategory_name,  -- Join subcategory table for subcategory_name
+      c.category_name AS category_name,  
+      s.subcategory_name AS subcategory_name,  
       gq.deadline 
     FROM groupQuiz AS gq
     JOIN quiz AS q ON gq.quiz_id = q.quiz_id
     JOIN studyGroup AS g ON g.group_id = gq.group_id
     JOIN groupMembers AS gm ON gm.group_id = g.group_id
-    JOIN category AS c ON q.category_id = c.category_id  -- Join category table
-    JOIN subcategory AS s ON q.subcategory_id = s.subcategory_id  -- Join subcategory table
+    LEFT JOIN category AS c ON q.category_id = c.category_id
+    LEFT JOIN subcategory AS s ON q.subcategory_id = s.subcategory_id
     WHERE gm.student_id = ? AND g.group_id = ?
-`,
-    [studentId, groupId],
-    (err, results) => {
-      if (err) {
-        console.error('Error executing query:', err);
-        return res.status(500).json({ message: 'Error fetching assigned quizzes', error: err.message });
-      }
+  `;
 
-      if (results.length === 0) {
-          return res.json([]); // return 200 with empty array      }
-      }
-      if (err) {
-        console.error('Error executing query:', err);
-        return res.status(500).json({ message: 'Error fetching assigned quizzes', error: err.message });
-      }
+  db.query(query, [studentId, groupId], (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).json({ message: 'Error fetching assigned quizzes', error: err.message });
+    }
 
-      res.json(results); // Always return 200, even if empty
-          }
-        );
-      });
+    console.log(results); 
+    res.json(results); 
+  });
+});
+
 
 router.delete('/delete-group/:groupId', authenticateJWT, (req, res) => {
   if (req.user.userType !== 'professor') {

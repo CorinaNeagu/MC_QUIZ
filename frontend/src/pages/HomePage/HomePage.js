@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode }  from "jwt-decode";
 import axios from "axios";
 import "./HomePage.css";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import UserProfile from "../UserProfile/UserProfile";
 
 
+
 const HomePage = () => {
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
+
+
 
   const [userProfile, setUserProfile] = useState({
     username: "",
@@ -74,36 +77,53 @@ const HomePage = () => {
     return <div>Loading...</div>;
   }
 
+
+
   return (
     <div className="homepage-container">
       <div className="homepage-header">
         
         <Sidebar />
+        
       </div>
 
       {userType === "student" ? (
         <div className="student-content">
           <h2 className="welcome-message"> 👋 Welcome, {userProfile.username}! </h2>
 
-          <button onClick={() => setShowProfile((prev) => !prev)}>
-            {showProfile ? "Hide Profile" : "Show Profile"}
+          <button className = "btn-profile" 
+                  onClick={() => setShowProfile((prev) => !prev)}>
+            {showProfile ? "✘ Hide Profile" : "🔎 Show Profile"}
           </button>
+          <div className="button-grid">
+            <button onClick={() => navigate("/")}>See your deadlines</button>
+            <button onClick={() => navigate("/")}></button>
+            
+          </div>
+
+          <div className="upcoming-deadlines">
+             <h3>My Calendar</h3>
+               
+          </div>
+          
           {showProfile && <UserProfile embedded={true} />}
+
         </div>
       ) : userType === "professor" ? (
         <div className="professor-content">
           <h2>Professor Dashboard</h2>
           <p className="welcome-message"> 👋 Welcome, {userProfile.username}!</p>
-
+          <button className = "btn-profile" 
+                  onClick={() => setShowProfile((prev) => !prev)}>
+                  {showProfile ? "✘ Hide Profile" : "🔎 Show Profile"}
+          </button>
           <div className="button-grid">
             <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
             <button onClick={() => navigate("/groups")}>Display Groups</button>
             
           </div>
 
-          <button onClick={() => setShowProfile((prev) => !prev)}>
-            {showProfile ? "Hide Profile" : "Show Profile"}
-          </button>
+          
           {showProfile && <UserProfile embedded={true} />}
         </div>
       ) : (

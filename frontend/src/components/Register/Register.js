@@ -46,6 +46,7 @@ const Register = () => {
 
   return (
     <div className="register-container">
+      <div className="register">
       <h2>Register</h2>
       <form onSubmit={handleRegister} className="register-form">
         <div className="form-group">
@@ -94,6 +95,7 @@ const Register = () => {
           <button type="submit">Register</button>
         </div>
       </form>
+    </div>
     </div>
   );
   
