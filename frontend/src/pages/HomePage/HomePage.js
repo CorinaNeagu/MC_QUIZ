@@ -79,6 +79,8 @@ const HomePage = () => {
 
 
 
+
+
   return (
     <div className="homepage-container">
       <div className="homepage-header">
@@ -111,15 +113,14 @@ const HomePage = () => {
         </div>
       ) : userType === "professor" ? (
         <div className="professor-content">
-          <h2>Professor Dashboard</h2>
           <p className="welcome-message"> 👋 Welcome, {userProfile.username}!</p>
           <button className = "btn-profile" 
                   onClick={() => setShowProfile((prev) => !prev)}>
                   {showProfile ? "✘ Hide Profile" : "🔎 Show Profile"}
           </button>
           <div className="button-grid">
-            <button onClick={() => navigate("/manage-quizzes")}>Manage Quizzes</button>
             <button onClick={() => navigate("/groups")}>Display Groups</button>
+            <button onClick={() => navigate("/create-quiz")}>Create Quiz</button>
             
           </div>
 

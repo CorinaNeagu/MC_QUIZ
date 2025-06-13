@@ -212,8 +212,8 @@ const DisplayResponses = () => {
                   <div className="your-answer">
                     <strong>Your Answer(s): </strong>
                     <div className="answer-list">
-                      {normalizeAnswers(response.studentAnswer).map((answer, idx) => (
-                        <div key={idx}>{answer}</div>
+                      {(normalizeAnswers(response.studentAnswer) || []).map((answer, idx) => (
+                         <div key={idx}>{answer || 'Unanswered'}</div>
                       ))}
                     </div>
                   </div>

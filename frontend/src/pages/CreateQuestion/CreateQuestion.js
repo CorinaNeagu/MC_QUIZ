@@ -345,12 +345,9 @@ const handleDiscardChanges = () => {
                 id="multipleChoice"
                 checked={isMultipleChoice}
                 onChange={handleMultipleChoiceChange}
-                className="checkbox-input"
+                className="checkbox-custom"
               />
-              Yes
-              <label htmlFor="multipleChoice" className="checkbox-custom"></label>
-              
-
+                Yes
             </div>
           </div>
 
@@ -363,22 +360,22 @@ const handleDiscardChanges = () => {
                 placeholder={`Answer ${index + 1}`}
                 required
               />
-    <label className="checkboxLabel">
-      
-      <div className="checkbox-wrapper">
-        <input
-          type="checkbox"
-          id={`correctCheckbox-${index}`}
-          checked={answer.isCorrect}
-          onChange={() => handleCheckboxChange(index)}
-                className="checkbox-input"
-        />
-        Correct:
-        <label htmlFor={`correctCheckbox-${index}`} className="checkbox-custom"></label>
-      </div>
-    </label>
-  </div>
-))}
+              <label className="checkboxLabel">
+                
+                <div className="checkbox-wrapper">
+                  <input
+                    type="checkbox"
+                    id={`correctCheckbox-${index}`}
+                    checked={answer.isCorrect}
+                    onChange={() => handleCheckboxChange(index)}
+                          className="checkbox-input"
+                  />
+                  Correct:
+                  <label htmlFor={`correctCheckbox-${index}`} className="checkbox-custom"></label>
+                </div>
+              </label>
+            </div>
+          ))}
 
 
           <div className="form-group">

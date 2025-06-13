@@ -27,6 +27,7 @@
   transition: border-color 0.3s ease;
 }
 
+
 .join-group input:focus {
   border-color: #007bff;
   outline: none;
@@ -46,7 +47,12 @@
   justify-content: center;
   transition: background-color 0.3s ease;
 }
-
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: -20px;
+}
 .join-group button:hover {
   background-color: #0056b3;
 }
@@ -91,13 +97,12 @@
 .message {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
   border-radius: 6px;
-  margin: 10px 0;
   font-weight: 600;
   font-size: 1rem;
-  max-width: 400px;
+  max-width: 600px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease forwards;
 }
 
 .message-icon {
@@ -105,6 +110,18 @@
   height: 20px;
   margin-right: 8px;
   flex-shrink: 0;
+}
+
+.message-container {
+  position: fixed;
+  top: 80px; 
+  left: 33%;
+  padding-top: 30px;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  animation: fadeInUp 0.5s ease forwards;
+  z-index: 999;
 }
 
 .message-error {
@@ -222,7 +239,7 @@
 .btn-assign-quiz,
 .btn-group-details,
 .btn-delete {
-     padding: 10px 18px;
+  padding: 10px 18px;
   margin-right: 10px;
   border: none;
   border-radius: 8px;
@@ -268,7 +285,6 @@
   border: 1px solid #ccc;
   border-radius: 25px;
   height: 40px;
-  margin-right: 10px;
   transition: border-color 0.3s ease;
 }
 
@@ -277,7 +293,7 @@
   outline: none;
 }
 
-.create-group button {
+.btn-create-group {
   font-size: 16px;
   cursor: pointer;
   background-color: #007bff;
@@ -292,29 +308,47 @@
   transition: background-color 0.3s ease;
 }
 
-.create-group button:hover {
-   background-color: #0056b3;
+.btn-create-group:hover {
+  background-color: #0056b3;
+}
+
+
+h2 {
+  text-align: center;
+   font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;      
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 2px solid #3498db; 
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
 }
 
 @media (max-width: 768px) {
+  /* Stack join/create group vertically on tablets */
   .join-group,
   .create-group {
     flex-direction: column;
     align-items: stretch;
     width: 90%;
     padding: 15px;
+    left: 50%;
+    top: 15px;
+    transform: translateX(-50%);
   }
 
   .join-group input,
   .create-group input[type="text"] {
     margin-right: 0;
     width: 100%;
+    margin-bottom: 10px; /* spacing between input and button */
   }
 
   .join-group button,
   .create-group button {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 0;
   }
 
   .group-cards,
@@ -339,28 +373,40 @@
 }
 
 @media (max-width: 480px) {
+  /* Single column grids for groups and quizzes on phones */
   .group-cards,
   .assigned-quizzes {
     grid-template-columns: 1fr; /* 1 column on mobile */
-  }
-
-  .join-group,
-  .create-group {
-    top: 10px;
     padding: 10px;
   }
 
+  /* Adjust join/create group fixed top bar */
+  .join-group,
+  .create-group {
+    width: 95%;
+    top: 10px;
+    padding: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Message box tweaks for mobile */
   .message {
     font-size: 0.9rem;
     padding: 10px;
     flex-direction: column;
     align-items: flex-start;
+    max-width: 90vw;
+    box-sizing: border-box;
   }
 
   .message-icon {
     margin-bottom: 5px;
+    width: 18px;
+    height: 18px;
   }
 
+  /* Smaller font sizes for cards */
   .quiz-card h3,
   .group-card h3 {
     font-size: 16px;
@@ -369,6 +415,15 @@
   .quiz-card p,
   .group-card p {
     font-size: 13px;
+  }
+
+  /* Buttons full width for easier tap */
+  .btn-display-students,
+  .btn-assign-quiz,
+  .btn-group-details,
+  .btn-delete {
+    width: 100%;
+    margin-right: 0;
   }
 }
 

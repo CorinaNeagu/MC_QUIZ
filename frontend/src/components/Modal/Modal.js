@@ -94,8 +94,8 @@ const Modal = ({
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
               />
-              <button onClick={handleAssignQuiz}>Assign</button>
-              <button onClick={() => navigate('/manage-quizzes')}>Go to Manage Quizzes</button>
+              <button className = "btn-modal" onClick={handleAssignQuiz}>Assign</button>
+              <button className = "btn-modal" onClick={() => navigate('/manage-quizzes')}>Go to Manage Quizzes</button>
             </div>
           ) : (
             <div className="create-quiz">

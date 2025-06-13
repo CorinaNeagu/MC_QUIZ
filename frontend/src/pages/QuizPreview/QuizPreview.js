@@ -15,6 +15,7 @@ const QuizPreview = () => {
   const [loading, setLoading] = useState(true); // Loading state
 
   const [deadline, setDeadline] = useState(""); // New deadline state
+  const [showDeadlineSection, setShowDeadlineSection] = useState(false);
   const [assigning, setAssigning] = useState(false); // Loading state for assign
 
   useEffect(() => {
@@ -129,25 +130,43 @@ const QuizPreview = () => {
         <p>No questions found for this quiz.</p>
       )}
 
-       <div style={{ marginTop: "20px" }}>
-        <label>
-          Select Deadline:{" "}
-          <input
-            type="datetime-local"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-             min={new Date().toISOString().slice(0,16)} 
-          />
-        </label>
-      </div>
+<div className="assign-deadline-wrapper">
+  <button
+    onClick={() => setShowDeadlineSection((prev) => !prev)}
+    className="toggle-deadline-btn"
+  >
+    {showDeadlineSection ? "Hide Deadline Section" : "Assign Deadline Now"}
+  </button>
+
+  {showDeadlineSection && (
+    <div className="deadline-card">
+      <label className="deadline-info">
+        You can assign the quiz now or later.
+      </label>
+
+      <label className="deadline-label">
+        Select Deadline:{" "}
+        <input
+          type="datetime-local"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+          min={new Date().toISOString().slice(0, 16)}
+          className="deadline-input"
+        />
+      </label>
 
       <button
         onClick={assignQuizToGroup}
         disabled={assigning}
-        style={{ marginTop: "15px", padding: "10px 20px" }}
+        className={`assign-btn ${assigning ? "disabled" : ""}`}
       >
         {assigning ? "Assigning..." : "Assign Quiz to Group"}
       </button>
+    </div>
+  )}
+</div>
+
+
     </div>
   );
 };

@@ -39,6 +39,23 @@
   cursor: pointer;
 }
 
+.btn-back {
+  margin-top: auto;
+  margin-bottom: 0.5rem;
+  align-self: center;
+  justify-items: center;
+  padding: 6px 10px;  
+  background-color: #007bff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  max-width: 200px; 
+  text-align: center;
+}
+
+
 .quiz-item button:hover {
   background-color: #0056b3;
 }
@@ -56,4 +73,38 @@
 .attempts-table td {
   border: 1px solid #ccc;
   padding: 8px;
+}
+
+
+@media (max-width: 600px) {
+  .group-details-page {
+    padding: 1rem;
+  }
+
+  .quiz-item.quiz-card {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  /* Make .btn-more full width and easy to tap on mobile */
+  .btn-more {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Attempts table responsive: make it scroll horizontally if needed */
+  .attempts-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .attempts-table th,
+  .attempts-table td {
+    white-space: nowrap;
+    padding: 10px 8px;
+  }
 }

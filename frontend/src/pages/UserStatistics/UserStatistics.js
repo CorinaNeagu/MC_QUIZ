@@ -3,9 +3,9 @@ import axios from 'axios';
 import './UserStatistics.css'; // Make sure to add your CSS here
 import { jwtDecode } from 'jwt-decode';
 import Sidebar from "../../components/Sidebar/Sidebar";
-import PieChartComponent from "../../components/PieChart/PieChart";
-import BarChart from '../../components/BarChart/BarChart';
-import BarChartProf from '../../components/BarChart/BarChartProf';
+import PieChartComponent from "../../components/Stats/PieChart/PieChart";
+import BarChart from '../../components/Stats/BarChart/BarChart';
+import GroupLeaderboard from '../../components/Stats/GroupLeaderboard/GroupLeaderboard';
 
 const UserStatistics = () => {
   const [userType, setUserType] = useState(null);
@@ -91,15 +91,16 @@ const UserStatistics = () => {
 
   const handleQuizChange = (event) => {
     setSelectedQuizId(event.target.value);
-    setQuizId(event.target.value); // Update quizId for LineChart component
+    setQuizId(event.target.value); 
   };
 
   return (
     <div className="statistics-container">
       <Sidebar showBackButton={true} />
 
+        <h1 className="message" >Quiz Statistics</h1>
+
       <div className="charts-section">
-        <h1>Quiz Statistics</h1>
 
         {userType === "student" ? (
           <div className="chart-container">
@@ -146,16 +147,13 @@ const UserStatistics = () => {
           <div className="chart-container">
 
             <div className="chart-card">
-              <BarChart selectedCategory={selectedCategory} /> {/* Pass selectedCategory */}
+              <BarChart selectedCategory={selectedCategory} /> 
             </div>
 
-            <div className="chart-card">
-              <h2>Comparative Performance Chart</h2>
-                    <BarChartProf />
-            </div>
+          
 
             <div className="chart-card">
-              <BarChart selectedCategory={selectedCategory} /> {/* Pass selectedCategory */}
+              <GroupLeaderboard  /> 
             </div>
           </div>
         ) : (

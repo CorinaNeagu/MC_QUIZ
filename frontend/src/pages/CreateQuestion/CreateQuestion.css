@@ -18,6 +18,11 @@ html, body {
   height: 100vh;
   padding: 20px;
   background-color: #ffffff;
+  width: 1200px;
+  margin-top: 150px;
+  margin-bottom: 50px;
+  scrollbar-width: none; 
+  scroll-behavior: smooth;
 }
 
 .quiz-content-wrapper {
@@ -32,7 +37,7 @@ html, body {
 
 .create-question-form-wrapper {
   flex: 1;
-  max-width: 600px;
+  max-width: 800px;
   background-color: #ffffff;
   padding: 25px;
   box-sizing: border-box;
@@ -44,6 +49,7 @@ html, body {
 
 .form-group {
   margin-bottom: 20px;
+
 }
 
 .form-group label {
@@ -142,13 +148,7 @@ button:active {
   gap: 10px;
 }
 
- .checkbox-input {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-  cursor: pointer;
-}
-
+ 
  .checkbox-custom {
   width: 20px;
   height: 20px;
@@ -182,16 +182,6 @@ button:active {
   transition: color 0.3s ease;
 }
 
-.yesButton {
-  position: relative;
-  pointer-events: none;
-}
-
-.yesButton:checked  {
-  background-color: #007bff; 
-  border-color: #007bff;
-}
-
 
 
 .action-buttons {
@@ -202,15 +192,15 @@ button:active {
 }
 
 .buttons-container {
-  display: flex; /* Use Flexbox to layout buttons */
-  align-items: center; /* Align the buttons vertically in the center */
-  gap: 10px; /* Space between the buttons */
-  justify-content: flex-start; /* Align the buttons to the left */
+  display: flex; 
+  align-items: center;
+  justify-content: flex-end; 
+  gap: 10px; 
 }
 
 .edit-button,
 .delete-button,
-.btn-save-edit,
+.save-edit-button,
 .discard-edit-button {
   padding: 12px 20px;
   font-size: 1.1em;
@@ -238,15 +228,15 @@ button:active {
 }
 
 .delete-button:hover {
-  background-color: #d32f2f;
+  background-color: #eb4949 !important;
 }
 
-.btn-save-edit{
+.save-edit-button{
   background-color: #007bff;
   color: white;
 }
 
-.btn-save-edit:hover {
+.save-edit-button:hover {
   background-color: #3986d9;
 }
 

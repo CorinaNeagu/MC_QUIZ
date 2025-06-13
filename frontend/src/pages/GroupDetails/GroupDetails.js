@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ModalGroupDetails from '../../components/Modal/ModalGroupDetails'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import './GroupDetails.css';
@@ -11,6 +11,7 @@ const GroupDetails = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,6 +74,10 @@ const GroupDetails = () => {
     setAttemptsError(null);
   };
 
+  const handleBackToGroups= () => {
+    navigate(`/groups`);
+  };
+
   if (loading) return <p>Loading assigned quizzes...</p>;
   if (error) return <p className="error-text">{error}</p>;
   if (quizzes.length === 0) return <p>No quizzes assigned for this group.</p>;
@@ -81,6 +86,10 @@ const GroupDetails = () => {
     <div className="group-details-page">
       <Sidebar showBackButton />
 
+      <button className = "btn-back" 
+                  onClick={handleBackToGroups}>
+          ❮❮ Back to Your Groups
+          </button>
       <h3>Assigned Quizzes</h3>
 
       <ul className="quiz-list assigned-quizzes">

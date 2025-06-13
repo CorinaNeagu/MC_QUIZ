@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import './CreateQuiz.css';
 
 
 const CreateQuiz = () => {
@@ -205,7 +206,7 @@ const filteredSubcategories = subcategories.filter(
           />
         </div>
 
-               <div className="checkbox-wrapper">
+        <div className="checkbox-wrapper">
           <input
             type="checkbox"
             id="retakeAllowed"
@@ -213,7 +214,7 @@ const filteredSubcategories = subcategories.filter(
             onChange={() => setRetakeAllowed(!retakeAllowed)}
             className="checkbox-input"
           />
-          <label htmlFor="retakeAllowed" className="checkbox-custom"> </label>
+          <label htmlFor="retakeAllowed" className="checkbox-label"> </label>
           Allow Retakes
         </div>
 
@@ -225,7 +226,7 @@ const filteredSubcategories = subcategories.filter(
             onChange={() => setIsActive(!isActive)}
             className="checkbox-input"
           />
-          <label htmlFor="isActive" className="checkbox-custom"></label>
+          <label htmlFor="isActive" className="checkbox-label"></label>
           Activate Quiz
         </div>
 

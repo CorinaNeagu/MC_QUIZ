@@ -316,6 +316,99 @@ ORDER BY score_percentage DESC;
 });
 
 
+router.get('/group-leaderboard/:groupId', authenticateJWT, async (req, res) => {
+  const { groupId } = req.params;
+  const { quizId } = req.query; // Grab quizId from query params
+
+  console.log('--- Group Leaderboard Request ---');
+  console.log('Group ID:', groupId);
+  console.log('Quiz ID filter:', quizId);
+
+  let query;
+  let queryParams;
+
+  if (quizId) {
+    // Query to get leaderboard filtered by quizId
+    query = `
+      SELECT 
+        s.student_id,
+        s.username,
+        ROUND(AVG(
+          CASE 
+            WHEN qs.no_questions IS NOT NULL AND qp.points_per_question IS NOT NULL 
+            THEN (qa.score / (qs.no_questions * qp.points_per_question)) * 100
+            ELSE NULL
+          END
+        ), 2) AS average_score
+      FROM groupMembers gm
+      JOIN Student s ON gm.student_id = s.student_id
+      LEFT JOIN QuizAttempt qa ON s.student_id = qa.student_id AND qa.quiz_id = ?
+      LEFT JOIN Quiz q ON qa.quiz_id = q.quiz_id
+      LEFT JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+      LEFT JOIN (
+        SELECT quiz_id, MAX(points_per_question) AS points_per_question
+        FROM Questions
+        GROUP BY quiz_id
+      ) qp ON q.quiz_id = qp.quiz_id
+      WHERE gm.group_id = ?
+        AND (qa.attempt_id IS NULL OR qa.attempt_id = (
+          SELECT MAX(sub.attempt_id)
+          FROM QuizAttempt sub
+          WHERE sub.quiz_id = qa.quiz_id AND sub.student_id = qa.student_id
+        ))
+      GROUP BY s.student_id, s.username
+      ORDER BY average_score DESC;
+    `;
+    queryParams = [quizId, groupId];
+  } else {
+    // Query for full group leaderboard without quiz filter
+    query = `
+      SELECT 
+        s.student_id,
+        s.username,
+        ROUND(AVG(
+          CASE 
+            WHEN qs.no_questions IS NOT NULL AND qp.points_per_question IS NOT NULL 
+            THEN (qa.score / (qs.no_questions * qp.points_per_question)) * 100
+            ELSE NULL
+          END
+        ), 2) AS average_score
+      FROM groupMembers gm
+      JOIN Student s ON gm.student_id = s.student_id
+      LEFT JOIN QuizAttempt qa ON s.student_id = qa.student_id
+      LEFT JOIN Quiz q ON qa.quiz_id = q.quiz_id
+      LEFT JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+      LEFT JOIN (
+        SELECT quiz_id, MAX(points_per_question) AS points_per_question
+        FROM Questions
+        GROUP BY quiz_id
+      ) qp ON q.quiz_id = qp.quiz_id
+      WHERE gm.group_id = ?
+        AND (qa.attempt_id IS NULL OR qa.attempt_id = (
+          SELECT MAX(sub.attempt_id)
+          FROM QuizAttempt sub
+          WHERE sub.quiz_id = qa.quiz_id AND sub.student_id = qa.student_id
+        ))
+      GROUP BY s.student_id, s.username
+      ORDER BY average_score DESC;
+    `;
+    queryParams = [groupId];
+  }
+
+  console.log('SQL Query:', query);
+  console.log('Query Parameters:', queryParams);
+
+  try {
+    const results = await queryAsync(query, queryParams);
+    console.log('Leaderboard results count:', results.length);
+    res.status(200).json(results);
+  } catch (err) {
+    console.error('Error fetching group leaderboard:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 
 module.exports = router;

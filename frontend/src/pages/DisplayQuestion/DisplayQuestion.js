@@ -89,7 +89,7 @@ const DisplayQuestion = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          submitQuiz(); // Auto-submit when time is up
+          submitQuiz(true); // Auto-submit when time is up
           return 0;
         }
         return prev - 1;
@@ -120,14 +120,14 @@ const DisplayQuestion = () => {
   };
 
   // Submit quiz
-  const submitQuiz = async () => {
+  const submitQuiz = async (forceSubmit = false) => {
     const lastQuestionId = questions[questions.length - 1].question_id;
     const lastQuestionAnswer = answers[lastQuestionId];
 
-    if (!lastQuestionAnswer || lastQuestionAnswer.length === 0) {
-      alert("Please answer the last question before submitting the quiz.");
-      return; // Don't allow submission
-    }
+     if (!forceSubmit && (!lastQuestionAnswer || lastQuestionAnswer.length === 0)) {
+    alert("Please answer the last question before submitting the quiz.");
+    return;
+  }
 
 
     try {
@@ -216,14 +216,14 @@ const DisplayQuestion = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="create-question-container">
+    <div className="question-container">
       <div className={`timer-box ${timeLeft <= 60 ? "timer-warning" : ""}`}>
         <div className="time">{formatTime(timeLeft)}</div>
       </div>
   
-      <div className="question-container">
+      <div className="answer-container">
         {questions.length > 0 ? (
-          <div>
+          <div className = "container">
             <h2>Question {currentQuestionIndex + 1} of {questions.length}</h2>
             <p>{questions[currentQuestionIndex].question_content}</p>
   

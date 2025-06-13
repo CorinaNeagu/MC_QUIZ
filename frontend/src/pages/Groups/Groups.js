@@ -333,10 +333,6 @@ const Groups = () => {
       }
     };
 
-
-console.log("Assigned Quizzes:", assignedQuizzes);
-
-
   return (
   <div className="groups-page">
     <Sidebar showBackButton={true} />
@@ -350,11 +346,12 @@ console.log("Assigned Quizzes:", assignedQuizzes);
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
           />
-          <button onClick={handleCreateGroup}>Create Group</button>
+          <button className = "btn-create-group"onClick={handleCreateGroup}>Create Group</button>
         </div>
-
-        {error && <ErrorMessage message={error} />}
-        {success && <SuccessMessage message={success} />}
+          <div className="message-container">
+                {error && <ErrorMessage message={error} />}
+                {success && <SuccessMessage message={success} />}
+          </div>
 
         <div className="group-cards">
           {groups.length === 0 ? (
@@ -392,6 +389,7 @@ console.log("Assigned Quizzes:", assignedQuizzes);
 
     {userType === 'student' && (
       <>
+      <div className = "group">
         <div className="join-group">
           <input
             type="text"
@@ -472,6 +470,7 @@ console.log("Assigned Quizzes:", assignedQuizzes);
             )}
           </>
         )}
+        </div>
       </>
     )}
 
@@ -496,15 +495,7 @@ console.log("Assigned Quizzes:", assignedQuizzes);
         setGroupMembers([]);
       }}
       title={`Students in Group: ${groups.find(g => g.group_id === selectedGroupId)?.group_name || ''}`}
-     footer={
-          <button onClick={() => {
-            setSelectedGroupId(null);
-            setGroupMembers([]);
-          }}>
-            Close
-          </button>
-        }
-        >
+    >
       {groupMembers.length > 0 ? (
         <ul>
           {groupMembers.map((student) => (

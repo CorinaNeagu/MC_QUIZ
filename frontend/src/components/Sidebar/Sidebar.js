@@ -6,6 +6,7 @@ import './Sidebar.css';
 const Sidebar = ({ showBackButton }) => {
   const navigate = useNavigate(); 
   const location = useLocation(); 
+  const userType = localStorage.getItem("userType"); 
 
 
   const handleGoHome = () => {
@@ -23,8 +24,14 @@ const Sidebar = ({ showBackButton }) => {
   const handleLogoutClick = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user_id');
+      localStorage.removeItem('userType'); 
     navigate('/');
   };
+
+  const handleManageQuizzes = () => {
+    navigate("/manage-quizzes");
+  };
+
 
   return (
     <div className="sidebar-container">
@@ -36,6 +43,11 @@ const Sidebar = ({ showBackButton }) => {
                 🏠 Home
               </button>
             )}
+          {userType === 'professor' && (
+              <button onClick={handleManageQuizzes} className="sidebar-item">
+                📌 Manage Quizzes
+              </button>
+          )}
           <button onClick={handleGroups} className="sidebar-item">
           🤝 Groups
           </button>

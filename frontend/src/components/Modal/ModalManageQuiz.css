@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+
 }
 
 .modal-backdrop.settings-centered {
@@ -25,11 +25,16 @@
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
-  overflow-y: auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 100%; 
 }
 
 .modal-content-inspect {
@@ -141,7 +146,7 @@
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.5rem;
   margin-top: 1rem;
 }
 
@@ -230,4 +235,71 @@
 
 .modal-content > ul li strong {
   color: #007bff;
+}
+
+@media (max-width: 900px) {
+  .modal-questions-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .modal-content-inspect {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 90vh;
+  }
+
+  .modal-questions-wrapper {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .question-card {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+  }
+
+  .btn-fetch-answers {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .answers-container {
+    max-height: 200px;
+    padding: 10px;
+  }
+
+  .answers-list li {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+
+  .settings-form label {
+    font-size: 1rem;
+  }
+
+  .settings-form input[type="text"],
+  .settings-form input[type="number"] {
+    padding: 8px;
+    font-size: 1rem;
+  }
+
+  .settings-form button {
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
 }

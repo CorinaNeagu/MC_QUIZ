@@ -24,6 +24,7 @@
   font-weight: 700;
   color: #1a202c;
   margin-bottom: 2rem;
+  margin-top: 40px;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   text-align: center;
@@ -84,14 +85,14 @@
 }
 
 .quiz-preview-container .correct::before {
-  content: "✔️";
+  content: "✅️";
   color: #38a169;
   margin-right: 0.75rem;
   font-weight: 700;
 }
 
 .quiz-preview-container .incorrect::before {
-  content: "✖️";
+  content: "❌";
   color: #e53e3e;
   margin-right: 0.75rem;
   font-weight: 700;
@@ -208,4 +209,77 @@
     font-size: 1rem;
     padding: 0.55rem 1.25rem;
   }
+}
+
+.assign-deadline-wrapper {
+  margin-top: 30px;
+}
+
+.toggle-deadline-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.toggle-deadline-btn:hover {
+  background-color: #0056b3;
+}
+
+.deadline-card {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #dce3ec;
+  border-radius: 8px;
+  background-color: #f9fbfc;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  max-width: 500px;
+  align-items: center;
+  justify-content: center;
+}
+
+.deadline-info {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.deadline-label {
+  font-weight: 500;
+  display: block;
+  margin-top: 10px;
+}
+
+.deadline-input {
+  margin-left: 10px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.assign-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.assign-btn:hover {
+  background-color: #0056b3;
+}
+
+.assign-btn.disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
 }
