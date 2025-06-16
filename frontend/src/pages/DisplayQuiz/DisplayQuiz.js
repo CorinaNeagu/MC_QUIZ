@@ -56,7 +56,6 @@ const DisplayQuiz = () => {
     fetchQuizSettings();
   }, [quizId]);
 
-  // Countdown timer effect
   useEffect(() => {
     if (!quizStarted || timeLeft === null || timeLeft <= 0) return;
 
@@ -103,10 +102,9 @@ const DisplayQuiz = () => {
           alert("Invalid quiz time limit.");
           return;
         }
-        setTimeLeft(quizSettings.time_limit * 60); // Set initial time based on quiz settings
+        setTimeLeft(quizSettings.time_limit * 60); 
         setStartTime(Date.now()); // Start time
   
-        // Pass timeLeft and startTime as query parameters to DisplayQuestion
         navigate(`/display-question/${quizId}/${response.data.attemptId}?timeLeft=${quizSettings.time_limit * 60}&startTime=${Date.now()}`);
       }
     } catch (err) {
@@ -122,13 +120,11 @@ const DisplayQuiz = () => {
     try {
       alert("Submitting your answers...");
   
-      // Replace this with your real submission logic
       await axios.post(
-        `http://localhost:5000/api/takeQuiz/submit-quiz`, // example route
+        `http://localhost:5000/api/takeQuiz/submit-quiz`, 
         {
           attempt_id: quizAttemptId,
           time_taken: timeTakenInSeconds,
-          // Include answers, scores etc.
         },
         {
           headers: {
@@ -138,7 +134,6 @@ const DisplayQuiz = () => {
       );
   
       alert(`Quiz submitted! Time taken: ${timeTakenInSeconds} seconds`);
-      // Optionally navigate away or show a result screen
     } catch (err) {
       console.error("Error submitting quiz:", err);
       alert("There was an error submitting the quiz.");

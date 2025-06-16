@@ -68,25 +68,37 @@ h3 {
 }
 
 .start-quiz-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: #fff;
+  background-color: #7c3aed; /* soft purple */
+  color: white;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 9999px; /* fully rounded (pill shape) */
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .start-quiz-btn:hover {
-  background-color: #0056b3;
+  background-color: #6d28d9;
+  transform: translateY(-1px);
 }
 
 .start-quiz-btn:disabled {
-  background-color: #d6d6d6;
+  background-color: #d1d5db;
+  color: #6b7280;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
+
+
+.quiz-unavailable-msg {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #a00;
+}
 button {
   padding: 10px 20px;
   margin-top: 20px;
@@ -123,51 +135,126 @@ button {
   background-color: #0056b3;
 }
 
-button:hover {
-  background-color: #218838;
+.upcoming-deadlines {
+  margin-top: 20px;
+  display: grid;
+  align-items: center; 
+  text-align: center;
 }
 
-.filters-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px; 
+.upcoming-deadlines h3 {
+  margin-bottom: 12px;
+  color: #333;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.taken-badge-row {
+  margin-top: 10px; 
+  width: 100%;
 }
 
-.search-bar-container {
+.taken-badge {
+  display: inline-block;
+  /* styling from before */
+  background: linear-gradient(135deg, #6EE7B7, #3B82F6);
+  color: white;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  user-select: none;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+
+
+.deadline-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  justify-items: center;
+  padding: 16px;
+  width: 1000px;
+  margin: 0 auto;
+}
+
+.deadline-card {
   position: relative;
-  width: 50%; 
+  background: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-left: 6px solid #4a90e2;
+  border-radius: 8px;
+  padding: 14px 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.search-bar {
-  width: 100%;
-  padding: 10px;
-  padding-left: 30px; 
-  border: 1px solid #ccc;
-  border-radius: 25px;
-  font-size: 16px;
+.deadline-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
+.deadline-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 6px;
+}
+
+.deadline-date {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.deadline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.btn-menu {
+  background-color: transparent;
+  border: none;
   font-size: 18px;
-  color: #888;
+  cursor: pointer;
+  color: black;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  user-select: none;
 }
 
-.category-filter {
-  width: 30%; 
+.menu-container {
+  position: relative;
 }
 
-.category-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 25px;
-  font-size: 16px;
+.menu-dropdown {
+  height: 50px;
+  position: absolute;
+  top: -25px;
+  left: 15px;
+  border-radius: 6px;
+  z-index: 10;
 }
+
+.start-quiz-btn {
+  background-color: #007bff;
+  height: 30px;
+  width: 100px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.start-quiz-btn:hover {
+  background-color: #0056b3;
+}
+
 
 .welcome-message {
   font-size: 1.5rem;
@@ -209,6 +296,52 @@ button:hover {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+.filter-sort-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 16px;
+  flex-wrap: nowrap; 
+}
+
+.input-icon-wrapper {
+  position: relative;
+  flex: 1; 
+  max-width: 400px;
+}
+.sort {
+  width: 180px;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #888;
+  pointer-events: none;
+}
+
+.deadline-filter-input {
+  width: 800px;
+  padding: 8px 12px 8px 36px; 
+  font-size: 1rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.deadline-sort-select {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  min-width: 160px;
+}
+
+
 
 @media (max-width: 768px) {
   .homepage-container {
@@ -238,12 +371,6 @@ button:hover {
 
   .quiz-card p {
     font-size: 13px;
-  }
-
-  .start-quiz-btn {
-    width: 100%;
-    font-size: 15px;
-    padding: 10px;
   }
 
   button {

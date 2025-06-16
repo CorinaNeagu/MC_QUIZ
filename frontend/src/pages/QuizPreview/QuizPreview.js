@@ -7,19 +7,17 @@ import './QuizPreview.css';
 
 const QuizPreview = () => {
   const location = useLocation();
-  const { quizId, assignToGroupId } = location.state; // Get quizId from the state passed via navigate
-  const navigate = useNavigate(); // Initialize useNavigate
+  const { quizId, assignToGroupId } = location.state; 
+  const navigate = useNavigate(); 
 
-  const [quizDetails, setQuizDetails] = useState([]); // Store quiz details
-  const [error, setError] = useState(""); // Error state
-  const [loading, setLoading] = useState(true); // Loading state
+  const [quizDetails, setQuizDetails] = useState([]); 
+  const [error, setError] = useState(""); 
+  const [loading, setLoading] = useState(true); 
 
-  const [deadline, setDeadline] = useState(""); // New deadline state
+  const [deadline, setDeadline] = useState(""); 
   const [showDeadlineSection, setShowDeadlineSection] = useState(false);
-  const [assigning, setAssigning] = useState(false); // Loading state for assign
-
+  const [assigning, setAssigning] = useState(false); 
   useEffect(() => {
-    // Fetch the quiz details (questions and answers)
     const fetchQuizDetails = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -37,7 +35,6 @@ const QuizPreview = () => {
           }
         );
 
-        // Ensure that response data contains questions
         if (response.data && response.data.questions) {
           setQuizDetails(response.data.questions); // Set quiz questions and answers
         } else {
@@ -90,10 +87,7 @@ const QuizPreview = () => {
     }
   };
 
-  // If there is an error, display it
   if (error) return <div>{error}</div>;
-
-  // Show loading state while the data is being fetched
   if (loading) return <div>Loading quiz details...</div>;
 
 

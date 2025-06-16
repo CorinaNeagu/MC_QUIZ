@@ -14,7 +14,7 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      navigate("/login");
+      navigate("/");
       return;
     }
 
@@ -29,7 +29,7 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
       }
     } catch (err) {
       console.error("Invalid or expired token:", err);
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate]);
 

@@ -1,82 +1,62 @@
-body {
-  background-image: url('/public/assets/background.jpg');
-  background-size: cover;
-  background-position: center;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  font-family: 'Arial', sans-serif;
-  color: #fff;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
 .landing-page-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  width: 500px;
+  height: 1000px;
+  background-color: white;
+  margin: 3rem auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden; 
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+  position: relative;
   text-align: center;
-  padding: 0 20px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
 }
 
-.landing-page-buttons {
-  margin-top: 30px;
+.form-container {
+  width: 100%;  
+  overflow: hidden; 
+  position: relative;
+}
+
+.form-slider {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+  width: 1000px; 
+  transition: transform 0.5s ease;
 }
 
-.landing-page-buttons button {
-  background-color: #007bff;
-  color: white;
-  font-size: 20px;
-  padding: 16px 36px;
+.form-panel {
+  width: 500px;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.login-active .form-slider {
+  transform: translateX(0);
+}
+
+.register-active .form-slider {
+  transform: translateX(-500px); 
+}
+
+.toggle-button {
+  background: none;
   border: none;
-  border-radius: 10px;
+  color: #007bff;
   cursor: pointer;
-  margin: 0;
-  min-width: 180px;
-  font-weight: 600;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
+  font-size: 1rem;
+  padding: 0;
+  text-decoration: underline;
 }
 
-.landing-page-buttons button:hover {
-  background-color: #5ac8fa;
-  transform: scale(1.1);
-  box-shadow: 0 6px 15px rgba(90, 200, 250, 0.6);
+.toggle-button:hover {
+  background-color: transparent !important; 
 }
 
-.landing-page-buttons button:focus {
-  outline: none;
-  box-shadow: 0 0 12px 3px rgba(0, 123, 255, 0.8);
-}
-
-@media (max-width: 768px) {
-  .landing-page-buttons {
-    margin-top: 20px;
-  }
-
-  .landing-page-buttons button {
-    font-size: 16px;
-    padding: 12px 28px;
-    width: 80vw;
-    max-width: 300px;
-    min-width: auto;
-  }
-}
-
-@media (max-width: 400px) {
-  .landing-page-buttons button {
-    font-size: 14px;
-    padding: 10px 20px;
-    width: 90vw;
-    max-width: 280px;
-  }
+p {
+  font-size: 1rem;
+  color: #555;
+  margin-top: 1.5rem;
 }

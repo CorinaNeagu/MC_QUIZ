@@ -1,32 +1,39 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import "./LandingPage.css";  
-
+import React, { useState } from "react";
+import Login from "../../components/Login/Login"
+import Register from "../../components/Register/Register"
+import "./LandingPage.css";
 
 const LandingPage = () => {
-  const navigate = useNavigate();
+  const [isLoginActive, setIsLoginActive] = useState(true);
 
-  const handleRegisterRedirect = () => {
-    console.log("Register button clicked!");
-    navigate("/register");
-  };
-
-  const handleLoginRedirect = () => {
-    navigate("/login"); // Navigate to the Login page
+  const toggleForm = () => {
+    setIsLoginActive(!isLoginActive);
   };
 
   return (
     <div className="landing-page-container">
-      <h1>Welcome to the Quiz Platform</h1>
-      <p>Select an option to get started</p>
-      
-      <div className="landing-page-buttons">
-        <button onClick={handleRegisterRedirect}>
-          Register
-        </button>
-        <button onClick={handleLoginRedirect}>
-          Login
-        </button>
+      <h2>Choose an option to get started</h2>
+      <div className={`form-container ${isLoginActive ? "login-active" : "register-active"}`}>
+        <div className="form-slider">
+          <div className="form-panel login-panel">
+            <Login />
+            <p>
+              Don't have an account?{" "}
+              <button className="toggle-button" onClick={toggleForm}>
+                Register
+              </button>
+            </p>
+          </div>
+          <div className="form-panel register-panel">
+            <Register />
+            <p>
+              Already have an account?{" "}
+              <button className="toggle-button" onClick={toggleForm}>
+                Login
+              </button>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

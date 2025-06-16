@@ -7,7 +7,6 @@ const router = express.Router();
 router.get('/profile', authenticateJWT, (req, res) => {
     const { id, userType } = req.user;  // Extract from JWT payload
 
-    console.log('Fetching profile for id:', id);
 
     // Dynamically choose the table based on userType
     const table = userType === "student" ? "Student" : "Professor";
@@ -42,10 +41,7 @@ router.get('/professor/quizzes', authenticateJWT, (req, res) => {
   // Ensure the user is a professor
   if (userType !== 'professor') {
     return res.status(403).json({ error: 'You are not authorized to view quizzes.' });
-  }
-
-  console.log('Fetching quizzes for professor id:', id);
-  
+  }  
   // Query to fetch quizzes for the professor, with category name
   const query = `
      SELECT 
@@ -261,6 +257,40 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
     });
   });
   
+router.get('/deadlines', authenticateJWT, (req, res) => {
+  const studentId = req.user.id;
+
+  const query = `
+    SELECT 
+      gq.assignment_id, 
+      q.quiz_id, 
+      q.title, 
+      gq.deadline,
+      qs.retake_allowed AS allowRetake,
+      EXISTS (
+        SELECT 1 
+        FROM QuizAttempt qa 
+        WHERE qa.quiz_id = q.quiz_id AND qa.student_id = ?
+      ) AS taken
+    FROM groupQuiz gq
+    JOIN quiz q ON q.quiz_id = gq.quiz_id
+    JOIN groupMembers gm ON gm.group_id = gq.group_id
+    LEFT JOIN QuizSettings qs ON qs.quiz_id = q.quiz_id
+    WHERE gm.student_id = ? AND gq.deadline > NOW()
+    ORDER BY gq.deadline ASC;
+  `;
+
+  db.query(query, [studentId, studentId], (err, results) => {
+    if (err) {
+      console.error('Error fetching deadlines:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+    res.json({ deadlines: results });
+  });
+});
+
+
+
   
   
   

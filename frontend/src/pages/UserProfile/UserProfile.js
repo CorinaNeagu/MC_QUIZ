@@ -19,7 +19,7 @@ const UserProfile = ({ embedded = false }) => {
     const token = localStorage.getItem("token");
 
     if (!token && !embedded) {
-      navigate("/login");
+      navigate("/");
     } else {
       fetch("http://localhost:5000/api/user/profile", {
         method: "GET",

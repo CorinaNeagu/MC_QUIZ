@@ -29,15 +29,10 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store the user_id (student_123 or professor_123) in localStorage
-        localStorage.setItem("user_id", data.user_id); // Store the combined user ID (student_123 or professor_123)
-
-        console.log("Registered User ID:", data.user_id);
-
-        // Redirect to login or home page
-        navigate("/login");
+        localStorage.setItem("user_id", data.user_id);
+        navigate("/");
       } else {
-        alert(data.message); // Show error message
+        alert(data.message);
       }
     } catch (error) {
       console.error("Error registering:", error);
@@ -47,58 +42,57 @@ const Register = () => {
   return (
     <div className="register-container">
       <div className="register">
-      <h2>Register</h2>
-      <form onSubmit={handleRegister} className="register-form">
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="userType">User Type:</label>
-          <select
-            id="userType"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
-            required
-          >
-            <option value="student">Student</option>
-            <option value="professor">Professor</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <button type="submit">Register</button>
-        </div>
-      </form>
-    </div>
+        <h2>Register</h2>
+        <form onSubmit={handleRegister} className="register-form">
+          <div className="form-group">
+            <label htmlFor="register-username">Username:</label>
+            <input
+              id="register-username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="register-email">Email:</label>
+            <input
+              id="register-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="register-password">Password:</label>
+            <input
+              id="register-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="register-userType">User Type:</label>
+            <select
+              id="register-userType"
+              value={userType}
+              onChange={(e) => setUserType(e.target.value)}
+              required
+            >
+              <option value="student">Student</option>
+              <option value="professor">Professor</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <button type="submit">Register</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
-  
 };
 
 export default Register;

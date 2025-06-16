@@ -54,7 +54,7 @@ const Sidebar = ({ showBackButton }) => {
           <button onClick={handleStatistics} className="sidebar-item">
           📈 Statistics
           </button>
-          <button onClick={handleLogoutClick} className="sidebar-item">
+          <button onClick={handleLogoutClick} className="sidebar-item-delete">
           🧧 Logout
           </button>
           

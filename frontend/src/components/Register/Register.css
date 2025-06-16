@@ -21,7 +21,7 @@
 }
 
 body {
-  background-image: url('/public/assets/background.jpg'); /* Correct path to the image in the public folder */
+  background-image: url('/public/assets/background.jpg'); 
   background-size: cover;
   background-position: center;
   height: 100vh;

@@ -333,6 +333,7 @@ const Groups = () => {
       }
     };
 
+    console.log(groups);
   return (
   <div className="groups-page">
     <Sidebar showBackButton={true} />
@@ -407,7 +408,7 @@ const Groups = () => {
             groups.map((group) => (
               <div key={group.group_id} className="group-card">
                 <h3>{group.group_name}</h3>
-                <p>Group Code: {group.group_code}</p>
+                <p>Group Professor: {group.group_code}</p>
                 <button
                   className="view-assigned"
                   onClick={() => handleViewAssignedQuizzes(group.group_id)}

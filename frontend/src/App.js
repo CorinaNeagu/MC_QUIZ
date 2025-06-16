@@ -24,8 +24,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/register" element={<Register />} /> 
-        <Route path="/login" element={<Login />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<UserProfile />} /> 
         <Route path="/create-quiz" element={<CreateQuiz/>} /> 
