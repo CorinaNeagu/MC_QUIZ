@@ -19,18 +19,21 @@ const GroupLeaderboard = () => {
   const [selectedQuiz, setSelectedQuiz] = useState('');
   const [useSingleQuiz, setUseSingleQuiz] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
+  // Redirect if no token
   useEffect(() => {
     if (!token) navigate('/');
   }, [navigate, token]);
 
+  // Fetch groups on mount or token change
   useEffect(() => {
+    if (!token) return;
+
     const fetchGroups = async () => {
-      if (!token) return;
       try {
         const res = await axios.get('http://localhost:5000/api/groups/professor-groups', {
           headers: { Authorization: `Bearer ${token}` },
@@ -40,16 +43,19 @@ const GroupLeaderboard = () => {
         setGroups([]);
       }
     };
+
     fetchGroups();
   }, [token]);
 
+  // Fetch quizzes when group changes and single quiz toggle is on
   useEffect(() => {
+    if (!token || !selectedGroup || !useSingleQuiz) {
+      setQuizzes([]);
+      setSelectedQuiz('');
+      return;
+    }
+
     const fetchQuizzes = async () => {
-      if (!token || !selectedGroup || !useSingleQuiz) {
-        setQuizzes([]);
-        setSelectedQuiz('');
-        return;
-      }
       try {
         const res = await axios.get(
           `http://localhost:5000/api/groups/student-assigned-quizzes/${selectedGroup}`,
@@ -60,23 +66,27 @@ const GroupLeaderboard = () => {
         setQuizzes([]);
       }
     };
+
     fetchQuizzes();
   }, [token, selectedGroup, useSingleQuiz]);
 
+  // Fetch leaderboard when dependencies change
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      if (!token || !selectedGroup) {
-        setLeaderboard([]);
-        return;
-      }
+    if (!token || !selectedGroup) {
+      setLeaderboard([]);
+      setLoading(false);
+      return;
+    }
 
+    const fetchLeaderboard = async () => {
       setLoading(true);
       try {
+        const params = useSingleQuiz && selectedQuiz ? { quizId: selectedQuiz } : {};
         const res = await axios.get(
           `http://localhost:5000/api/stats/group-leaderboard/${selectedGroup}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-            params: useSingleQuiz && selectedQuiz ? { quizId: selectedQuiz } : {},
+            params,
           }
         );
         setLeaderboard(res.data);
@@ -90,18 +100,19 @@ const GroupLeaderboard = () => {
     fetchLeaderboard();
   }, [token, selectedGroup, selectedQuiz, useSingleQuiz]);
 
-  const formatUsername = (name) => (name.length > 8 ? name.slice(0, 8) + '…' : name);
+  const formatUsername = (name) => (name.length > 10 ? name.slice(0, 10) + '…' : name);
 
   return (
-    <div className="leaderboard-container">
-      <h2>Leaderboard</h2>
+    <div className="leaderboard-wrapper">
+      <h3 className="leaderboard-title">Group Leaderboard</h3>
 
       <div className="controls">
-        <div className="select-container">
-          <label htmlFor="group-select">Select Group:</label>
+        {/* Group Selector */}
+        <div className="control-group">
+          <label htmlFor="group-select" className="control-label">Select Group:</label>
           <select
             id="group-select"
-            className="dropdown"
+            className="control-select"
             value={selectedGroup}
             onChange={e => {
               setSelectedGroup(e.target.value);
@@ -109,7 +120,7 @@ const GroupLeaderboard = () => {
               setLeaderboard([]);
             }}
           >
-            <option value=""> Choose a group </option>
+            <option value="">Choose a group</option>
             {groups.map(group => (
               <option key={group.group_id} value={group.group_id}>
                 {group.group_name}
@@ -118,26 +129,31 @@ const GroupLeaderboard = () => {
           </select>
         </div>
 
-        <div className="checkbox-container">
+        {/* Single Quiz Toggle */}
+        <div className="control-group checkbox-group">
           <input
             type="checkbox"
             id="quiz-toggle"
+            className="checkbox-input"
             checked={useSingleQuiz}
             onChange={e => setUseSingleQuiz(e.target.checked)}
           />
-          <label htmlFor="quiz-toggle">View leaderboard for a specific quiz</label>
+          <label htmlFor="quiz-toggle" className="checkbox-label">
+            View leaderboard for a specific quiz
+          </label>
         </div>
 
+        {/* Quiz Selector */}
         {useSingleQuiz && quizzes.length > 0 && (
-          <div className="select-container">
-            <label htmlFor="quiz-select">Select Quiz:</label>
+          <div className="control-group">
+            <label htmlFor="quiz-select" className="control-label">Select Quiz:</label>
             <select
               id="quiz-select"
-              className="dropdown"
+              className="control-select"
               value={selectedQuiz}
               onChange={e => setSelectedQuiz(e.target.value)}
             >
-              <option value=""> Choose a quiz </option>
+              <option value="">Choose a quiz</option>
               {quizzes.map(quiz => (
                 <option key={quiz.quiz_id} value={quiz.quiz_id}>
                   {quiz.title}
@@ -148,30 +164,32 @@ const GroupLeaderboard = () => {
         )}
       </div>
 
-      <div className="chart-wrapper" style={{ width: '100%', height: 350 }}>
+      <div className="chart-container">
         {loading ? (
-          <p className="message">Loading leaderboard...</p>
-        ) : leaderboard.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <p>Loading leaderboard...</p>
+        ) : leaderboard.length === 0 ? (
+          <p>No leaderboard data found.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={350}>
             <BarChart
               data={leaderboard}
-              margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              barCategoryGap="20%"
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="username"
                 tickFormatter={formatUsername}
                 interval={0}
-                angle={-35}
+                angle={-45}
                 textAnchor="end"
                 height={60}
+                className="x-axis"
               />
-              <YAxis domain={[0, 100]} />
+              <YAxis domain={[0, 100]} className="y-axis" />
               <Tooltip
-                formatter={(value) => 
-                  typeof value === 'number' ? value.toFixed(1) : value
-                }
-                labelFormatter={(label) => `User: ${label}`}
+                formatter={value => (typeof value === 'number' ? value.toFixed(1) : value)}
+                labelFormatter={label => `User: ${label}`}
               />
               <Bar
                 dataKey="average_score"
@@ -181,8 +199,6 @@ const GroupLeaderboard = () => {
               />
             </BarChart>
           </ResponsiveContainer>
-        ) : (
-          <p className="message">No leaderboard data yet.</p>
         )}
       </div>
     </div>

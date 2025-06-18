@@ -1,34 +1,65 @@
 .statistics-container {
-  display: flex;
-  width: 100%;
-  height: 100vh; 
-  overflow: hidden; 
-  margin-top:120px;
-  align-items: center;
-  flex-direction: column;
+  padding-left: 250px; 
+  padding: 2rem;
+  min-height: 100vh;
+  scrollbar-width: none; 
+  -ms-overflow-style: none;  
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  flex: 1;
+  padding: 100px;
+  max-height: 100vh; 
 }
 
-.charts-section {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto; 
-  margin-top:20px;
-  scrollbar-width: none; 
-  -ms-overflow-style: none;   
+.accordion-item {
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
   justify-content: center;
-  align-items: center;
-  }
+}
 
-.chart-container {
-  position: relative;  
+.accordion-header {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  font-size: 1.2rem;
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
   display: flex;
-  flex-wrap: wrap;
-  margin-top:20px;
-  justify-content: center;
-  gap: 30px;
-  padding: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion-content {
+  padding: 1rem 1.5rem;
+  background-color: #fefefe;
+  border-top: 1px solid #ddd;
+  animation: slideDown 0.3s ease forwards;
+  overflow: visible;
   box-sizing: border-box;
-  overflow: auto; 
+  max-height: none; /* no max height restriction */
+  height: auto;     /* let it grow naturally */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  flex: 1;
+
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
 }
 
 .header  {
@@ -48,22 +79,6 @@
 }
 
 
-.chart-card {
-  flex: 1 1 45%;       
-  max-width: 500px;    
-  min-width: 300px;    
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding-bottom: 1rem;
-}
-
 select {
   margin-bottom: 20px; 
   padding: 8px; 
@@ -72,77 +87,3 @@ select {
   width: 100%; 
 }
 
-@media (max-width: 768px) {
-  .statistics-container {
-    flex-direction: column;
-    height: fit-content;
-    padding-left: 20px;
-    padding-right: 15px;
-    padding-top: 60px;
-  }
-
-  .charts-section {
-    padding: 100px 0;
-    width: 100%;
-  }
-
-  .chart-container {
-    flex-direction: column;
-    gap: 15px;
-    padding-top: 200px;
-  }
-
-  .chart-card {
-    padding: 15px;
-    padding-left: 100px;
-    padding-right: 100 px;
-    width: 100%;
-    max-width: 100%;
-    min-width: unset;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-  }
-
-  .chart-card:hover {
-    transform: scale(1.05);
-  }
-
-  .chart-card h4 {
-    font-size: 18px;
-  }
-
-  .chart-card p {
-    font-size: 13px;
-  }
-
-  .line-chart-container {
-    width: 100%;
-    height: 300px;
-  }
-
-  select {
-    width: 100%;
-    font-size: 14px;
-    padding: 10px;
-    margin-bottom: 15px;
-  }
-}
-
-@media (max-width: 400px) {
-  .chart-card h4 {
-    font-size: 16px;
-  }
-
-  .chart-card p {
-    font-size: 12px;
-  }
-
-  .line-chart-container {
-    height: 250px;
-  }
-
-  select {
-    font-size: 13px;
-    padding: 8px;
-  }
-}

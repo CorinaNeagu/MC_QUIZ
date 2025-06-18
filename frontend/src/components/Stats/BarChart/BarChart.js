@@ -17,30 +17,34 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
   const [quizData, setQuizData] = useState([]);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [studentId, setStudentId] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    if (!token) {
+  if (!token) {
+    navigate("/");
+    return;
+  }
+
+  try {
+    const decodedToken = jwtDecode(token);
+    const expirationTime = decodedToken.exp * 1000;
+
+    if (expirationTime < Date.now()) {
       navigate("/");
-      return;
+    } else {
+      setUserType(decodedToken.userType);
+      setStudentId(decodedToken.id); // 👈 assuming 'id' is the studentId
     }
+  } catch (err) {
+    console.error("Invalid or expired token:", err);
+    navigate("/");
+  }
+}, [navigate]);
 
-    try {
-      const decodedToken = jwtDecode(token);
-      const expirationTime = decodedToken.exp * 1000;
-
-      if (expirationTime < Date.now()) {
-        navigate("/");
-      } else {
-        setUserType(decodedToken.userType);
-      }
-    } catch (err) {
-      console.error("Invalid or expired token:", err);
-      navigate("/");
-    }
-  }, [navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,6 +136,7 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
             fill="#4a90e2" 
             radius={[4, 4, 0, 0]}
             isAnimationActive={true}
+            barSize={40}
          />
         </BarChart>
       </ResponsiveContainer>

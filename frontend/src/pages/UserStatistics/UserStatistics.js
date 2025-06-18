@@ -7,19 +7,19 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import PieChartComponent from "../../components/Stats/PieChart/PieChart";
 import BarChart from '../../components/Stats/BarChart/BarChart';
 import GroupLeaderboard from '../../components/Stats/GroupLeaderboard/GroupLeaderboard';
+import RetakeLineChart from '../../components/Stats/LineChart/LineChart';
 
 const UserStatistics = () => {
   const [userType, setUserType] = useState(null);
 
-  // Student-specific states
-  const [quizzes, setQuizzes] = useState([]);
-  const [selectedQuizId, setSelectedQuizId] = useState('');
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [subcategories, setSubcategories] = useState([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [studentId, setStudentId] = useState(null);
 
-  // Decode token to get user type
+  const [expandedSections, setExpandedSections] = useState([]);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -27,31 +27,12 @@ const UserStatistics = () => {
     try {
       const decoded = jwtDecode(token);
       setUserType(decoded.userType);
+      setStudentId(decoded.id);
     } catch (err) {
       console.error("Invalid token:", err);
     }
   }, []);
 
-  // Fetch quizzes (for students)
-  useEffect(() => {
-    if (userType !== "student") return;
-
-    const fetchStudentQuizzes = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:5000/api/stats/unique-quizzes', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setQuizzes(res.data);
-      } catch (err) {
-        console.error("Failed to fetch quizzes:", err);
-      }
-    };
-
-    fetchStudentQuizzes();
-  }, [userType]);
-
-  // Fetch all categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -68,7 +49,6 @@ const UserStatistics = () => {
     fetchCategories();
   }, []);
 
-  // Fetch subcategories for a selected category
   useEffect(() => {
     if (!selectedCategory) {
       setSubcategories([]);
@@ -92,69 +72,142 @@ const UserStatistics = () => {
     fetchSubcategories();
   }, [selectedCategory]);
 
-  const renderStudentCharts = () => (
-    <div className="chart-container">
-      <div className="chart-card">
-        <PieChartComponent />
+  const toggleSection = (section) => {
+    setExpandedSections(prev =>
+      prev.includes(section)
+        ? prev.filter(s => s !== section) 
+        : [...prev, section]               
+    );
+  };
+
+  const renderStudentSections = () => (
+    <div className="accordion-container">
+
+      <div className="accordion-item">
+        <button
+          className="accordion-header"
+          onClick={() => toggleSection('pieChart')}
+        >
+          Quiz Category {expandedSections.includes('pieChart') ? '▲' : '▼'}
+        </button>
+        {expandedSections.includes('pieChart') && (
+          <div className="accordion-content">
+            <PieChartComponent />
+          </div>
+        )}
       </div>
 
-      <div className="chart-card">
-        <p>Select a Category</p>
-        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-          <option value="">Select a Category</option>
-          {categories.map(cat => (
-            <option key={cat.category_id} value={cat.category_id}>
-              {cat.category_name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          id="subcategorySelect"
-          value={selectedSubcategory}
-          onChange={(e) => setSelectedSubcategory(e.target.value)}
+      <div className="accordion-item">
+        <button
+          className="accordion-header"
+          onClick={() => toggleSection('lineChart')}
         >
-          <option value="">All Subcategories</option>
-          {subcategories.map((sub, idx) => (
-            <option key={idx} value={sub}>{sub}</option>
-          ))}
-        </select>
+          Retake History {expandedSections.includes('lineChart') ? '  ▲' : '  ▼'}
+        </button>
+        {expandedSections.includes('lineChart') && (
+          <div className="accordion-content">
+            <h3>Retake History</h3>
+              <RetakeLineChart studentId={studentId} />
+          </div>
+        )}
+      </div>
 
-        {selectedCategory ? (
-          <BarChart
-            selectedCategory={selectedCategory}
-            selectedSubcategory={selectedSubcategory}
-          />
-        ) : (
-          <p>Select a category to see quizzes</p>
+      <div className="accordion-item">
+        <button
+          className="accordion-header"
+          onClick={() => toggleSection('barChart')}
+        >
+          Bar Chart {expandedSections.includes('barChart') ? '  ▲' : '  ▼'}
+        </button>
+        {expandedSections.includes('barChart') && (
+          <div className="accordion-content">
+            <p>Select a Category</p>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">Select a Category</option>
+              {categories.map((cat) => (
+                <option key={cat.category_id} value={cat.category_id}>
+                  {cat.category_name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              id="subcategorySelect"
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+            >
+              <option value="">All Subcategories</option>
+              {subcategories.map((sub, idx) => (
+                <option key={idx} value={sub}>
+                  {sub}
+                </option>
+              ))}
+            </select>
+
+            {selectedCategory ? (
+              <BarChart
+                selectedCategory={selectedCategory}
+                selectedSubcategory={selectedSubcategory}
+                margin ={{bottom: 200}}
+              />
+            ) : (
+              <p>Select a category to see quizzes</p>
+            )}
+          </div>
         )}
       </div>
     </div>
   );
 
-  const renderProfessorCharts = () => (
-    <div className="chart-container">
-      <div className="chart-card">
-        <BarChart selectedCategory={selectedCategory} />
+  const renderProfessorSections = () => (
+    <div className="accordion-container">
+
+      <div className="accordion-item">
+        <button
+          className="accordion-header"
+          onClick={() => toggleSection('barChart')}
+        >
+          Quiz Average {expandedSections.includes('barChart') ? '▲' : '▼'}
+        </button>
+        {expandedSections.includes('barChart') && (
+          <div className="accordion-content">
+            <BarChart selectedCategory={selectedCategory} />
+          </div>
+        )}
       </div>
-      
-      <div className="chart-card">
-        <GroupLeaderboard />
+
+      {/* Group Leaderboard Section */}
+      <div className="accordion-item">
+        <button
+          className="accordion-header"
+          onClick={() => toggleSection('groupLeaderboard')}
+        >
+          Group Leaderboard {expandedSections.includes('groupLeaderboard') ? '▲' : '▼'}
+        </button>
+        {expandedSections.includes('groupLeaderboard') && (
+          <div className="accordion-content">
+            <GroupLeaderboard />
+          </div>
+        )}
       </div>
+
     </div>
   );
 
   return (
     <div className="statistics-container">
       <Sidebar showBackButton={true} />
-      <h2 className = "header">📊📈 Quiz Statistics</h2>
+      <h2 className="header">📊📈 Quiz Statistics</h2>
 
       <div className="charts-section">
-        {userType === "student"
-          ? renderStudentCharts()
-          : userType === "professor"
-          ? renderProfessorCharts()
-          : <p>Loading...</p>}
+        {userType === 'student'
+          ? renderStudentSections()
+          : userType === 'professor'
+            ? renderProfessorSections()
+            : <p>Loading...</p>}
       </div>
     </div>
   );

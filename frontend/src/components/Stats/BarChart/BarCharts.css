@@ -3,11 +3,20 @@
   padding: 40px 30px;
   background: linear-gradient(135deg, #eaf3fb, #f6fdff);
   border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(74, 144, 226, 0.15);
+  box-shadow:
+    0 4px 8px rgba(74, 144, 226, 0.12),
+    0 8px 20px rgba(74, 144, 226, 0.15);
   max-width: 960px;
   margin: 50px auto;
   font-family: 'Inter', sans-serif;
   text-align: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.bar-chart-wrapper:hover {
+  box-shadow:
+    0 6px 14px rgba(74, 144, 226, 0.18),
+    0 12px 28px rgba(74, 144, 226, 0.25);
 }
 
 /* === TITLE === */
@@ -16,38 +25,47 @@
   font-weight: 700;
   color: #2563eb;
   margin-bottom: 30px;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  text-transform: uppercase;
+  user-select: none;
 }
 
 /* === CHART CONTAINER === */
 .bar-chart-container {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 30px;
   max-width: 900px;
   margin: 0 auto;
-  box-shadow: 0 6px 18px rgba(50, 50, 93, 0.08);
+  box-shadow:
+    0 6px 12px rgba(50, 50, 93, 0.06),
+    0 6px 18px rgba(50, 50, 93, 0.08);
   transition: box-shadow 0.3s ease;
 }
 
 .bar-chart-container:hover {
-  box-shadow: 0 12px 28px rgba(74, 144, 226, 0.25);
+  box-shadow:
+    0 10px 20px rgba(50, 50, 93, 0.1),
+    0 14px 28px rgba(74, 144, 226, 0.25);
 }
 
 /* === BAR STYLING === */
 .bar-chart-container svg rect {
-  fill: #3b82f6;
+  fill: url(#barGradient);
   transition: transform 0.3s ease, fill 0.3s ease;
   stroke: none;
   outline: none;
+  rx: 6; /* rounded corners */
+  ry: 6;
+  cursor: pointer;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
 .bar-chart-container svg rect:hover {
-  fill: #60a5fa;
-  transform: scaleY(1.05);
-  cursor: pointer;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
+  fill: url(#barGradientHover);
+  transform: scaleY(1.08);
+  filter: drop-shadow(0 4px 10px rgba(60, 130, 250, 0.25));
 }
 
 /* === AXIS LABELS === */
@@ -56,6 +74,7 @@
   font-weight: 600;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  fill: #334155;
 }
 
 .bar-chart-container svg .x-axis text,
@@ -65,8 +84,8 @@
 
 /* === GRID LINES === */
 .bar-chart-container svg line {
-  stroke: #d1d5db;
-  stroke-width: 1.5;
+  stroke: #e0e7ff;
+  stroke-width: 1;
 }
 
 /* === RESPONSIVENESS === */
@@ -78,14 +97,16 @@ svg {
 
 /* === CUSTOM TOOLTIP === */
 .recharts-tooltip-wrapper {
-  background: #ffffff !important;
-  border-radius: 10px !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
-  padding: 14px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  padding: 16px !important;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   color: #1f2937;
-  border: none !important;
+  border: 1px solid #dbeafe !important;
+  pointer-events: none; /* avoid pointer issues */
+  transition: opacity 0.2s ease;
 }
 
 /* === MOBILE === */
@@ -96,6 +117,7 @@ svg {
 
   .bar-chart-wrapper h3 {
     font-size: 22px;
+    margin-bottom: 24px;
   }
 
   .bar-chart-container {
@@ -105,4 +127,9 @@ svg {
   .bar-chart-container svg text {
     font-size: 12px;
   }
+}
+
+/* === SVG GRADIENTS === */
+.bar-chart-container svg defs {
+  pointer-events: none;
 }

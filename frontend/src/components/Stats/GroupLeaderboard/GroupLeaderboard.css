@@ -1,117 +1,115 @@
-.leaderboard-container {
-  padding: 40px 30px;
+/* GroupLeaderboard.css */
+
+.leaderboard-wrapper {
   max-width: 900px;
-  margin: 50px auto;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
-  font-family: 'Inter', sans-serif;
-  color: #2d3748;
+  margin: 2rem auto;
+  padding: 1rem 2rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
 .leaderboard-title {
-  font-size: 2.25rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #222;
   text-align: center;
-  margin-bottom: 40px;
-  color: #1a202c;
 }
 
+/* Controls container */
 .controls {
   display: flex;
   flex-wrap: wrap;
+  gap: 1.5rem;
   justify-content: center;
-  gap: 24px;
-  margin-bottom: 40px;
+  margin-bottom: 2rem;
 }
 
-.select-container {
+/* Grouped controls */
+.control-group {
   display: flex;
   flex-direction: column;
   min-width: 220px;
 }
 
-.select-label {
+/* Labels */
+.control-label {
   font-weight: 600;
-  margin-bottom: 8px;
-  color: #4a5568;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  color: #555;
 }
 
-.dropdown {
-  padding: 10px 14px;
+/* Select dropdowns */
+.control-select {
+  padding: 0.5rem 0.7rem;
   font-size: 1rem;
-  border: 2px solid #cbd5e0;
-  border-radius: 8px;
-  transition: border-color 0.25s ease;
-  background: #f7fafc;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  transition: border-color 0.3s ease;
+  background-color: #fff;
   cursor: pointer;
 }
 
-.dropdown:hover,
-.dropdown:focus {
-  border-color: #4a90e2;
+.control-select:focus {
   outline: none;
-  background: #fff;
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
 }
 
-.checkbox-container {
-  display: flex;
+/* Checkbox container */
+.checkbox-group {
+  flex-direction: row;
   align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  color: #4a5568;
-  cursor: pointer;
-  user-select: none;
   min-width: 280px;
+  gap: 0.5rem;
 }
 
 .checkbox-input {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  accent-color: #4a90e2;
 }
 
-.chart-wrapper {
-  width: 100%;
-  height: 350px;
-  background: #f9fafb;
-  border-radius: 14px;
-  padding: 20px 10px 10px;
-  box-shadow: inset 0 0 8px rgba(74, 144, 226, 0.1);
-}
-
-.recharts-tooltip-wrapper {
-  font-family: 'Inter', sans-serif !important;
-  font-size: 0.875rem !important;
-  background: #2d3748 !important;
-  color: #f7fafc !important;
-  padding: 8px 12px !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-}
-
-.message {
-  text-align: center;
-  font-style: italic;
-  color: #718096;
+.checkbox-label {
   font-size: 1rem;
-  margin-top: 1.5rem;
+  color: #444;
+  cursor: pointer;
+  user-select: none;
 }
 
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .select-container,
-  .checkbox-container {
-    min-width: 100%;
-  }
-  .leaderboard-container {
-    padding: 30px 20px;
-  }
-  .leaderboard-title {
-    font-size: 1.75rem;
-  }
+/* Chart container */
+.chart-container {
+  width: 100%;
+  height: 360px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
+  box-shadow: 0 1px 7px rgba(0, 0, 0, 0.05);
+}
+
+/* Messages */
+.chart-container p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666;
+  margin-top: 5rem;
+}
+
+/* Recharts axis text styling */
+.x-axis text {
+  font-size: 0.85rem;
+  fill: #666;
+  font-weight: 500;
+  user-select: none;
+}
+
+.y-axis text {
+  font-size: 0.85rem;
+  fill: #666;
+  font-weight: 500;
+  user-select: none;
 }

@@ -92,9 +92,7 @@ router.get('/quizzes-by-category/:category_id', (req, res) => {
 
 router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) => {
   const { categoryId } = req.params;
-  const studentId = req.user.id; // Get student_id from JWT
-  console.log('Student ID:', studentId);  // Log student ID for debugging
-  console.log('Category ID:', categoryId); // Log category ID for debugging
+  const studentId = req.user.id; 
 
   const query = `
     SELECT 
@@ -102,7 +100,6 @@ router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) 
       sc.subcategory_name,
       sc.subcategory_id,
       q.title, 
-      -- Calculate the score out of 100
       ROUND(
         (qa.score / (qs.no_questions * qp.points_per_question)) * 100, 
         2
@@ -126,20 +123,12 @@ router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) 
       );
   `;
 
-  // Log the query being executed with parameters for debugging
-  console.log('Executing query:', query);
-  console.log('Parameters:', [studentId, categoryId]);
-
   db.query(query, [studentId, categoryId], (err, results) => {
     if (err) {
       console.error('Error fetching student quizzes:', err);
       return res.status(500).json({ message: 'Error fetching quizzes' });
     }
 
-    // Log the raw query results
-    console.log('Query Results:', results);
-
-    // Transform the results if necessary and log the transformed data
     const transformedResults = results.map(result => ({
       category_name: result.category_name,
       quiz_title: result.title,
@@ -150,15 +139,12 @@ router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) 
 
     console.log('Transformed Results:', transformedResults);
 
-    // Send the transformed results as the response
     res.status(200).json(transformedResults);
   });
 });
 
 router.get('/quizzes-taken-by-user/:quizId', authenticateJWT, (req, res) => {
-  const studentId = req.user.id;  // Extract userId from the token
-
-  console.log('User IDxxx:', studentId);  // Debugging log
+  const studentId = req.user.id; 
 
   if (!studentId) {
     return res.status(400).json({ error: 'User ID is missing or invalid' });
@@ -177,27 +163,23 @@ router.get('/quizzes-taken-by-user/:quizId', authenticateJWT, (req, res) => {
     ORDER BY a.start_time DESC
     LIMIT 5;
   `;
-
-  // Using db.query with parameterized values properly
   db.query(query, [studentId, req.params.quizId], (err, results) => {
     if (err) {
       console.error('Error fetching quizzes:', err);
       return res.status(500).json({ error: 'Database error' });
     }
 
-    console.log('Fetched quizzes with scores:', results);  // Log query results
-    res.json(results);  // Return quizzes taken by the authenticated user along with their scores
+    console.log('Fetched quizzes with scores:', results);  
+    res.json(results);  
   });
 });
 
 router.get('/unique-quizzes', authenticateJWT, (req, res) => {
-  const studentId = req.user.id; // Extract userId from the token
-
+  const studentId = req.user.id;
   if (!studentId) {
     return res.status(400).json({ error: 'User ID is missing or invalid' });
   }
 
-  // Query to fetch unique quiz titles taken by the user
   const query = `
     SELECT DISTINCT q.quiz_id, q.title
     FROM QuizAttempt a
@@ -212,7 +194,7 @@ router.get('/unique-quizzes', authenticateJWT, (req, res) => {
       return res.status(500).json({ error: 'Database error' });
     }
 
-    res.json(results); // Return unique quiz titles and quiz_ids
+    res.json(results); 
   });
 });
 
@@ -222,12 +204,10 @@ router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
   console.log('Professor ID:', professorId);
   console.log('User Type:', userType);
 
-  // Only allow professors to access their grade distribution data
   if (userType !== 'professor') {
     return res.status(403).json({ error: 'Access denied' });
   }
 
-  // Query to get grade distribution (average scores per quiz)
   const query = `
       SELECT
         q.title AS name,
@@ -251,23 +231,17 @@ router.get('/professor-grade-distribution', authenticateJWT, (req, res) => {
   console.log('Executing query:', query);
   console.log('Professor ID for query:', professorId);
 
-  // Execute the query
   db.query(query, [professorId], (err, result) => {
     if (err) {
       console.error('Error fetching professor grade distribution:', err);
       return res.status(500).json({ error: 'Internal server error' });
     }
-    console.log('Query result:', result);
 
-    // Transform the result to match the front-end format
     const rows = result.map(row => ({
       name: row.name,
       value: row.value
     }));
 
-    console.log('Transformed rows:', rows);
-
-    // Send the data as a JSON response
     res.json(rows);
   });
 });
@@ -361,7 +335,6 @@ router.get('/group-leaderboard/:groupId', authenticateJWT, async (req, res) => {
     `;
     queryParams = [quizId, groupId];
   } else {
-    // Query for full group leaderboard without quiz filter
     query = `
       SELECT 
         s.student_id,
@@ -408,7 +381,70 @@ router.get('/group-leaderboard/:groupId', authenticateJWT, async (req, res) => {
   }
 });
 
+router.get('/retake-scores-history/:studentId', authenticateJWT, async (req, res) => {
+  const { studentId } = req.params;
 
+  if (req.user.id !== parseInt(studentId) && req.user.userType !== 'professor') {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+
+  const query = `
+    SELECT 
+      q.quiz_id,
+      q.title,
+      qa.attempt_id,
+      qa.score,
+      qa.start_time,
+      qs.no_questions,
+      qp.points_per_question
+    FROM Quiz q
+    JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+    JOIN QuizAttempt qa ON qa.quiz_id = q.quiz_id
+    JOIN (
+      SELECT quiz_id, MAX(points_per_question) AS points_per_question
+      FROM Questions
+      GROUP BY quiz_id
+    ) qp ON q.quiz_id = qp.quiz_id
+    WHERE qa.student_id = ?
+      AND qs.retake_allowed = 1
+    ORDER BY q.quiz_id, qa.start_time;
+  `;
+
+  try {
+    const results = await queryAsync(query, [studentId]);
+
+    if (!results.length) {
+      return res.status(404).json({ message: 'No retake history found' });
+    }
+
+    const quizHistory = {};
+
+    for (const row of results) {
+      const percentageScore = Math.round((row.score / (row.no_questions * row.points_per_question)) * 100);
+
+      if (!quizHistory[row.quiz_id]) {
+        quizHistory[row.quiz_id] = {
+          quiz_id: row.quiz_id,
+          title: row.title,
+          scores: []
+        };
+      }
+
+      quizHistory[row.quiz_id].scores.push({
+        attempt_id: row.attempt_id,
+        start_time: row.start_time,
+        percentage_score: percentageScore
+      });
+    }
+
+    const formatted = Object.values(quizHistory);
+
+    res.status(200).json(formatted);
+  } catch (err) {
+    console.error('Error fetching retake scores history:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 module.exports = router;
