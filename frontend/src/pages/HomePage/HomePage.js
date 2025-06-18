@@ -104,9 +104,9 @@ const HomePage = () => {
 
 const toggleMenu = (assignmentId) => {
   if (openMenuId === assignmentId) {
-    setOpenMenuId(null); // close if already open
+    setOpenMenuId(null);
   } else {
-    setOpenMenuId(assignmentId); // open the clicked one
+    setOpenMenuId(assignmentId);
   }
 };
 
@@ -206,17 +206,17 @@ const handleGoToQuiz = (quizId) => {
                   })
                   .map((deadline) => (
                     <div key={deadline.assignment_id} className="deadline-card">
-                      <div className="deadline-header">
+                      <div className="deadline-header-menu-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="deadline-header">
+                          
+                          <div className="deadline-title">{deadline.title}</div>
 
-                      {deadline.taken && !deadline.allowRetake && (
-                          <div className="taken-badge-row">
-                            <div className="taken-badge">Taken</div>
-                          </div>
-                        )}
-
-                      <div className="deadline-title">{deadline.title}</div>
-
-                        
+                          {deadline.taken && !deadline.allowRetake && (
+                            <div className="taken-badge-row">
+                              <div className="taken-badge">Cannot be retaken</div>
+                            </div>
+                          )}
+                        </div>
 
                         <div className="menu-container">
                           <button
@@ -227,31 +227,32 @@ const handleGoToQuiz = (quizId) => {
                             ⋮
                           </button>
 
-                          {openMenuId === deadline.assignment_id && (
-                            <div className="menu-dropdown">
-                              <button
-                                className="start-quiz-btn"
-                                onClick={() => handleGoToQuiz(deadline.quiz_id)}
-                                disabled={!deadline.allowRetake && deadline.taken}
-                              >
-                                Go to Quiz
-                              </button>
-                            </div>
-                          )}
+                              {openMenuId === deadline.assignment_id && (
+                                <div className="menu-dropdown">
+                                  <button
+                                    className="start-quiz-btn"
+                                    onClick={() => handleGoToQuiz(deadline.quiz_id)}
+                                    disabled={!deadline.allowRetake && deadline.taken}
+                                  >
+                                    Go to Quiz
+                                  </button>
+                                </div>
+                              )}
                         </div>
                       </div>
 
-                      <div className="deadline-date">
-                        Due on {new Date(deadline.deadline).toLocaleDateString()}
+                        <div className="deadline-date">
+                          Due on {new Date(deadline.deadline).toLocaleDateString()}
+                        </div>
                       </div>
-                    </div>
+
                   ))}
               </div>
             )}
           </div>
         )}
 
-        {showProfile && <UserProfile embedded={true} />}
+    {showProfile && <UserProfile embedded={true} />}
       </div>
     ) : userType === "professor" ? (
       <div className="professor-content">

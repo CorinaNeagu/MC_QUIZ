@@ -14,12 +14,16 @@ const Groups = () => {
 
   const [groups, setGroups] = useState([]);
   const [newGroupName, setNewGroupName] = useState('');
+
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
+
   const [userType, setUserType] = useState('');
   const [groupCodeToJoin, setGroupCodeToJoin] = useState('');
+
   const [joinError, setJoinError] = useState('');
   const [joinSuccess, setJoinSuccess] = useState('');
+
   const [groupMembers, setGroupMembers] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
@@ -151,30 +155,42 @@ const Groups = () => {
 
 
   const handleJoinGroup = async () => {
-    setJoinError('');
-    setJoinSuccess('');
+  setJoinError('');
+  setJoinSuccess('');
 
-    if (!groupCodeToJoin.trim()) {
-      setJoinError('Group code cannot be empty.');
-      return;
+  if (!groupCodeToJoin.trim()) {
+    setJoinError('Group code cannot be empty.');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    const res = await axios.post('http://localhost:5000/api/groups/join-group', {
+      group_code: groupCodeToJoin,
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setJoinSuccess('Successfully joined the group!');
+    setGroupCodeToJoin('');
+    fetchGroups();
+  } catch (err) {
+    // Handle 404 specifically
+    if (err.response && err.response.status === 404) {
+      setJoinError('No such group code exists.');
+    } else if (err.response && err.response.status === 400) {
+      setJoinError(err.response.data.error || 'You have already joined this group.');
+    } else if (err.response && err.response.status === 403) {
+      setJoinError(err.response.data.error || 'Only students can join groups.');
+    } else {
+      setJoinError('An unexpected error occurred.');
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/groups/join-group', {
-        group_code: groupCodeToJoin,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    // Instead of console.error(err), do a simpler log or nothing:
+    console.log('Join group error:', err.response?.data?.error || err.message);
+  }
+};
 
-      setJoinSuccess('Successfully joined the group!');
-      setGroupCodeToJoin('');
-      fetchGroups();
-    } catch (err) {
-      setJoinError('Invalid group code or error joining the group.');
-      console.error('Error joining group:', err);
-    }
-  };
 
   const handleDisplayStudents = async (groupId) => {
     try {
@@ -206,6 +222,7 @@ const Groups = () => {
   const openAssignModal = async (groupId) => {
   try {
     const token = localStorage.getItem("token");
+
     const res = await axios.get(`http://localhost:5000/api/groups/group-members/${groupId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -214,6 +231,8 @@ const Groups = () => {
       alert('Cannot assign a quiz to a group with no members.');
       return;
     }
+
+    await fetchAssignedQuizzes(groupId); 
 
     setModalGroupId(groupId);
     setShowAssignModal(true);
@@ -234,6 +253,15 @@ const Groups = () => {
   const handleAssignQuiz = async () => {
   if (!modalGroupId || !selectedQuizId || !deadline) {
     alert("Please select a quiz and provide a deadline before assigning.");
+    return;
+  }
+
+   const isAlreadyAssigned = assignedQuizzes.some(
+    (quiz) => quiz.quiz_id === selectedQuizId
+  );
+
+  if (isAlreadyAssigned) {
+    alert('This quiz has already been assigned to this group.');
     return;
   }
 
@@ -264,7 +292,6 @@ const Groups = () => {
     ) {
       alert('This quiz has already been assigned to this group.');
     } else {
-      console.error('Error assigning quiz:', err);
       alert('Failed to assign quiz.');
     }
   }
@@ -303,9 +330,15 @@ const Groups = () => {
     };
 
     const handleViewAssignedQuizzes = (groupId) => {
-      fetchAssignedQuizzes(groupId);
-      setActiveGroupForQuizzes(groupId);
-    };
+  if (activeGroupForQuizzes === groupId) {
+    // Clicking same group again toggles off
+    setActiveGroupForQuizzes(null);
+    setAssignedQuizzes([]); // optionally clear quizzes
+  } else {
+    fetchAssignedQuizzes(groupId);
+    setActiveGroupForQuizzes(groupId);
+  }
+};
 
    const handleDeleteGroup = async (groupId) => {
     if (!groupId) {
@@ -333,7 +366,7 @@ const Groups = () => {
       }
     };
 
-    console.log(groups);
+
   return (
   <div className="groups-page">
     <Sidebar showBackButton={true} />
@@ -347,7 +380,11 @@ const Groups = () => {
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
           />
-          <button className = "btn-create-group"onClick={handleCreateGroup}>Create Group</button>
+          <button 
+            className = "btn-create-group" 
+            onClick={handleCreateGroup}>
+              Create Group
+          </button>
         </div>
           <div className="message-container">
                 {error && <ErrorMessage message={error} />}
@@ -401,6 +438,11 @@ const Groups = () => {
           <button onClick={handleJoinGroup}>Join Group</button>
         </div>
 
+                <div className="message-container">
+                {joinError && <ErrorMessage message={joinError} />}
+                {joinSuccess && <SuccessMessage message={joinSuccess} />}
+              </div>
+
         <div className="group-cards">
           {groups.length === 0 ? (
             <p>You are not a part of any group yet.</p>
@@ -408,13 +450,14 @@ const Groups = () => {
             groups.map((group) => (
               <div key={group.group_id} className="group-card">
                 <h3>{group.group_name}</h3>
-                <p>Group Professor: {group.group_code}</p>
+                <p>Group Professor: {group.professor_username}</p>
                 <button
-                  className="view-assigned"
+                  className={`view-assigned ${activeGroupForQuizzes === group.group_id ? 'active' : ''}`}
                   onClick={() => handleViewAssignedQuizzes(group.group_id)}
                 >
-                  View Assigned Quizzes
+                  View Assigned Quizzes 
                 </button>
+
               </div>
             ))
           )}

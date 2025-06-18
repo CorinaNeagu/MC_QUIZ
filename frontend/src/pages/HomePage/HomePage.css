@@ -5,6 +5,13 @@ body {
   background-repeat: no-repeat;
   min-height: 100vh; 
   overflow-x: hidden; 
+  scrollbar-width: none; 
+  -ms-overflow-style: none;  
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  flex: 1;
+  padding: 100px;
+  max-height: 100vh; 
 }
 
 .homepage-container {
@@ -210,6 +217,8 @@ button {
 
 .deadline-header {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   justify-content: space-between;
   align-items: start;
 }

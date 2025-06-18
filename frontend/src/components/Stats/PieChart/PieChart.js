@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import axios from 'axios';
-import ModalPieChart from '../ModalPieChart/ModalPieChart';  // Import the new modal component
+import ModalPieChart from '../ModalPieChart/ModalPieChart';  
 import './PieChart.css';
 
 const COLORS = ['#4169E1', '#00CED1', '#191970', '#4B9CD3', '#ADD8E6'];

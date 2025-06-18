@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './UserStatistics.css'; // Make sure to add your CSS here
+import './UserStatistics.css';
 import { jwtDecode } from 'jwt-decode';
+
 import Sidebar from "../../components/Sidebar/Sidebar";
 import PieChartComponent from "../../components/Stats/PieChart/PieChart";
 import BarChart from '../../components/Stats/BarChart/BarChart';
@@ -9,159 +10,153 @@ import GroupLeaderboard from '../../components/Stats/GroupLeaderboard/GroupLeade
 
 const UserStatistics = () => {
   const [userType, setUserType] = useState(null);
-  const [quizId, setQuizId] = useState(null); // Track selected quizId
-  const [quizzes, setQuizzes] = useState([]);
-  const [selectedQuizId, setSelectedQuizId] = useState("Select a quiz");
-  const [categories, setCategories] = useState([]); // State to store categories
-  const [selectedCategory, setSelectedCategory] = useState(''); // State to store selected category
-  const[subcategories, setSubcategories] = useState([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(''); 
 
+  // Student-specific states
+  const [quizzes, setQuizzes] = useState([]);
+  const [selectedQuizId, setSelectedQuizId] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+
+  // Decode token to get user type
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUserType(decoded.userType);
-      } catch (err) {
-        console.error("Failed to decode token", err);
-      }
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      setUserType(decoded.userType);
+    } catch (err) {
+      console.error("Invalid token:", err);
     }
   }, []);
 
-  // Fetch unique quizzes for the student
+  // Fetch quizzes (for students)
   useEffect(() => {
-    if (userType === "student") {
-      const fetchUniqueQuizzes = async () => {
-        try {
-          const token = localStorage.getItem('token');
-          const response = await axios.get('http://localhost:5000/api/stats/unique-quizzes', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setQuizzes(response.data);
-        } catch (error) {
-          console.error('Error fetching unique quizzes:', error);
-        }
-      };
+    if (userType !== "student") return;
 
-      fetchUniqueQuizzes();
-    }
+    const fetchStudentQuizzes = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get('http://localhost:5000/api/stats/unique-quizzes', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setQuizzes(res.data);
+      } catch (err) {
+        console.error("Failed to fetch quizzes:", err);
+      }
+    };
+
+    fetchStudentQuizzes();
   }, [userType]);
 
-  // Fetch categories for the dropdown
+  // Fetch all categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/categories', {
+        const res = await axios.get('http://localhost:5000/api/categories', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setCategories(response.data.categories);
+        setCategories(res.data.categories || []);
       } catch (err) {
-        console.error('Error fetching categories:', err);
+        console.error("Failed to fetch categories:", err);
       }
     };
 
     fetchCategories();
   }, []);
 
+  // Fetch subcategories for a selected category
   useEffect(() => {
-  const fetchSubcategoriesFromQuizzes = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (selectedCategory) {
-        const response = await axios.get(
+    if (!selectedCategory) {
+      setSubcategories([]);
+      return;
+    }
+
+    const fetchSubcategories = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(
           `http://localhost:5000/api/stats/student-category-quizzes/${selectedCategory}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const subcategories = [...new Set(response.data.map(q => q.subcategory_name))];
-        setSubcategories(subcategories);
+        const uniqueSubs = [...new Set(res.data.map(q => q.subcategory_name))];
+        setSubcategories(uniqueSubs);
+      } catch (err) {
+        console.error("Failed to fetch subcategories:", err);
       }
-    } catch (error) {
-      console.error("Error fetching subcategories:", error);
-    }
-  };
+    };
 
-  fetchSubcategoriesFromQuizzes();
-}, [selectedCategory]);
+    fetchSubcategories();
+  }, [selectedCategory]);
 
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-  };
+  const renderStudentCharts = () => (
+    <div className="chart-container">
+      <div className="chart-card">
+        <PieChartComponent />
+      </div>
 
-  const handleQuizChange = (event) => {
-    setSelectedQuizId(event.target.value);
-    setQuizId(event.target.value); 
-  };
+      <div className="chart-card">
+        <p>Select a Category</p>
+        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+          <option value="">Select a Category</option>
+          {categories.map(cat => (
+            <option key={cat.category_id} value={cat.category_id}>
+              {cat.category_name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          id="subcategorySelect"
+          value={selectedSubcategory}
+          onChange={(e) => setSelectedSubcategory(e.target.value)}
+        >
+          <option value="">All Subcategories</option>
+          {subcategories.map((sub, idx) => (
+            <option key={idx} value={sub}>{sub}</option>
+          ))}
+        </select>
+
+        {selectedCategory ? (
+          <BarChart
+            selectedCategory={selectedCategory}
+            selectedSubcategory={selectedSubcategory}
+          />
+        ) : (
+          <p>Select a category to see quizzes</p>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderProfessorCharts = () => (
+    <div className="chart-container">
+      <div className="chart-card">
+        <BarChart selectedCategory={selectedCategory} />
+      </div>
+      
+      <div className="chart-card">
+        <GroupLeaderboard />
+      </div>
+    </div>
+  );
 
   return (
     <div className="statistics-container">
       <Sidebar showBackButton={true} />
-
-        <h1 className="message" >Quiz Statistics</h1>
+      <h2 className = "header">📊📈 Quiz Statistics</h2>
 
       <div className="charts-section">
-
-        {userType === "student" ? (
-          <div className="chart-container">
-            <div className="chart-card">
-              <PieChartComponent />
-            </div>
-
-          <div className="chart-card">
-
-              <h2>Select a Category</h2>
-              
-              <select onChange={handleCategoryChange} value={selectedCategory}>
-                <option value="">Select a Category</option>
-                {categories.map(category => (
-                  <option key={category.category_id} value={category.category_id}>
-                    {category.category_name}
-                  </option>
-                ))}
-              </select>
-
-            <select
-              id="subcategorySelect"
-              value={selectedSubcategory}
-              onChange={(e) => setSelectedSubcategory(e.target.value)}
-            >
-              <option value="">All Subcategories</option>
-              {subcategories.map((sub, idx) => (
-                <option key={idx} value={sub}>{sub}</option>
-              ))}
-            </select>
-
-
-            {selectedCategory ? (
-              <BarChart
-                selectedCategory={selectedCategory}
-                selectedSubcategory={selectedSubcategory}
-              />
-            ) : (
-              <p>Select a category to see quizzes</p>
-            )}    
-          </div>
-           </div>
-        ) : userType === "professor" ? (
-          <div className="chart-container">
-
-            <div className="chart-card">
-              <BarChart selectedCategory={selectedCategory} /> 
-            </div>
-
-          
-
-            <div className="chart-card">
-              <GroupLeaderboard  /> 
-            </div>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
+        {userType === "student"
+          ? renderStudentCharts()
+          : userType === "professor"
+          ? renderProfessorCharts()
+          : <p>Loading...</p>}
       </div>
     </div>
-  
   );
 };
 

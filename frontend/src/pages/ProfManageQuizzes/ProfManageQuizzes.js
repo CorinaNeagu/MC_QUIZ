@@ -222,7 +222,7 @@ const ProfManageQuizzes = () => {
       <Sidebar showBackButton={true} />
 
       <div className="scrollable-content">
-        <h2>Your Quizzes</h2>
+        <h2 className = "header-quiz"> 📝 Your Quizzes</h2>
 
         {quizzes.length === 0 ? (
           <p>You have not created any quizzes yet.</p>

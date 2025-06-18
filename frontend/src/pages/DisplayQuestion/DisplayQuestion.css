@@ -163,7 +163,7 @@ body {
 }
 
 .checkbox-input:checked + .checkbox-label::after {
-  content: 'yes';
+  content: '';
   position: absolute;
   left: 7px;
   top: 8px;

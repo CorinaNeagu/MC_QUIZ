@@ -2,12 +2,21 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
-const BarChart = ({ selectedCategory, selectedSubcategory }) => {
+const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
   const [quizData, setQuizData] = useState([]);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,8 +44,9 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!userType) return; // wait for userType before fetching
+      setLoading(true);
       const token = localStorage.getItem("token");
-
       if (!token) return;
 
       try {
@@ -45,156 +55,90 @@ const BarChart = ({ selectedCategory, selectedSubcategory }) => {
             `http://localhost:5000/api/stats/student-category-quizzes/${selectedCategory}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          setQuizData(response.data);
+
+          const normalizedData = response.data.map((item) => ({
+            quizTitle: item.quiz_title,
+            realScore: item.real_score || 0,
+            subcategoryName: item.subcategory_name || "General",
+          }));
+
+          const filtered = selectedSubcategory
+            ? normalizedData.filter((q) => q.subcategoryName === selectedSubcategory)
+            : normalizedData;
+
+          setQuizData(filtered);
         } else if (userType === "professor") {
           const response = await axios.get(
             "http://localhost:5000/api/stats/professor-grade-distribution",
             { headers: { Authorization: `Bearer ${token}` } }
           );
+
           const normalized = response.data.map((item) => ({
-            quiz_title: item.quiz_title || item.name,
-            real_score: item.real_score || item.value,
-            subcategory_name: item.subcategory_name || "General",
+            quizTitle: item.quiz_title || item.name,
+            realScore: item.real_score || item.value,
+            subcategoryName: item.subcategory_name || "General",
           }));
+
           setQuizData(normalized);
+        } else {
+          setQuizData([]);
         }
       } catch (err) {
         console.error("Error fetching quiz data:", err);
+        setQuizData([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [userType, selectedCategory]);
-
-  const renderGroupedBarChart = (data) => {
-    const chartHeight = 300;
-    const topPadding = 30;
-    const svgPadding = 60;
-    const barWidth = 30;
-
-    const subcategoryNames = [...new Set(data.map((quiz) => quiz.subcategory_name))];
-    const chartWidth = 800;
-
-    const dynamicSpacing = 10;
-    const subcategorySpacing = subcategoryNames.length === 1 ? 0 : 100;
-
-    const maxValue = Math.max(...data.map((quiz) => parseFloat(quiz.real_score)), 100);
-
-    return (
-      <svg width={chartWidth} height={chartHeight + topPadding + 80} style={{ position: "relative" }}>
-        {/* Y-axis ticks */}
-        {[0, 20, 40, 60, 80, 100].map((tick) => {
-          const y = topPadding + chartHeight - (tick / maxValue) * chartHeight;
-          return (
-            <g key={tick}>
-              <line x1="40" y1={y} x2="1500" y2={y} stroke="#ccc" />
-              <text x="35" y={y - 5} textAnchor="end" fontSize="12">
-                {tick}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Bars and labels */}
-        {subcategoryNames.map((subcategory, subcategoryIndex) => {
-          const quizzesInSub = data.filter((quiz) => quiz.subcategory_name === subcategory);
-
-          return (
-            <g key={subcategory}>
-              {quizzesInSub.map((quiz, quizIndex) => {
-                const barHeight = (parseFloat(quiz.real_score) / maxValue) * chartHeight;
-                const x =
-                  svgPadding +
-                  subcategoryIndex * (subcategorySpacing + quizzesInSub.length * (barWidth + dynamicSpacing)) +
-                  (quizIndex + 1) * dynamicSpacing +
-                  quizIndex * barWidth;
-                const y = topPadding + chartHeight - barHeight;
-
-                return (
-                  <g key={quiz.quiz_id || quiz.quiz_title}>
-                    <rect
-                      x={x}
-                      y={y}
-                      width={barWidth}
-                      height={barHeight}
-                      fill="#4B9CD3"
-                      onMouseEnter={(e) =>
-                        setTooltip({
-                          visible: true,
-                          x: e.clientX,
-                          y: e.clientY,
-                          content: quiz.quiz_title,
-                        })
-                      }
-                      onMouseMove={(e) =>
-                        setTooltip((prev) => ({
-                          ...prev,
-                          x: e.clientX,
-                          y: e.clientY,
-                        }))
-                      }
-                      onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, content: "" })}
-                    />
-                    <text x={x + barWidth / 2} y={y - 5} textAnchor="middle" fontSize="12">
-                      {quiz.real_score}
-                    </text>
-                    <text
-                      x={x + barWidth / 2}
-                      y={topPadding + chartHeight + 15}
-                      textAnchor="middle"
-                      fontSize="12"
-                    >
-                      {quiz.quiz_title.length > 5 ? quiz.quiz_title.slice(0, 5) + "…" : quiz.quiz_title}
-                    </text>
-                  </g>
-                );
-              })}
-
-              <text
-                x={
-                  svgPadding +
-                  subcategoryIndex * (subcategorySpacing + quizzesInSub.length * (barWidth + dynamicSpacing)) +
-                  (quizzesInSub.length * (barWidth + dynamicSpacing)) / 2
-                }
-                y={topPadding + chartHeight + 35}
-                textAnchor="middle"
-                fontSize="14"
-              >
-                {subcategory.length > 15 ? subcategory.slice(0, 15) + "…" : subcategory}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    );
-  };
+  }, [userType, selectedCategory, selectedSubcategory]);
 
   if (loading) return <div>Loading chart...</div>;
 
-  const filteredData = selectedSubcategory
-    ? quizData.filter((quiz) => quiz.subcategory_name === selectedSubcategory)
-    : quizData;
+  if (!userType) return null;
+
+  if (quizData.length === 0) return <div>No data found.</div>;
 
   return (
-    <div className="bar-chart-wrapper" style={{ overflowX: "auto", width: "100%" }}>
-      <div style={{ minWidth: "1000px", overflow: "visible" }}>
-        {filteredData.length > 0 ? (
-          <>
-            <h3>
-              {userType === "student"
-                ? `Quiz Scores for Category: ${selectedCategory}`
-                : "Average Grades for Your Quizzes"}
-            </h3>
-            {renderGroupedBarChart(filteredData)}
-          </>
-        ) : (
-          <div>No data found.</div>
-        )}
-      </div>
+  <div className="bar-chart-wrapper">
+    <h3>
+      {userType === "student"
+        ? `Quiz Scores for Category: ${selectedCategory || "All"}`
+        : "Average Grades for Your Quizzes"}
+    </h3>
+    <div className="bar-chart-container">
+      <ResponsiveContainer width="100%" height={350}>
+        <BarChart
+          data={quizData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+          barCategoryGap="20%"
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="quizTitle"
+            angle={-45}
+            textAnchor="end"
+            interval={0}
+            height={60}
+            tickFormatter={(str) => (str.length > 10 ? str.slice(0, 10) + "…" : str)}
+            className="x-axis"
+          />
+          <YAxis domain={[0, 100]} className="y-axis" />
+          <Tooltip />
+          <Legend />
+          <Bar 
+            dataKey="realScore" 
+            fill="#4a90e2" 
+            radius={[4, 4, 0, 0]}
+            isAnimationActive={true}
+         />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
-  );
+  </div>
+);
+
 };
 
-export default BarChart;
+export default BarChartComponent;

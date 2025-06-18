@@ -28,9 +28,8 @@ html, body {
 .quiz-content-wrapper {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  gap: 30px;
   flex: 1;
+  gap: 20px;
   overflow: hidden;
   margin-top: 20px;
 }

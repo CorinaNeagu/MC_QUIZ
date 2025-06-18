@@ -176,3 +176,21 @@ html, body {
   background-color: rgb(229, 43, 43) !important;
 }
 
+.header-quiz  {
+  font-size: 1.5rem;
+  font-weight: 600;
+  width: 1500px;
+  padding-right: 15px;
+  align-items: center;
+  justify-items: center;
+  color: #2c3e50;      
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 2px solid #3498db; 
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
+}
+
+.header-quiz:hover {
+  transform: scale(1.05);
+}

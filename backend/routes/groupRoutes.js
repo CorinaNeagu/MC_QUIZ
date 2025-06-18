@@ -130,18 +130,27 @@ router.get('/group-members/:groupId', authenticateJWT, (req, res) => {
 });
 
 router.get('/student-groups', authenticateJWT, (req, res) => {
-  const studentId = req.user.id; // Get student ID from JWT
+  const studentId = req.user.id;
+
   db.query(
-    `SELECT g.group_id, g.group_name, g.group_code 
-    FROM studyGroup g 
-    JOIN groupMembers gm ON g.group_id = gm.group_id 
-    WHERE gm.student_id = ?`, 
-    [studentId], (err, results) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-    
-    res.json(results); // Return the list of groups the student is a part of
-  });
+    `SELECT 
+      g.group_id, 
+      g.group_name, 
+      g.group_code,
+      p.username AS professor_username
+      FROM studyGroup g
+      JOIN groupMembers gm ON g.group_id = gm.group_id
+      LEFT JOIN Professor p ON g.professor_id = p.professor_id
+      WHERE gm.student_id = ?
+    `, 
+    [studentId], 
+    (err, results) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      res.json(results);
+    }
+  );
 });
+
 
 router.post('/assign-quiz', (req, res) => {
   const { quiz_id, group_id, deadline } = req.body;

@@ -1,78 +1,108 @@
-/* Overall wrapper for the bar chart */
+/* === BAR CHART WRAPPER === */
 .bar-chart-wrapper {
+  padding: 40px 30px;
+  background: linear-gradient(135deg, #eaf3fb, #f6fdff);
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(74, 144, 226, 0.15);
+  max-width: 960px;
+  margin: 50px auto;
+  font-family: 'Inter', sans-serif;
   text-align: center;
-  padding: 20px;
-  background-color: #f0faff !important;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 40px;
 }
 
-/* Header for the chart */
+/* === TITLE === */
 .bar-chart-wrapper h3 {
-  font-size: 24px;
-  color: #4a90e2; /* Cute blue color */
-  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 30px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* Container for the bar chart itself */
+/* === CHART CONTAINER === */
 .bar-chart-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
-  width: 100%;
-  max-width: 800px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 18px rgba(50, 50, 93, 0.08);
+  transition: box-shadow 0.3s ease;
 }
 
-/* Style for the bars */
+.bar-chart-container:hover {
+  box-shadow: 0 12px 28px rgba(74, 144, 226, 0.25);
+}
+
+/* === BAR STYLING === */
 .bar-chart-container svg rect {
-  fill: #4a90e2; /* Bar color */
-  transition: all 0.3s ease;
+  fill: #3b82f6;
+  transition: transform 0.3s ease, fill 0.3s ease;
+  stroke: none;
+  outline: none;
 }
 
 .bar-chart-container svg rect:hover {
-  fill: #7ab8e7; 
-  transform: scale(1.05);
+  fill: #60a5fa;
+  transform: scaleY(1.05);
+  cursor: pointer;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
 }
 
-/* Axis labels and ticks */
+/* === AXIS LABELS === */
 .bar-chart-container svg text {
   font-size: 14px;
-  fill: #333; /* Dark gray text */
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.bar-chart-container svg .x-axis,
-.bar-chart-container svg .y-axis {
-  font-size: 14px;
-  font-weight: bold;
-  fill: #4a90e2;
-  text-anchor: middle;
+.bar-chart-container svg .x-axis text,
+.bar-chart-container svg .y-axis text {
+  fill: #2563eb;
 }
 
-/* Y-axis line styling */
+/* === GRID LINES === */
 .bar-chart-container svg line {
-  stroke-width: 2;
+  stroke: #d1d5db;
+  stroke-width: 1.5;
 }
 
+/* === RESPONSIVENESS === */
 svg {
   display: block;
   max-width: 100%;
+  height: auto;
 }
 
-/* Responsive Design */
+/* === CUSTOM TOOLTIP === */
+.recharts-tooltip-wrapper {
+  background: #ffffff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+  padding: 14px !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #1f2937;
+  border: none !important;
+}
+
+/* === MOBILE === */
 @media (max-width: 768px) {
-  .bar-chart-container {
-    padding: 15px;
+  .bar-chart-wrapper {
+    padding: 24px 16px;
   }
 
   .bar-chart-wrapper h3 {
-    font-size: 20px;
+    font-size: 22px;
   }
 
-  .bar-chart-container svg {
-    width: 100%;
-    height: auto;
+  .bar-chart-container {
+    padding: 20px;
+  }
+
+  .bar-chart-container svg text {
+    font-size: 12px;
   }
 }

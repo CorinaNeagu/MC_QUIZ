@@ -43,17 +43,21 @@ const Sidebar = ({ showBackButton }) => {
                 🏠 Home
               </button>
             )}
+
           {userType === 'professor' && (
               <button onClick={handleManageQuizzes} className="sidebar-item">
                 📌 Manage Quizzes
               </button>
           )}
+          
           <button onClick={handleGroups} className="sidebar-item">
           🤝 Groups
           </button>
+
           <button onClick={handleStatistics} className="sidebar-item">
           📈 Statistics
           </button>
+
           <button onClick={handleLogoutClick} className="sidebar-item-delete">
           🧧 Logout
           </button>
