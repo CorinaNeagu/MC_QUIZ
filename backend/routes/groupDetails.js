@@ -5,7 +5,7 @@ const db = require("../db");
 
 
 router.get('/student-assigned-quizzes/:groupId', authenticateJWT, (req, res) => {
-  const studentId = req.user.id;  // from JWT token
+  const studentId = req.user.id;  
   const groupId = req.params.groupId;
 
   const sql = `

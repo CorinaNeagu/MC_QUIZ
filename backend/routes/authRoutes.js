@@ -18,7 +18,6 @@ router.post("/register", async (req, res) => {
     }
 
     try {
-        // Check if email already exists in the corresponding table based on userType
         const checkQuery =
             userType === "student"
                 ? `SELECT * FROM Student WHERE email = ?`
@@ -80,11 +79,9 @@ router.post("/login", async (req, res) => {
     }
 
     try {
-        // Dynamically choose the table based on userType (either Student or Professor)
         const table = userType === "student" ? "Student" : "Professor";
-        const idField = userType === "student" ? "student_id" : "professor_id";  // Field to identify user in the table
+        const idField = userType === "student" ? "student_id" : "professor_id";  
 
-        // Query the respective table for the user by email
         const query = `SELECT * FROM ${table} WHERE email = ?`;
         db.query(query, [email], async (err, results) => {
             if (err) {
@@ -98,25 +95,22 @@ router.post("/login", async (req, res) => {
 
             const user = results[0];
 
-            // Check if password is correct
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (!isPasswordValid) {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
 
-            // Generate JWT token with the respective primary key (student_id or professor_id)
             const token = jwt.sign(
                 { id: user.student_id || user.professor_id, userType },
                 process.env.JWT_SECRET,
                 { expiresIn: "1h" }
             );
 
-            // Return response with the token, both student_id and professor_id (depending on the userType)
             const response = {
                 message: "Login successful",
                 token,
-                student_id: user.student_id || null, // Return student_id if user is a student
-                professor_id: user.professor_id || null, // Return professor_id if user is a professor
+                student_id: user.student_id || null, 
+                professor_id: user.professor_id || null, 
                 userType,
             };
 

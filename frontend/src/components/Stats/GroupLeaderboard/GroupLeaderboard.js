@@ -196,6 +196,7 @@ const GroupLeaderboard = () => {
                 fill="#4a90e2"
                 radius={[6, 6, 0, 0]}
                 isAnimationActive={true}
+                barSize={40}
               />
             </BarChart>
           </ResponsiveContainer>

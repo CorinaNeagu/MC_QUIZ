@@ -179,7 +179,6 @@ const UserStatistics = () => {
         )}
       </div>
 
-      {/* Group Leaderboard Section */}
       <div className="accordion-item">
         <button
           className="accordion-header"

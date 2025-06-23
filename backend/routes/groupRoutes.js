@@ -14,7 +14,7 @@ router.get('/professor-groups', authenticateJWT, (req, res) => {
 
   db.query(
     'SELECT * FROM studyGroup WHERE professor_id = ?',
-    [req.user.id],  // Use req.user.id instead of req.user.userId
+    [req.user.id], 
     (err, results) => {
       if (err) return res.status(500).json({ error: 'Database error' });
       res.json(results);
@@ -23,15 +23,13 @@ router.get('/professor-groups', authenticateJWT, (req, res) => {
 });
 
 router.post('/create-group', authenticateJWT, (req, res) => {
-  const { group_name, group_code } = req.body;  // Extract the group name and code from request body
-  const professor_id = req.user.id;  // Use the authenticated user's ID (professor)
+  const { group_name, group_code } = req.body; 
+  const professor_id = req.user.id;  
 
-  // Check if the user is a professor
   if (req.user.userType !== 'professor') {
     return res.status(403).json({ error: 'Only professors can create groups' });
   }
 
-  // Check for duplicate group code
   db.query('SELECT * FROM studyGroup WHERE group_code = ?', [group_code], (err, results) => {
     if (err) {
       console.error("Error checking for duplicate group code:", err);
@@ -39,11 +37,9 @@ router.post('/create-group', authenticateJWT, (req, res) => {
     }
 
     if (results.length > 0) {
-      // If a group with the same code already exists
       return res.status(400).json({ error: 'Group code already exists' });
     }
 
-    // Insert the new group into the database
     db.query(
       'INSERT INTO studyGroup (group_name, professor_id, group_code) VALUES (?, ?, ?)', 
       [group_name, professor_id, group_code], 
@@ -53,7 +49,6 @@ router.post('/create-group', authenticateJWT, (req, res) => {
           return res.status(500).json({ error: 'Error inserting group into database' });
         }
 
-        // Successfully created the group
         res.status(201).json({ message: 'Group created successfully' });
       }
     );

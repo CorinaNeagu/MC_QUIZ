@@ -1,23 +1,22 @@
 const express = require('express');
 const db = require('../db');
-const authenticateJWT = require('../middleware/authMiddleware'); // Import the authentication middleware
-const router = express.Router();
+const authenticateJWT = require('../middleware/authMiddleware'); 
 const jwt = require('jsonwebtoken'); 
+const router = express.Router();
 
 const queryAsync = (sql, params) => {
   return new Promise((resolve, reject) => {
     db.query(sql, params, (err, results) => {
       if (err) {
-        reject(err); // Reject promise if error occurs
+        reject(err); 
       } else {
-        resolve(results); // Resolve promise with results if no error
+        resolve(results); 
       }
     });
   });
 };
 
 router.get('/categories', (req, res) => {
-    // SQL query to fetch all categories
     const query = 'SELECT * FROM Category';
   
     db.query(query, (err, results) => {
@@ -31,7 +30,6 @@ router.get('/categories', (req, res) => {
   });
 
   router.get('/subcategories', (req, res) => {
-    // SQL query to fetch all categories
     const query = 'SELECT * FROM Subcategory';
   
     db.query(query, (err, results) => {
@@ -44,7 +42,6 @@ router.get('/categories', (req, res) => {
     });
   });
 
-  // Quiz creation endpoint
 router.post('/quizzes', (req, res) => {
   const {
     title,
@@ -57,21 +54,19 @@ router.post('/quizzes', (req, res) => {
     noQuestions,
   } = req.body;
 
-  const token = req.headers['authorization']?.split(' ')[1]; // Extract JWT token from the header
+  const token = req.headers['authorization']?.split(' ')[1]; 
 
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized: No token provided' });
   }
 
-  // Verify the token
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: 'Unauthorized: Invalid token' });
     }
 
-    const professor_id = decoded.id; // Assuming 'id' is the professor's ID from the JWT payload
+    const professor_id = decoded.id; 
 
-    // Insert quiz data into the `Quiz` table
     const insertQuizQuery = `
   INSERT INTO Quiz (professor_id, title, category_id, subcategory_id, created_at)
   VALUES (
@@ -90,7 +85,6 @@ router.post('/quizzes', (req, res) => {
 
       const quiz_id = quizResults.insertId;
 
-      // Insert quiz settings into the `QuizSettings` table
       const insertQuizSettingsQuery = `
         INSERT INTO QuizSettings (quiz_id, time_limit, deduction_percentage, retake_allowed, is_active, no_questions)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -104,7 +98,6 @@ router.post('/quizzes', (req, res) => {
             return res.status(500).json({ message: 'Error creating quiz settings' });
           }
 
-          // Return the created quiz ID in the response
           return res.status(200).json({ message: 'Quiz created successfully', quizId: quiz_id });
         }
       );
@@ -223,15 +216,13 @@ router.post("/answers", async (req, res) => {
 
 // GET route to fetch all questions for a specific quiz
 router.get('/questions/:quizId', async (req, res) => {
-  const quizId = req.params.quizId;  // Extract quizId from URL parameters
+  const quizId = req.params.quizId;  
 
-  // Validate quizId
   if (!quizId) {
     return res.status(400).json({ message: 'Quiz ID is required.' });
   }
 
   try {
-    // Query the database to get all questions for the specific quizId
     const query = 'SELECT * FROM Questions WHERE quiz_id = ?';
     
     db.query(query, [quizId], (err, result) => {
@@ -240,7 +231,6 @@ router.get('/questions/:quizId', async (req, res) => {
         return res.status(500).json({ message: 'Error fetching questions from database.' });
       }
 
-      // Send back the questions as a response
       return res.status(200).json({
         message: 'Questions fetched successfully.',
         questions: result,
@@ -253,15 +243,12 @@ router.get('/questions/:quizId', async (req, res) => {
 });
 
 router.get('/answers/:questionId', async (req, res) => {
-  const questionId = req.params.questionId;  // Extract questionId from URL parameters
-
-  // Validate questionId
+  const questionId = req.params.questionId; 
   if (!questionId) {
     return res.status(400).json({ message: 'Question ID is required.' });
   }
 
   try {
-    // Query the database to get all answers for the specific questionId
     const query = 'SELECT * FROM Answers WHERE question_id = ?';
     
     db.query(query, [questionId], (err, result) => {
@@ -270,10 +257,9 @@ router.get('/answers/:questionId', async (req, res) => {
         return res.status(500).json({ message: 'Error fetching answers from database.' });
       }
 
-      // Send back the answers as a response
       return res.status(200).json({
         message: 'Answers fetched successfully.',
-        answers: result, // Return the fetched answers
+        answers: result, 
       });
     });
   } catch (err) {
@@ -287,7 +273,6 @@ router.get('/quizPreview/:quizId', async (req, res) => {
   const { quizId } = req.params;
 
   try {
-    // Fetch the quiz questions from the database
     const quizQuestions = await queryAsync(
       'SELECT * FROM questions WHERE quiz_id = ?', 
       [quizId]
@@ -297,14 +282,12 @@ router.get('/quizPreview/:quizId', async (req, res) => {
       return res.status(404).json({ message: 'No questions found for this quiz' });
     }
 
-    // Fetch the answers for the fetched questions
     const questionIds = quizQuestions.map((q) => q.question_id);
     const answers = await queryAsync(
       'SELECT * FROM answers WHERE question_id IN (?)', 
       [questionIds]
     );
 
-    // Organize the answers by question_id
     const quizDetails = quizQuestions.map((question) => {
       const questionAnswers = answers.filter(
         (answer) => answer.question_id === question.question_id
@@ -315,7 +298,6 @@ router.get('/quizPreview/:quizId', async (req, res) => {
       };
     });
 
-    // Send the quiz details as response
     res.json({ questions: quizDetails });
   } catch (err) {
     console.error('Error fetching quiz preview:', err);
@@ -325,7 +307,6 @@ router.get('/quizPreview/:quizId', async (req, res) => {
 
 
 router.get('/display/quizzes', (req, res) => {
-  // SQL query to get quizzes with their categories
   const query = `
     SELECT q.quiz_id, q.title, q.category_id, c.category_name, qs.is_active, qs.retake_allowed
     FROM Quiz q
@@ -334,14 +315,12 @@ router.get('/display/quizzes', (req, res) => {
     WHERE qs.is_active = 1;
   `;
 
-  // Execute the query to fetch quizzes and categories
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching quizzes:', err);
       return res.status(500).json({ error: 'Error fetching quizzes from the database' });
     }
     
-    // Respond with the list of quizzes
     res.json(results);
   });
 });
@@ -377,17 +356,17 @@ router.delete("/delete/:questionId", authenticateJWT, (req, res) => {
 
 // Update an existing question and its answers by editingQuestionId
 router.put("/questions/:editingQuestionId", authenticateJWT, async (req, res) => {
-  const { editingQuestionId } = req.params; // Get the dynamic question ID from the URL parameter
+  const { editingQuestionId } = req.params; 
   const { questionContent, isMultipleChoice, pointsPerQuestion, answers } = req.body;
-  const token = req.headers.authorization?.split(" ")[1]; // Extract the token from the header
+  const token = req.headers.authorization?.split(" ")[1]; 
 
   if (!token) {
     return res.status(401).json({ message: "No token provided. Please log in." });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-    const professor_id = decoded.id; // Get the professor ID from the decoded token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    const professor_id = decoded.id; 
 
     if (!questionContent || pointsPerQuestion == null || !answers) {
       return res.status(400).json({ message: "Please provide all required fields." });
@@ -443,11 +422,6 @@ router.put("/questions/:editingQuestionId", authenticateJWT, async (req, res) =>
     return res.status(401).json({ message: 'Invalid or expired token. Please log in again.' });
   }
 });
-
-
-
-
-
 
 
 module.exports = router;

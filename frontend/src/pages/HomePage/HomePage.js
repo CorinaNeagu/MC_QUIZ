@@ -147,7 +147,7 @@ const handleGoToQuiz = (quizId) => {
           <button onClick={() => setShowDeadlines((prev) => !prev)}>
             {showDeadlines ? "Hide your deadlines" : "See your deadlines"}
           </button>
-          <button onClick={() => navigate("/")}>Your History</button>
+          <button onClick={() => navigate("/history")}>Your History</button>
         </div>
 
         {showDeadlines && (

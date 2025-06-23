@@ -14,7 +14,6 @@ router.post('/quiz_attempts/:attempt_id/submit', (req, res) => {
     return res.status(400).json({ message: 'No answers provided or invalid format' });
   }
 
-  // Query to get quizId and studentId for this attempt
   const selectQuizAndStudentQuery = `
     SELECT quiz_id, student_id
     FROM QuizAttempt
@@ -269,24 +268,17 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
       return res.status(404).json({ message: 'No responses found for this attempt.' });
     }
 
-    // Log the results before processing them
-    console.log("Query Results:", results);
-
     const responses = results.map(row => {
-      // Convert the student answers and correct answers into arrays
       const studentAnswers = row.student_answers.split(',').map(answer => answer.trim());
       const correctAnswers = row.correct_answers.split(',').map(answer => answer.trim());
 
       return {
         questionText: row.question_content,
-        studentAnswer: studentAnswers,  // Now it's an array of student answers
-        correctAnswers: correctAnswers,  // Now it's an array of correct answers
+        studentAnswer: studentAnswers,  
+        correctAnswers: correctAnswers,  
         points: row.points,
       };
     });
-
-    // Log the processed responses clearly
-    console.log("Processed Responses:", responses);
 
     return res.status(200).json({ responses });
   });

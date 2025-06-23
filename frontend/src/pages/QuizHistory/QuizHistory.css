@@ -1,0 +1,164 @@
+.quiz-history-container {
+  width: 100%;
+  max-width: 1200px; 
+  margin: 30px auto;
+  padding: 100px 40px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  overflow-y: auto;
+  max-height: 100vh;
+  scrollbar-width: none; 
+  -ms-overflow-style: none;  
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  flex: 1;
+  padding: 100px;
+  max-height: 100vh; 
+}
+
+
+h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.attempts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 20px; 
+}
+
+.attempt-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.attempt-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.quiz-title {
+  margin: 0 0 12px 0;
+  font-size: 1.25rem;
+  color: #34495e;
+}
+
+.attempt-card p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.attempt-card strong {
+  color: #2980b9;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Container */
+.modal {
+  background: #fff;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 20px 30px;
+  position: relative;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.modal-date-picker {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  border: 1.8px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.modal-date-picker:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px #007bffaa;
+}
+
+.modal-attempts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modal-attempt-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.modal-attempt-card:hover {
+  background-color: #e6f0ff;
+}
+
+.modal-attempt-card p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.no-match {
+  font-style: italic;
+  color: #777;
+  padding: 15px 0;
+  text-align: center;
+}
+
+.show-all-attempts {
+  margin-top: 12px;
+  font-weight: 600;
+  color: #007bff;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.show-all-attempts:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}

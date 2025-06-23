@@ -5,14 +5,12 @@ const router = express.Router();
 
 // User Profile route
 router.get('/profile', authenticateJWT, (req, res) => {
-    const { id, userType } = req.user;  // Extract from JWT payload
+    const { id, userType } = req.user;  
 
 
-    // Dynamically choose the table based on userType
     const table = userType === "student" ? "Student" : "Professor";
     const userKey = userType === "student" ? "student_id" : "professor_id";
 
-    // Query the respective table for the user by the ID (either student_id or professor_id)
     const query = `SELECT username, email, created_at FROM ${table} WHERE ${userKey} = ?`;
     db.query(query, [id], (err, result) => {
         if (err) {
@@ -25,7 +23,6 @@ router.get('/profile', authenticateJWT, (req, res) => {
             return res.status(404).json({ error: `${userType.charAt(0).toUpperCase() + userType.slice(1)} not found` });
         }
 
-        // Send the user data to frontend
         res.json({
             username: result[0].username,
             email: result[0].email,
@@ -38,11 +35,9 @@ router.get('/profile', authenticateJWT, (req, res) => {
 router.get('/professor/quizzes', authenticateJWT, (req, res) => {
   const { id, userType } = req.user; 
   
-  // Ensure the user is a professor
   if (userType !== 'professor') {
     return res.status(403).json({ error: 'You are not authorized to view quizzes.' });
   }  
-  // Query to fetch quizzes for the professor, with category name
   const query = `
      SELECT 
     q.quiz_id, 
@@ -102,7 +97,6 @@ router.get('/professor/questions/:quizId', authenticateJWT, (req, res) => {
 router.get('/settings/:quizId', authenticateJWT, (req, res) => {
   const { quizId } = req.params;
 
-  // Fetch the settings for the specific quizId
   const query = `
     SELECT time_limit, deduction_percentage, retake_allowed, is_active 
     FROM QuizSettings 
@@ -123,13 +117,10 @@ router.get('/settings/:quizId', authenticateJWT, (req, res) => {
   });
 });
 
-
-//Method to update DB title, time_limit, deduction_percentage
 router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
   const { quizId } = req.params;
   const { time_limit, deduction_percentage, retake_allowed, is_active, title } = req.body;
 
-  // First, update the settings in QuizSettings table
   const query = `
     UPDATE QuizSettings 
     SET time_limit = ?, 
@@ -149,7 +140,6 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
       return res.status(404).json({ message: 'Quiz settings not found for this quiz.' });
     }
 
-    // If title is being updated, update it in the Quiz table
     if (title) {
       const titleUpdateQuery = `
         UPDATE Quiz 
@@ -171,7 +161,6 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
   });
 });
 
-  //Delete Quiz from DB
   router.delete("/delete-quiz/:quizId", authenticateJWT, (req, res) => {
     const { quizId } = req.params;
   
@@ -290,6 +279,40 @@ router.get('/deadlines', authenticateJWT, (req, res) => {
 });
 
 
+// Get student quiz attempt history
+// Get student quiz attempt history
+router.get('/history', authenticateJWT, (req, res) => {
+  const { id, userType } = req.user; // ID from the JWT token
+
+  // Only allow students to access this route
+  if (userType !== 'student') {
+    return res.status(403).json({ error: 'Access denied. Only students can view history.' });
+  }
+
+  const query = `
+    SELECT 
+      qa.attempt_id,
+      qa.quiz_id,
+      q.title AS quiz_title,
+      qa.score,
+      qa.start_time AS attempt_time,
+      qa.end_time,
+      qa.time_taken
+    FROM QuizAttempt qa
+    JOIN Quiz q ON qa.quiz_id = q.quiz_id
+    WHERE qa.student_id = ?
+    ORDER BY qa.start_time DESC
+  `;
+
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      console.error("Error fetching student history:", err);
+      return res.status(500).json({ error: "Failed to retrieve quiz history." });
+    }
+
+    res.json({ history: results });
+  });
+});
 
   
   
