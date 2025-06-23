@@ -38,6 +38,9 @@ const Groups = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const [professorGroups, setProfessorGroups] = useState([]);
+  const [showProfessorModal, setShowProfessorModal] = useState(false);
+
   // Fetch user type and groups based on it (professor or student)
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -190,6 +193,7 @@ const Groups = () => {
     console.log('Join group error:', err.response?.data?.error || err.message);
   }
 };
+
 
 
   const handleDisplayStudents = async (groupId) => {
@@ -366,11 +370,25 @@ const Groups = () => {
       }
     };
 
+    const handleDisplayProfessors = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await axios.get('http://localhost:5000/api/groups/professors-with-groups', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setProfessorGroups(res.data);
+    setShowProfessorModal(true);
+  } catch (err) {
+    console.error("Error fetching professor groups:", err);
+    alert("Failed to load professors and their groups.");
+  }
+};
+
 
   return (
   <div className="groups-page">
     <Sidebar showBackButton={true} />
-
+    
     {userType === 'professor' && (
       <>
         <div className="create-group">
@@ -426,23 +444,33 @@ const Groups = () => {
     )}
 
     {userType === 'student' && (
+      
       <>
-      <div className = "group">
+      <div className="top-section">
         <div className="join-group">
-          <input
-            type="text"
-            placeholder="Enter group code"
-            value={groupCodeToJoin}
-            onChange={(e) => setGroupCodeToJoin(e.target.value)}
-          />
-          <button onClick={handleJoinGroup}>Join Group</button>
-        </div>
+  <div className="input-row">
+    <input
+      type="text"
+      placeholder="Enter group code"
+      value={groupCodeToJoin}
+      onChange={(e) => setGroupCodeToJoin(e.target.value)}
+    />
+    <button onClick={handleJoinGroup}>Join Group</button>
+  </div>
+  
+  <button className="btn-display-professors" onClick={handleDisplayProfessors}>
+    Display Professors & Groups
+  </button>
+</div>
+      </div>
 
-                <div className="message-container">
-                {joinError && <ErrorMessage message={joinError} />}
-                {joinSuccess && <SuccessMessage message={joinSuccess} />}
-              </div>
+        <div className="message-container">
+                  {joinError && <ErrorMessage message={joinError} />}
+                  {joinSuccess && <SuccessMessage message={joinSuccess} />}
+                </div>
+      
 
+  
         <div className="group-cards">
           {groups.length === 0 ? (
             <p>You are not a part of any group yet.</p>
@@ -514,7 +542,7 @@ const Groups = () => {
             )}
           </>
         )}
-        </div>
+        
       </>
     )}
 
@@ -551,8 +579,13 @@ const Groups = () => {
       ) : (
         <p>No students in this group yet.</p>
       )}
-</ModalGroupDetails>
+    </ModalGroupDetails>
 
+    <ModalGroupDetails
+      isOpen={showProfessorModal}
+      onClose={() => setShowProfessorModal(false)}
+      professorGroups={professorGroups}
+    />  
   </div>
 );
 

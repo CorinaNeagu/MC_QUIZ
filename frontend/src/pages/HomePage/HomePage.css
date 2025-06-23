@@ -14,6 +14,59 @@ body {
   max-height: 100vh; 
 }
 
+.welcome-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: normal; 
+}
+
+.profile-icon-inline {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  cursor: pointer;
+}
+
+.profile-icon-placeholder-inline {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ccc;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  user-select: none;
+  border: 2px solid #ccc;
+  cursor: pointer;
+}
+
+.profile-pic-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+  z-index: 1000;
+}
+
+.profile-pic-expanded {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
 .homepage-container {
   font-family: Arial, sans-serif;
   text-align: center;
@@ -75,11 +128,11 @@ h3 {
 }
 
 .start-quiz-btn {
-  background-color: #7c3aed; /* soft purple */
+  background-color: #7c3aed; 
   color: white;
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 9999px; /* fully rounded (pill shape) */
+  border-radius: 9999px; 
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -99,13 +152,12 @@ h3 {
   box-shadow: none;
 }
 
-
-
 .quiz-unavailable-msg {
   margin-top: 6px;
   font-size: 0.9rem;
   color: #a00;
 }
+
 button {
   padding: 10px 20px;
   margin-top: 20px;
@@ -162,7 +214,6 @@ button {
 
 .taken-badge {
   display: inline-block;
-  /* styling from before */
   background: linear-gradient(135deg, #6EE7B7, #3B82F6);
   color: white;
   font-weight: 600;
@@ -174,7 +225,6 @@ button {
   letter-spacing: 0.03em;
   text-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
-
 
 
 .deadline-cards {

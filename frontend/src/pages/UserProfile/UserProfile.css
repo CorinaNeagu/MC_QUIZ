@@ -248,3 +248,95 @@ h2 {
     font-size: 0.95rem;
   }
 }
+
+.file-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  max-width: 440px;
+  justify-content: center;
+  background: #ffffff;
+  padding: 20px 28px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.file-upload-label {
+  background-color: #007bff;
+  color: #fff;
+  padding: 14px 30px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.45);
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, transform 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.file-upload-label:hover {
+  background-color: #0056b3;
+  box-shadow: 0 10px 25px rgba(0, 86, 179, 0.65);
+  transform: translateY(-3px);
+}
+
+.file-upload-input {
+  display: none;
+}
+
+.file-name {
+  font-size: 1rem;
+  color: #555;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: text;
+  font-style: italic;
+  flex-grow: 1;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fafafa;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.07);
+  transition: border-color 0.3s ease;
+}
+
+.file-name:hover {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.upload-button {
+  background-color: #28a745;
+  color: white;
+  padding: 14px 32px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(40, 167, 69, 0.5);
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #218838;
+  box-shadow: 0 10px 25px rgba(33, 136, 56, 0.7);
+  transform: translateY(-3px);
+}
+
+.upload-button:disabled {
+  background-color: #c1c8ca;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  color: #7a7e80;
+}

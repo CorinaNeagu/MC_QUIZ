@@ -418,7 +418,6 @@ const handleDiscardChanges = () => {
             <div className="question-content-wrapper">
               <strong>{q.question_content}</strong>
 
-              {/* Conditionally render buttons based on edit mode */}
               <div className="buttons-container">
                 {editingQuestionId === q.question_id ? (
                   <>
@@ -454,7 +453,6 @@ const handleDiscardChanges = () => {
               </div>
             </div>
 
-              {/* Answer list */}
               <ul>
                 {(questionAnswers[q.question_id] || []).map((a) => (
                   <li key={a.answer_id}>
@@ -463,7 +461,6 @@ const handleDiscardChanges = () => {
                 ))}
               </ul>
             </li>
-          {/* Add a separator between each question */}
           {index < questions.length - 1 && <hr />} 
         </div>
       ))}

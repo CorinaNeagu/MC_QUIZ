@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require('path');
+
 const authRoutes = require("./routes/authRoutes"); // Authentication-related routes (register, login)
 const userRoutes = require("./routes/userRoutes"); // User-related routes (profile, etc.)
 const quizRoutes = require("./routes/quizRoutes");
@@ -16,6 +18,8 @@ dotenv.config();
 
 app.use(express.json());
 app.use(cors());
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Use the routes
 app.use("/api/auth", authRoutes); 

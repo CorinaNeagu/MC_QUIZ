@@ -8,63 +8,91 @@
   max-height: 100vh; 
 }
 
-.join-group,
-.create-group {
+.top-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 20px 30px;
+  width: fit-content; /* shrink-wrap the container */
+}
+
+.join-group {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 50%;
-  padding: 10px 30px;
-  font-size: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  z-index: 1000;
+  width: 1000px; 
+  padding: 10px 20px;
   background-color: #f9f9f9;
   border-radius: 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
+  display: flex;
+  flex-direction: column; /* stack input-row and second button */
+  gap: 10px;
+  z-index: 1000;
+  font-size: 16px;
 }
 
-.join-group input,
-.create-group input[type="text"] {
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.input-row input {
   flex-grow: 1;
+  height: 40px;
   padding: 10px 15px;
   font-size: 16px;
-  border: 1px solid #ccc;
   border-radius: 25px;
-  height: 40px;
+  border: 1px solid #ccc;
   transition: border-color 0.3s ease;
-  margin-right: 10px;
 }
 
-.join-group input:focus,
-.create-group input[type="text"]:focus {
+.input-row input:focus {
   border-color: #007bff;
   outline: none;
 }
 
-.join-group button,
-.btn-create-group {
+.input-row button {
+  height: 40px;
+  padding: 0 20px;
   font-size: 16px;
-  cursor: pointer;
+  border-radius: 25px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 25px;
-  height: 40px;
-  padding: 0 20px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
 }
 
-.join-group button:hover,
-.btn-create-group:hover {
+.input-row button:hover {
   background-color: #0056b3;
+}
+
+.btn-display-professors {
+  width: 500px;
+  height: 40px;
+  margin: 0 auto; /* centers horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  font-size: 16px;
+  border-radius: 25px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-display-professors:hover {
+  background-color: #0056b3;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .groups-page {

@@ -2,6 +2,107 @@ const express = require("express");
 const db = require("../db");
 const authenticateJWT = require("../middleware/authMiddleware");
 const router = express.Router();
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "../uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Save as userId + original file extension
+    const ext = path.extname(file.originalname);
+    cb(null, `${req.user.id}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // max 5MB
+  fileFilter: (req, file, cb) => {
+    // Accept only images
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"));
+    }
+    cb(null, true);
+  },
+});
+
+router.post(
+  "/upload-profile-pic",
+  authenticateJWT,
+  upload.single("profilePic"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const { id, userType } = req.user;
+    const table = userType === "student" ? "Student" : "Professor";
+    const userKey = userType === "student" ? "student_id" : "professor_id";
+
+    const profilePicPath = `/uploads/${req.file.filename}`; // relative path for DB
+
+    // First: get old profile pic path so we can delete old file
+    const selectQuery = `SELECT profile_picture FROM ${table} WHERE ${userKey} = ?`;
+    db.query(selectQuery, [id], (selectErr, selectResult) => {
+      if (selectErr) {
+        console.error("Error fetching old profile picture:", selectErr);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      if (selectResult.length === 0) {
+        return res.status(404).json({ error: `${userType.charAt(0).toUpperCase() + userType.slice(1)} not found` });
+      }
+
+      const oldProfilePic = selectResult[0].profile_picture;
+
+      // Update DB to new profile pic path
+      const updateQuery = `UPDATE ${table} SET profile_picture = ? WHERE ${userKey} = ?`;
+      db.query(updateQuery, [profilePicPath, id], (updateErr, updateResult) => {
+        if (updateErr) {
+          console.error("Error updating profile picture path:", updateErr);
+          return res.status(500).json({ error: "Failed to update profile picture" });
+        }
+
+        // Delete old profile pic file if it exists and is not empty
+        if (oldProfilePic) {
+          const oldPicPathOnDisk = path.join(__dirname, "..", oldProfilePic);
+          fs.access(oldPicPathOnDisk, fs.constants.F_OK, (err) => {
+            if (!err) {
+              fs.unlink(oldPicPathOnDisk, (unlinkErr) => {
+                if (unlinkErr) console.error("Failed to delete old profile picture:", unlinkErr);
+              });
+            }
+          });
+        }
+
+        return res.json({ message: "Profile picture uploaded successfully", profilePicPath });
+      });
+    });
+  }
+);
+
+// Error handling middleware for multer errors (optional)
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    console.error("Multer Error:", err);
+    return res.status(400).json({ error: err.message });
+  }
+  if (err.message === "Only JPEG, PNG, and WEBP image files are allowed!") {
+    console.error("File type validation error:", err.message);
+    return res.status(400).json({ error: err.message });
+  }
+  console.error("Unexpected error:", err.stack || err);
+  next(err);
+});
+
 
 // User Profile route
 router.get('/profile', authenticateJWT, (req, res) => {
@@ -11,7 +112,7 @@ router.get('/profile', authenticateJWT, (req, res) => {
     const table = userType === "student" ? "Student" : "Professor";
     const userKey = userType === "student" ? "student_id" : "professor_id";
 
-    const query = `SELECT username, email, created_at FROM ${table} WHERE ${userKey} = ?`;
+    const query = `SELECT username, email, created_at, profile_picture FROM ${table} WHERE ${userKey} = ?`;
     db.query(query, [id], (err, result) => {
         if (err) {
             console.error("Database error:", err);
@@ -28,6 +129,7 @@ router.get('/profile', authenticateJWT, (req, res) => {
             email: result[0].email,
             created_at: result[0].created_at, 
             userType, 
+            profilePic: result[0].profile_picture || "",
         });
     });
 });
@@ -280,7 +382,6 @@ router.get('/deadlines', authenticateJWT, (req, res) => {
 
 
 // Get student quiz attempt history
-// Get student quiz attempt history
 router.get('/history', authenticateJWT, (req, res) => {
   const { id, userType } = req.user; // ID from the JWT token
 
@@ -313,16 +414,6 @@ router.get('/history', authenticateJWT, (req, res) => {
     res.json({ history: results });
   });
 });
-
-  
-  
-  
-  
-  
-  
-  
-  
-
 
 
 module.exports = router;

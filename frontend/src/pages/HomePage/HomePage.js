@@ -22,11 +22,14 @@ const HomePage = () => {
   const [filterText, setFilterText] = useState("");
   const [sortOrder, setSortOrder] = useState("date-asc");
 
+  const [isPicExpanded, setIsPicExpanded] = useState(false);
+
   const [userProfile, setUserProfile] = useState({
     username: "",
     email: "",
     created_at: "",
     userType: "",
+    profilePic: "",
   });
 
   const navigate = useNavigate();
@@ -65,6 +68,7 @@ const HomePage = () => {
                 email: data.email,
                 created_at: data.created_at,
                 userType: data.userType,
+                profilePic: data.profilePic || ""
               });
             }
           })
@@ -77,6 +81,10 @@ const HomePage = () => {
       setLoading(false);
     }
   }, [navigate]);
+
+  const togglePicExpand = () => {
+  setIsPicExpanded((prev) => !prev);
+};
 
   const formattedDate = new Date(userProfile.created_at).toLocaleDateString();
 
@@ -134,7 +142,32 @@ const handleGoToQuiz = (quizId) => {
 
     {userType === "student" ? (
       <div className="student-content">
-        <h2 className="welcome-message">👋 Welcome, {userProfile.username}!</h2>
+        <h2 className="welcome-message">
+          {userProfile.profilePic ? (
+            <img
+              src={`http://localhost:5000${userProfile.profilePic}`}
+              alt={`${userProfile.username}'s profile`}
+              className="profile-icon-inline"
+              onClick={togglePicExpand}
+              title="Click to expand"
+            />
+          ) : (
+            <div
+              className="profile-icon-placeholder-inline"
+              onClick={togglePicExpand}
+              title="Click to expand"
+            >
+              {userProfile.username
+                ? userProfile.username
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                : "?"}
+            </div>
+          )}
+          👋 Welcome, {userProfile.username}!
+        </h2>
 
         <button
           className="btn-profile"
@@ -256,7 +289,32 @@ const handleGoToQuiz = (quizId) => {
       </div>
     ) : userType === "professor" ? (
       <div className="professor-content">
-        <p className="welcome-message">👋 Welcome, {userProfile.username}!</p>
+        <h2 className="welcome-message">
+          {userProfile.profilePic ? (
+            <img
+              src={`http://localhost:5000${userProfile.profilePic}`}
+              alt={`${userProfile.username}'s profile`}
+              className="profile-icon-inline"
+              onClick={togglePicExpand}
+              title="Click to expand"
+            />
+          ) : (
+            <div
+              className="profile-icon-placeholder-inline"
+              onClick={togglePicExpand}
+              title="Click to expand"
+            >
+              {userProfile.username
+                ? userProfile.username
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                : "?"}
+            </div>
+          )}
+          👋 Welcome, {userProfile.username}!
+        </h2>
         <button
           className="btn-profile"
           onClick={() => setShowProfile((prev) => !prev)}
@@ -270,10 +328,21 @@ const handleGoToQuiz = (quizId) => {
         </div>
 
         {showProfile && <UserProfile embedded={true} />}
+
       </div>
     ) : (
       <div>Loading...</div>
     )}
+
+    {isPicExpanded && userProfile.profilePic && (
+  <div className="profile-pic-modal" onClick={togglePicExpand}>
+    <img
+      src={`http://localhost:5000${userProfile.profilePic}`}
+      alt={`${userProfile.username}'s profile enlarged`}
+      className="profile-pic-expanded"
+    />
+  </div>
+)}
   </div>
 );
 }
