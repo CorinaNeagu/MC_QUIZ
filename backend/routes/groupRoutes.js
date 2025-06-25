@@ -116,10 +116,10 @@ router.get('/group-members/:groupId', authenticateJWT, (req, res) => {
 
   db.query(query, [groupId], (err, results) => {
     if (err) {
-      console.error('Error fetching group members:', err);
-      return res.status(500).json({ error: 'Database error' });
-    }
-
+  console.error('Error fetching group members:', err.sqlMessage);
+  return res.status(500).json({ error: 'Database error' });
+}
+console.log('Fetched group members:', results);
     res.json(results);
   });
 });

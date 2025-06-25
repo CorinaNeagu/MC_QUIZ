@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Modal from '../../components/Modal/Modal'; 
-import ModalGroupDetails from '../../components/Modal/ModalGroupDetails';
+import ModalStudentList from "../../components/Modal/ModalGroupDetails"
 import { ErrorMessage, SuccessMessage } from '../../components/Message/Message';
 
 import "./Groups.css";
@@ -38,6 +38,7 @@ const Groups = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [professorGroups, setProfessorGroups] = useState([]);
   const [showProfessorModal, setShowProfessorModal] = useState(false);
 
@@ -63,7 +64,7 @@ const Groups = () => {
   console.log('Token:', token);
 
   if (!activeGroupForQuizzes || !token) {
-    return; // nothing to fetch
+    return; 
   }
 
   setLoading(true);
@@ -90,7 +91,7 @@ const Groups = () => {
       const res = await axios.get('http://localhost:5000/api/user/professor/quizzes', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setQuizzes(res.data);  // Set quizzes data
+      setQuizzes(res.data); 
     } catch (err) {
       console.error('Error fetching quizzes:', err);
     }
@@ -126,7 +127,6 @@ const Groups = () => {
     return;
   }
 
-  // Check for duplicate group name (case-insensitive)
   const duplicate = groups.some(
     (group) => group.group_name.toLowerCase() === newGroupName.trim().toLowerCase()
   );
@@ -188,12 +188,9 @@ const Groups = () => {
       setJoinError('An unexpected error occurred.');
     }
 
-    // Instead of console.error(err), do a simpler log or nothing:
     console.log('Join group error:', err.response?.data?.error || err.message);
   }
 };
-
-
 
   const handleDisplayStudents = async (groupId) => {
     try {
@@ -201,8 +198,13 @@ const Groups = () => {
       const res = await axios.get(`http://localhost:5000/api/groups/group-members/${groupId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setGroupMembers(res.data);
+      
       setSelectedGroupId(groupId);
+      setGroupMembers(res.data);
+      setIsModalOpen(true);
+
+      console.log(groupId);
+      console.log(res.data)
     } catch (err) {
       setGroupMembers([]);
       console.error("Error fetching group members:", err);
@@ -305,9 +307,8 @@ const Groups = () => {
     navigate(`/quiz/${quizId}`);
   };
 
-  // Generate group code
   const generateGroupCode = () => {
-      return Math.random().toString(36).substring(2, 8).toUpperCase(); // 6-char random code
+      return Math.random().toString(36).substring(2, 8).toUpperCase(); 
   };
 
     const handleGroupDetails = async (groupId) => {
@@ -334,9 +335,8 @@ const Groups = () => {
 
     const handleViewAssignedQuizzes = (groupId) => {
   if (activeGroupForQuizzes === groupId) {
-    // Clicking same group again toggles off
     setActiveGroupForQuizzes(null);
-    setAssignedQuizzes([]); // optionally clear quizzes
+    setAssignedQuizzes([]); 
   } else {
     fetchAssignedQuizzes(groupId);
     setActiveGroupForQuizzes(groupId);
@@ -579,32 +579,14 @@ useEffect(() => {
       handleAssignQuiz={handleAssignQuiz}
     />
 
-    <ModalGroupDetails
+    <ModalStudentList
       isOpen={selectedGroupId !== null}
       onClose={() => {
         setSelectedGroupId(null);
         setGroupMembers([]);
       }}
-      title={`Students in Group: ${groups.find(g => g.group_id === selectedGroupId)?.group_name || ''}`}
-    >
-      {groupMembers.length > 0 ? (
-        <ul>
-          {groupMembers.map((student) => (
-            <li key={student.student_id}>
-              {student.username} — {student.email}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No students in this group yet.</p>
-      )}
-    </ModalGroupDetails>
-
-    <ModalGroupDetails
-      isOpen={showProfessorModal}
-      onClose={() => setShowProfessorModal(false)}
-      professorGroups={professorGroups}
-    />  
+      students={groupMembers}
+    />
   </div>
 );
 

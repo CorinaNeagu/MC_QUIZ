@@ -322,11 +322,11 @@
 }
 
 .btn-delete {
-  background-color: #d32f2f !important;
+  background-color:red !important;
 }
 
 .btn-delete:hover {
-  background-color: #9a0007 !important;
+  background-color: rgb(229, 43, 43) !important;
 }
 
 
