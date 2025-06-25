@@ -5,7 +5,7 @@ const ModalPieChart = ({ isOpen, onClose, position, selectedCategory, quizzesInC
   if (!isOpen) return null;
 
   const handleContentClick = (e) => {
-    e.stopPropagation(); // Prevent clicks inside modal from bubbling to overlay
+    e.stopPropagation(); 
   };
 
   return (

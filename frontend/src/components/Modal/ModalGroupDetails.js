@@ -11,22 +11,23 @@ const ModalStudentsList = ({ isOpen, onClose, groupName = '', students = [] }) =
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-        <header className="modal-header">
-          <h2>Students in Group: {groupName}</h2>
-        </header>
-        <main className="modal-content">
+        <div className="modal-header">
+          <h2>{groupName ? `Students in ${groupName}` : 'Group Students'}</h2>
+        </div>
+        <div className="modal-content">
           {students && students.length > 0 ? (
-            <ul>
+            <ul className="student-list">
               {students.map((student) => (
-                <li key={student.student_id}>
-                  {student.username} — {student.email}
+                <li key={student.student_id} className="student-item">
+                  <p className="student-name">{student.username}</p>
+                  <p className="student-email">{student.email}</p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No students enrolled in this group.</p>
+            <p className="no-students">No students enrolled in this group.</p>
           )}
-        </main>
+        </div>
       </div>
     </div>
   );

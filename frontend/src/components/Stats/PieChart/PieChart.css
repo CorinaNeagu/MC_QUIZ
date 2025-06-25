@@ -75,3 +75,13 @@
     transform: scale(1);
   }
 }
+
+.recharts-tooltip-wrapper {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: #333;
+  font-size: 14px;
+}

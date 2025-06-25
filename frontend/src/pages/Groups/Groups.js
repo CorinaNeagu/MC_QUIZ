@@ -411,7 +411,8 @@ useEffect(() => {
     
     {userType === 'professor' && (
       <>
-        <div className="create-group">
+        <div className="join-group">
+          <div className="input-row">
           <input
             type="text"
             placeholder="New group name"
@@ -423,6 +424,7 @@ useEffect(() => {
             onClick={handleCreateGroup}>
               Create Group
           </button>
+          </div>
         </div>
           
           <div className="message-container">

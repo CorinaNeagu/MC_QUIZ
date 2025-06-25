@@ -12,4 +12,22 @@ code {
     monospace;
 }
 
+.recharts-surface rect,
+.recharts-wrapper rect,
+.recharts-sector rect {
+  fill: transparent !important;
+  stroke: none !important;
+}
+
+.recharts-sector {
+  outline: none !important;
+}
+
+.chart-container {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+
 

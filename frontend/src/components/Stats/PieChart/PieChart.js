@@ -62,7 +62,7 @@ const PieChartComponent = () => {
     }));
   }, [quizStats]);
 
-  // Handle clicking a pie slice to open modal with quizzes in category
+
   const handlePieClick = async (data, index, event) => {
     if (!data?.payload?.category_id) {
       console.error("category_id missing from pie slice data");

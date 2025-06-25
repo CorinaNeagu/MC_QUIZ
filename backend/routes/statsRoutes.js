@@ -3,7 +3,6 @@ const router = express.Router();
 const authenticateJWT = require("../middleware/authMiddleware");
 const db = require("../db");
 
-// Helper function to use async/await with db.query
 function queryAsync(query, values) {
   return new Promise((resolve, reject) => {
     db.query(query, values, (err, results) => {
@@ -17,63 +16,59 @@ function queryAsync(query, values) {
 
 // GET quiz attempts per category for logged-in student
 router.get('/pie-chart/quiz-category', authenticateJWT, async (req, res) => {
-  // Get student ID from JWT
   const studentId = req.user.id;  
-  console.log("Student ID:", studentId);  // Log the student ID to verify
+  console.log("Student ID:", studentId);  
 
-  // SQL query to fetch quiz attempts per category for the logged-in student
   const query = `
-    SELECT c.category_name, c.category_id, COUNT(q.quiz_id) AS quizzes_taken
-    FROM QuizAttempt qa
-    JOIN Quiz q ON qa.quiz_id = q.quiz_id
-    JOIN Category c ON q.category_id = c.category_id
-    WHERE qa.student_id = ?
-    GROUP BY c.category_name, c.category_id
+    SELECT 
+  c.category_name, 
+  c.category_id, 
+  COUNT(DISTINCT q.quiz_id) AS quizzes_taken
+FROM QuizAttempt qa
+JOIN Quiz q ON qa.quiz_id = q.quiz_id
+JOIN Category c ON q.category_id = c.category_id
+WHERE qa.student_id = ?
+GROUP BY c.category_name, c.category_id
+
   `;
 
   try {
-    // Execute the query and get the results
     const results = await queryAsync(query, [studentId]);
 
-    console.log("📊 Results:", results);  // Log the results for debugging
+    console.log("📊 Results:", results); 
 
-    // Check if any data is returned
     if (results.length > 0) {
-      // Return the results as JSON
       res.status(200).json(results);
     } else {
-      // If no data, return an empty array or a message
       res.status(404).json({ message: "No data available" });
     }
   } catch (err) {
-    // Catch any errors and return an appropriate response
-    console.error("❌ Error fetching quiz stats:", err);
+    console.error(" Error fetching quiz stats:", err);
     res.status(500).json({ message: "Error fetching quiz category statistics" });
   }
 });
 
 router.get('/quizzes-by-category/:category_id', (req, res) => {
-  const categoryId = req.params.category_id; // Get category_id from the URL parameter
-  console.log("From URL " ,categoryId);
+  const categoryId = req.params.category_id;
+  console.log("From URL:", categoryId);
 
-  // SQL query to get quizzes for the selected category
   const query = `
     SELECT 
-      q.quiz_id, 
-      q.title AS quiz_title, 
+      q.quiz_id,
+      q.title AS quiz_title,
       c.category_name,
       c.category_id
     FROM 
       Quiz q
     JOIN 
-      Category c
-    ON 
-      q.category_id = c.category_id
+      Category c ON q.category_id = c.category_id
+    JOIN
+      QuizSettings qs ON q.quiz_id = qs.quiz_id
     WHERE 
-      c.category_id = ?;
+      c.category_id = ? AND
+      qs.is_active = 1;
   `;
 
-  // Execute the query with the category ID as a parameter
   db.query(query, [categoryId], (err, results) => {
     if (err) {
       console.error('Error fetching quizzes for category:', err);
@@ -81,14 +76,14 @@ router.get('/quizzes-by-category/:category_id', (req, res) => {
     }
 
     console.log("Results from DB:", results);
-    // If results are found, send them as a JSON response
     if (results.length > 0) {
       res.json(results);
     } else {
-      res.status(404).json({ message: 'No quizzes found for this category' });
+      res.status(404).json({ message: 'No active quizzes found for this category' });
     }
   });
 });
+
 
 router.get('/student-category-quizzes/:categoryId', authenticateJWT, (req, res) => {
   const { categoryId } = req.params;
@@ -292,7 +287,7 @@ ORDER BY score_percentage DESC;
 
 router.get('/group-leaderboard/:groupId', authenticateJWT, async (req, res) => {
   const { groupId } = req.params;
-  const { quizId } = req.query; // Grab quizId from query params
+  const { quizId } = req.query; 
 
   console.log('--- Group Leaderboard Request ---');
   console.log('Group ID:', groupId);

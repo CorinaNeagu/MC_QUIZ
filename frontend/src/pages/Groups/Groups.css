@@ -122,6 +122,7 @@
 
 .group-card {
   background-color: #fff;
+  width: 400px;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -366,46 +367,9 @@ h2 {
 }
 
 @media (max-width: 768px) {
-  .join-group,
-  .create-group {
-    flex-direction: column;
-    align-items: stretch;
-    width: 90%;
-    padding: 15px;
-    top: 15px;
-  }
-
-  .join-group input,
-  .create-group input[type="text"] {
-    margin-right: 0;
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  .join-group button,
-  .create-group button {
-    width: 100%;
-    margin-top: 0;
-  }
-
   .group-cards,
   .assigned-quizzes {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 10px;
-  }
-
-  .quiz-card,
-  .group-card {
-    width: 100%;
-  }
-
-  .btn-display-students,
-  .btn-assign-quiz,
-  .btn-group-details,
-  .btn-delete {
-    padding: 10px;
-    margin-bottom: 8px;
-    width: 100%;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -413,46 +377,15 @@ h2 {
   .group-cards,
   .assigned-quizzes {
     grid-template-columns: 1fr;
-    padding: 10px;
   }
 
-  .join-group,
-  .create-group {
-    width: 95%;
-    top: 10px;
-    padding: 10px;
+  .quiz-card,
+  .group-card {
+    padding: 1rem;
   }
 
   .message {
+    padding: 0.75rem;
     font-size: 0.9rem;
-    padding: 10px;
-    flex-direction: column;
-    align-items: flex-start;
-    max-width: 90vw;
-    box-sizing: border-box;
-  }
-
-  .message-icon {
-    margin-bottom: 5px;
-    width: 18px;
-    height: 18px;
-  }
-
-  .quiz-card h3,
-  .group-card h3 {
-    font-size: 16px;
-  }
-
-  .quiz-card p,
-  .group-card p {
-    font-size: 13px;
-  }
-
-  .btn-display-students,
-  .btn-assign-quiz,
-  .btn-group-details,
-  .btn-delete {
-    width: 100%;
-    margin-right: 0;
   }
 }

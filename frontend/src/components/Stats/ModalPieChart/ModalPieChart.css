@@ -1,81 +1,95 @@
 .modal-backdrop {
-  position: fixed; 
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4); 
-  backdrop-filter: blur(3px); 
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
   z-index: 999;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
 }
 
 .modal-container {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  width: 320px;
-  max-height: 450px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.12),
+    0 8px 30px rgba(0, 0, 0, 0.08);
+  width: 360px;
+  max-height: 480px;
   overflow-y: auto;
-  padding: 25px 30px;
+  padding: 32px 36px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
-  border: 1px solid #e0e0e0;
+  color: #222;
+  border: 1px solid #e5e7eb;
   transition: transform 0.3s ease, opacity 0.3s ease;
   position: relative;
 }
 
 .modal-container h2 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 20px;
-  color: #0066ff;
+  margin-bottom: 24px;
+  color: #007bff; /* brighter blue */
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
 .modal-container ul {
   list-style: none;
   padding-left: 0;
   margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px; /* space between pills */
+  justify-content: center;
 }
 
 .modal-container li {
-  padding: 10px 12px;
+  background-color: #e6f0ff;
+  color: #004085;
+  padding: 8px 20px;
   font-size: 15px;
-  border-radius: 6px;
-  border-bottom: 1px solid #f0f0f0;
+  border-radius: 9999px; /* fully rounded pill shape */
+  border: 1.5px solid #007bff;
   cursor: default;
-  transition: background-color 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.15);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .modal-container li:hover {
-  background-color: #f5faff;
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
 }
 
+
 .modal-container button {
-  background-color: #0066ff;
+  background-color: #007bff;
   color: #fff;
   border: none;
-  padding: 12px 18px;
-  font-size: 15px;
-  border-radius: 8px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.25s ease;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.35);
 }
 
 .modal-container button:hover {
-  background-color: #0051cc;
+  background-color: #0056b3;
 }
 
 .modal-container-enter {
   opacity: 0;
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 .modal-container-enter-active {
@@ -91,14 +105,14 @@
 
 .modal-container-exit-active {
   opacity: 0;
-  transform: scale(0.95);
+  transform: scale(0.96);
   transition: all 0.3s ease-in;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;

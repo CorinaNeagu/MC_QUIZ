@@ -5,6 +5,9 @@ import axios from "axios";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import "./QuizHistory.css";
 
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+
+
 const QuizHistory = () => {
   const [attempts, setAttempts] = useState([]);
   const [latestAttempts, setLatestAttempts] = useState([]);
@@ -13,6 +16,7 @@ const QuizHistory = () => {
   const [selectedQuizTitle, setSelectedQuizTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [filterDate, setFilterDate] = useState(""); 
+  const [showEvolution, setShowEvolution] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -90,10 +94,16 @@ const QuizHistory = () => {
 
   if (loading) return <div>Loading quiz history...</div>;
 
+  const evolutionData = modalAttempts.map(a => ({
+    date: new Date(a.attempt_time).toLocaleDateString(),
+    score: a.score,
+  })).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  
   return (
     <div className="quiz-history-container">
       <Sidebar showBackButton={true} />
-      <h2>📚 Your Quiz History</h2>
+      <h2 className = "your-message">📚 Your Quiz History</h2>
       {latestAttempts.length === 0 ? (
         <p>No quiz attempts yet.</p>
       ) : (
@@ -129,39 +139,60 @@ const QuizHistory = () => {
       )}
 
       {showModal && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{selectedQuizTitle} – All Attempts</h3>
-            </div>
+          <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3>{selectedQuizTitle} – All Attempts</h3>
+                <button 
+                  className="btn-evolution"
+                  onClick={() => setShowEvolution((prev) => !prev)}>
+                  {showEvolution ? "Hide" : "Show Evolution"}
+                </button>
+              </div>
 
-            <input
-              type="date"
-              value={filterDate}
-              onChange={handleDateChange}
-              className="modal-date-picker"
-              placeholder="Filter by date"
-            />
-
-            <ul className="modal-attempts">
-              {modalAttempts.length === 0 ? (
-                <p className="no-match">No attempts match your filter.</p>
-              ) : (
-                modalAttempts.map((a) => (
-                  <li key={a.attempt_id} className="modal-attempt-card">
-                    <p><strong>Score:</strong> {a.score}</p>
-                    <p><strong>Start:</strong> {new Date(a.attempt_time).toLocaleString()}</p>
-                    <p><strong>End:</strong> {new Date(a.end_time).toLocaleString()}</p>
-                    <p>
-                      <strong>Duration:</strong> {formatDuration(a.attempt_time, a.end_time)}
-                    </p>
-                  </li>
-                ))
+              {!showEvolution && (
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={handleDateChange}
+                  className="modal-date-picker"
+                  placeholder="Filter by date"
+                />
               )}
-            </ul>
+
+              {showEvolution ? (
+                <div style={{ width: "100%", height: 300 }}>
+                  <ResponsiveContainer>
+                    <LineChart data={evolutionData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <ul className="modal-attempts">
+                  {modalAttempts.length === 0 ? (
+                    <p className="no-match">No attempts match your filter.</p>
+                  ) : (
+                    modalAttempts.map((a) => (
+                      <li key={a.attempt_id} className="modal-attempt-card">
+                        <p><strong>Score:</strong> {a.score}</p>
+                        <p><strong>Start:</strong> {new Date(a.attempt_time).toLocaleString()}</p>
+                        <p><strong>End:</strong> {new Date(a.end_time).toLocaleString()}</p>
+                        <p>
+                          <strong>Duration:</strong> {formatDuration(a.attempt_time, a.end_time)}
+                        </p>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
