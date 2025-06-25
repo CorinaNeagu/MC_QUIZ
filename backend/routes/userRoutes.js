@@ -6,7 +6,6 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, "../uploads");
@@ -16,7 +15,6 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Save as userId + original file extension
     const ext = path.extname(file.originalname);
     cb(null, `${req.user.id}${ext}`);
   },
@@ -24,9 +22,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // max 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
-    // Accept only images
     if (!file.mimetype.startsWith("image/")) {
       return cb(new Error("Only image files are allowed!"));
     }
@@ -47,9 +44,9 @@ router.post(
     const table = userType === "student" ? "Student" : "Professor";
     const userKey = userType === "student" ? "student_id" : "professor_id";
 
-    const profilePicPath = `/uploads/${req.file.filename}`; // relative path for DB
+    const profilePicPath = `/uploads/${req.file.filename}`; 
 
-    // First: get old profile pic path so we can delete old file
+    // First: get old profile pic path so the old one can be deleted
     const selectQuery = `SELECT profile_picture FROM ${table} WHERE ${userKey} = ?`;
     db.query(selectQuery, [id], (selectErr, selectResult) => {
       if (selectErr) {
@@ -102,7 +99,6 @@ router.use((err, req, res, next) => {
   console.error("Unexpected error:", err.stack || err);
   next(err);
 });
-
 
 // User Profile route
 router.get('/profile', authenticateJWT, (req, res) => {

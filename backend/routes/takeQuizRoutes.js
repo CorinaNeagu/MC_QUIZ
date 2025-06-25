@@ -29,70 +29,78 @@ router.get('/quiz-settings/:quizId', (req, res) => {
 });
 
 router.get('/quiz/:quizId', async (req, res) => {
-    const quizId = req.params.quizId;
-  
-    try {
-        // First query to fetch quiz information and settings
-        const quizQuery = `
-             SELECT q.quiz_id, q.title, q.created_at, c.category_name, qs.time_limit, 
-                   qs.deduction_percentage, qs.retake_allowed, qs.is_active, qs.no_questions
-            FROM Quiz q
-            JOIN Category c ON q.category_id = c.category_id
-            JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
-            WHERE q.quiz_id = ?;
-        `;
-        
-        // Second query to fetch the questions for the quiz
-        const questionsQuery = `
-            SELECT * FROM Questions WHERE quiz_id = ?;
-        `;
-        
-        // Third query to fetch the answers for the quiz questions
-        const answersQuery = `
-            SELECT * FROM Answers WHERE question_id IN (SELECT question_id FROM Questions WHERE quiz_id = ?);
-        `;
-        
-        db.query(quizQuery, [quizId], (err, quizResult) => {
-            if (err) {
-                console.error("Error fetching quiz info:", err);
-                return res.status(500).json({ message: 'Error fetching quiz details from database.' });
-            }
+  const quizId = req.params.quizId;
 
-            // Fetch questions
-            db.query(questionsQuery, [quizId], (err, questionsResult) => {
-                if (err) {
-                    console.error("Error fetching questions:", err);
-                    return res.status(500).json({ message: 'Error fetching questions.' });
-                }
+  try {
+    // Query to fetch quiz info, settings, category, and subcategory
+    const quizQuery = `
+      SELECT 
+        q.quiz_id, q.title, q.created_at, 
+        c.category_name, s.subcategory_name,
+        qs.time_limit, qs.deduction_percentage, 
+        qs.retake_allowed, qs.is_active, qs.no_questions
+      FROM Quiz q
+      JOIN Category c ON q.category_id = c.category_id
+      JOIN Subcategory s ON q.subcategory_id = s.subcategory_id
+      JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+      WHERE q.quiz_id = ?;
+    `;
 
-                // Fetch answers
-                db.query(answersQuery, [quizId], (err, answersResult) => {
-                    if (err) {
-                        console.error("Error fetching answers:", err);
-                        return res.status(500).json({ message: 'Error fetching answers.' });
-                    }
+    // Fetch questions for the quiz
+    const questionsQuery = `
+      SELECT * FROM Questions WHERE quiz_id = ?;
+    `;
 
-                    // Combine all results
-                    const quizData = {
-                        ...quizResult[0],  // Quiz info
-                        questions: questionsResult.map(question => ({
-                            ...question,
-                            answers: answersResult.filter(answer => answer.question_id === question.question_id)
-                        }))
-                    };
-                    
+    // Fetch answers for the quiz questions
+    const answersQuery = `
+      SELECT * FROM Answers WHERE question_id IN (SELECT question_id FROM Questions WHERE quiz_id = ?);
+    `;
 
-                    return res.status(200).json(quizData);
-                });
-            });
+    db.query(quizQuery, [quizId], (err, quizResult) => {
+      if (err) {
+        console.error("Error fetching quiz info:", err);
+        return res.status(500).json({ message: 'Error fetching quiz details from database.' });
+      }
+
+      if (quizResult.length === 0) {
+        return res.status(404).json({ message: "Quiz not found" });
+      }
+
+      const quiz = quizResult[0];
+
+      db.query(questionsQuery, [quizId], (err, questionsResult) => {
+        if (err) {
+          console.error("Error fetching questions:", err);
+          return res.status(500).json({ message: 'Error fetching questions.' });
+        }
+
+        db.query(answersQuery, [quizId], (err, answersResult) => {
+          if (err) {
+            console.error("Error fetching answers:", err);
+            return res.status(500).json({ message: 'Error fetching answers.' });
+          }
+
+          const quizData = {
+            ...quiz,
+            questions: questionsResult.map(question => ({
+              ...question,
+              answers: answersResult.filter(answer => answer.question_id === question.question_id)
+            }))
+          };
+
+          return res.status(200).json(quizData);
         });
+      });
+    });
 
-    } catch (err) {
-        console.error("Error:", err);
-        return res.status(500).json({ message: 'An error occurred while fetching quiz details.' });
-    }
-
+  } catch (err) {
+    console.error("Error:", err);
+    return res.status(500).json({ message: 'An error occurred while fetching quiz details.' });
+  }
 });
+
+
+
 
 
 router.post('/quiz_attempts', (req, res) => {

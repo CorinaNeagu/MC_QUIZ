@@ -207,35 +207,52 @@ button {
   font-size: 1.4rem;
   font-weight: 600;
 }
+
 .taken-badge-row {
   margin-top: 10px; 
+  margin-bottom: 10px;
   width: 100%;
 }
 
 .taken-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #6EE7B7, #3B82F6);
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #34D399, #2563EB); 
+  color: #fff;
   font-weight: 600;
-  padding: 0.25rem 0.75rem;
+  padding: 0.4rem 1rem;
   font-size: 0.85rem;
   border-radius: 9999px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
   user-select: none;
   letter-spacing: 0.03em;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
 }
+
+.taken-badge:hover {
+  transform: scale(1.05);
+}
+
+.badge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 
 
 .deadline-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  justify-items: center;
-  padding: 16px;
-  width: 1000px;
+  grid-template-columns: repeat(3, minmax(250px, 1fr));
+  gap: 25px;
+  padding: 24px;
+  max-width: 1200px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
+
 
 .deadline-card {
   position: relative;
@@ -273,29 +290,76 @@ button {
   align-items: start;
 }
 
+.menu-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+
 .btn-menu {
   background-color: transparent;
   border: none;
-  font-size: 18px;
+  font-size: 22px;
+  color: #333;
   cursor: pointer;
-  color: black;
-  padding: 0;
-  margin: 0;
-  line-height: 1;
-  user-select: none;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
 
-.menu-container {
-  position: relative;
+.btn-menu:hover {
+  background-color: transparent !important;
 }
 
 .menu-dropdown {
-  height: 50px;
   position: absolute;
-  top: -25px;
-  left: 15px;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 100;
+  width: 140px;
+  opacity: 0;
+  transform: translateY(-5px);
+  animation: dropdownFadeIn 0.25s forwards;
+}
+
+.menu-dropdown button {
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: none;
+  background-color: transparent;
+  color: #2c3e50;
+  font-weight: 500;
+  cursor: pointer;
   border-radius: 6px;
-  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.menu-dropdown button:hover:not(:disabled) {
+  background-color: transparent !important;
+}
+
+.menu-dropdown button:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+  background-color: transparent;
+}
+
+
+@keyframes dropdownFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .start-quiz-btn {
@@ -311,7 +375,7 @@ button {
 }
 
 .start-quiz-btn:hover {
-  background-color: #0056b3;
+  background-color: transparent !important;
 }
 
 

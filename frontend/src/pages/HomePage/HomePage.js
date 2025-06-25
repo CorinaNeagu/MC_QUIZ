@@ -51,7 +51,6 @@ const HomePage = () => {
       } else {
         setUserType(decodedToken.userType);
 
-        // Fetch user profile data
         fetch("http://localhost:5000/api/user/profile", {
           method: "GET",
           headers: {
@@ -239,45 +238,52 @@ const handleGoToQuiz = (quizId) => {
                   })
                   .map((deadline) => (
                     <div key={deadline.assignment_id} className="deadline-card">
-                      <div className="deadline-header-menu-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div className="deadline-header">
-                          
-                          <div className="deadline-title">{deadline.title}</div>
+  <div className="deadline-header-menu-container flex justify-between items-center">
+    
+    {/* Left: Title and optional badge */}
+    <div className="deadline-header">
+      <div className="deadline-title font-semibold text-lg">{deadline.title}</div>
 
-                          {deadline.taken && !deadline.allowRetake && (
-                            <div className="taken-badge-row">
-                              <div className="taken-badge">Cannot be retaken</div>
-                            </div>
-                          )}
-                        </div>
+      {deadline.taken && !deadline.allowRetake ? (
+        <div className="taken-badge-row mt-1">
+          <span className="taken-badge text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+            Cannot be retaken
+          </span>
+        </div>
+      ) : null}
+    </div>
 
-                        <div className="menu-container">
-                          <button
-                            className="btn-menu"
-                            onClick={() => toggleMenu(deadline.assignment_id)}
-                            aria-label="Open menu"
-                          >
-                            ⋮
-                          </button>
+    {/* Right: Menu button and dropdown */}
+    <div className="menu-container">
+  <button
+    className="btn-menu text-xl px-2"
+    onClick={() => toggleMenu(deadline.assignment_id)}
+    aria-label="Open menu"
+  >
+    ⋮
+  </button>
 
-                              {openMenuId === deadline.assignment_id && (
-                                <div className="menu-dropdown">
-                                  <button
-                                    className="start-quiz-btn"
-                                    onClick={() => handleGoToQuiz(deadline.quiz_id)}
-                                    disabled={!deadline.allowRetake && deadline.taken}
-                                  >
-                                    Go to Quiz
-                                  </button>
-                                </div>
-                              )}
-                        </div>
-                      </div>
+  {openMenuId === deadline.assignment_id && (
+    <div className="menu-dropdown">
+      <button
+        className="start-quiz-btn"
+        onClick={() => handleGoToQuiz(deadline.quiz_id)}
+        disabled={!deadline.allowRetake && deadline.taken}
+      >
+        Go to Quiz
+      </button>
+    </div>
+  )}
+</div>
 
-                        <div className="deadline-date">
-                          Due on {new Date(deadline.deadline).toLocaleDateString()}
-                        </div>
-                      </div>
+  </div>
+
+  <div className="deadline-date text-sm text-gray-500 mt-2">
+    Due on {new Date(deadline.deadline).toLocaleDateString()}
+  </div>
+</div>
+
+
 
                   ))}
               </div>

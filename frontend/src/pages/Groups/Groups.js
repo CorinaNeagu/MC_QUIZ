@@ -41,20 +41,19 @@ const Groups = () => {
   const [professorGroups, setProfessorGroups] = useState([]);
   const [showProfessorModal, setShowProfessorModal] = useState(false);
 
-  // Fetch user type and groups based on it (professor or student)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      const decodedToken = JSON.parse(atob(token.split('.')[1])); //decode jwt
+      const decodedToken = JSON.parse(atob(token.split('.')[1])); 
       setUserType(decodedToken.userType);
     }
 
-    fetchGroups();  // Load groups based on user type
+    fetchGroups();  
   }, [userType]);
 
    useEffect(() => {
     if (userType === 'professor') {
-      fetchQuizzes();  // Fetch quizzes only for professors
+      fetchQuizzes(); 
     }
   }, [userType]);
 
@@ -384,6 +383,27 @@ const Groups = () => {
   }
 };
 
+useEffect(() => {
+  if (error || success) {
+    const timer = setTimeout(() => {
+      setError(null);
+      setSuccess('');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }
+}, [error, success]);
+
+// Auto clear joinError and joinSuccess after 5 seconds (student)
+useEffect(() => {
+  if (joinError || joinSuccess) {
+    const timer = setTimeout(() => {
+      setJoinError('');
+      setJoinSuccess('');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }
+}, [joinError, joinSuccess]);
+
 
   return (
   <div className="groups-page">
@@ -404,6 +424,7 @@ const Groups = () => {
               Create Group
           </button>
         </div>
+          
           <div className="message-container">
                 {error && <ErrorMessage message={error} />}
                 {success && <SuccessMessage message={success} />}
@@ -446,28 +467,26 @@ const Groups = () => {
     {userType === 'student' && (
       
       <>
-      <div className="top-section">
         <div className="join-group">
-  <div className="input-row">
-    <input
-      type="text"
-      placeholder="Enter group code"
-      value={groupCodeToJoin}
-      onChange={(e) => setGroupCodeToJoin(e.target.value)}
-    />
-    <button onClick={handleJoinGroup}>Join Group</button>
-  </div>
-  
-  <button className="btn-display-professors" onClick={handleDisplayProfessors}>
-    Display Professors & Groups
-  </button>
-</div>
-      </div>
+          <div className="input-row">
+            <input
+              type="text"
+              placeholder="Enter group code"
+              value={groupCodeToJoin}
+              onChange={(e) => setGroupCodeToJoin(e.target.value)}
+            />
+            <button onClick={handleJoinGroup}>Join Group</button>
+          </div>
+          
+          <button className="btn-display-professors" onClick={handleDisplayProfessors}>
+            Display Professors & Groups
+          </button>
+        </div>
 
         <div className="message-container">
                   {joinError && <ErrorMessage message={joinError} />}
                   {joinSuccess && <SuccessMessage message={joinSuccess} />}
-                </div>
+        </div>
       
 
   

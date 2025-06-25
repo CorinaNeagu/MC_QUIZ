@@ -3,11 +3,10 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./DisplayQuestion.css";
 
-// Fisher-Yates Shuffle to randomize the array
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
-    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    const j = Math.floor(Math.random() * (i + 1)); 
+    [array[i], array[j]] = [array[j], array[i]]; 
   }
   return array;
 };
@@ -22,11 +21,10 @@ const DisplayQuestion = () => {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [timeLeft, setTimeLeft] = useState(null);  // Timer state
+  const [timeLeft, setTimeLeft] = useState(null); 
   const [startTime, setStartTime] = useState(null);
   const user_id = localStorage.getItem("user_id");
 
-  // Extract timeLeft and startTime from query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const timeLeftFromUrl = parseInt(params.get("timeLeft"), 10);
@@ -54,22 +52,19 @@ const DisplayQuestion = () => {
           }
         );
 
-        // Shuffle questions first
         const shuffledQuestions = shuffleArray(response.data);
 
-        // Shuffle answers for each question
         shuffledQuestions.forEach(question => {
           question.answers = shuffleArray(question.answers);
         });
 
-        // Initialize the answers state with empty arrays for each question
         const initialAnswers = shuffledQuestions.reduce((acc, question) => {
           acc[question.question_id] = [];
           return acc;
         }, {});
 
         setQuestions(shuffledQuestions);
-        setAnswers(initialAnswers);  // Initialize answers state
+        setAnswers(initialAnswers);  
         setLoading(false);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -81,7 +76,6 @@ const DisplayQuestion = () => {
     fetchQuestions();
   }, [quizId, location.search]);
 
-  // Countdown Timer
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0) return;
 
@@ -89,7 +83,7 @@ const DisplayQuestion = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          submitQuiz(true); // Auto-submit when time is up
+          submitQuiz(true); 
           return 0;
         }
         return prev - 1;
@@ -99,7 +93,6 @@ const DisplayQuestion = () => {
     return () => clearInterval(interval);
   }, [timeLeft]);
 
-  // Handle answer selection
   const handleAnswerSelect = (questionId, selectedOption) => {
     setAnswers((prevAnswers) => {
       const sanitizedQuestionId = Number(questionId);
@@ -119,7 +112,6 @@ const DisplayQuestion = () => {
     });
   };
 
-  // Submit quiz
   const submitQuiz = async (forceSubmit = false) => {
     const lastQuestionId = questions[questions.length - 1].question_id;
     const lastQuestionAnswer = answers[lastQuestionId];

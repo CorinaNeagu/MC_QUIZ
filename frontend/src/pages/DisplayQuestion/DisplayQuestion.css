@@ -184,10 +184,24 @@ body {
   outline: none;
 }
 
-.next-btn, 
-.submit-btn {
-  width: 250px;
+.button-group {
+  display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 20px;
+  margin-top: 2.5rem;
+  flex-wrap: nowrap; /* prevent wrapping */
+  width: 100%; /* make sure it uses available space */
+  max-width: 600px; /* optional, limit the total width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.next-btn,
+.submit-btn { 
+  flex: 1 1 48%; 
+  min-width: 120px;
+  padding: 12px 20px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -195,16 +209,25 @@ body {
   cursor: pointer;
   font-size: 1.1rem;
   font-weight: 600;
-  margin-top: 2.5rem;
-  margin-left: 120px;
   box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  text-align: center;
 }
 
-.next-btn:hover {
+.next-btn:hover,
+.submit-btn:hover {
   background-color: #0056b3;
   box-shadow: 0 8px 20px rgba(0, 86, 179, 0.6);
+  transform: translateY(-2px);
 }
+
+.next-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 
 .loading, .error {
   font-size: 1.25rem;

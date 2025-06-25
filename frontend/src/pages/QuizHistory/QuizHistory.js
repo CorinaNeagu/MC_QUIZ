@@ -12,7 +12,7 @@ const QuizHistory = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedQuizTitle, setSelectedQuizTitle] = useState("");
   const [loading, setLoading] = useState(true);
-  const [filterDate, setFilterDate] = useState(""); // for date picker
+  const [filterDate, setFilterDate] = useState(""); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const QuizHistory = () => {
       .sort((a, b) => new Date(b.attempt_time) - new Date(a.attempt_time));
     setModalAttempts(filtered);
     setSelectedQuizTitle(quizTitle);
-    setFilterDate(""); // Reset date filter
+    setFilterDate(""); 
     setShowModal(true);
   };
 
@@ -70,16 +70,14 @@ const QuizHistory = () => {
   };
 
   const handleDateChange = (e) => {
-    const selectedDate = e.target.value; // yyyy-mm-dd string
+    const selectedDate = e.target.value; 
     setFilterDate(selectedDate);
 
     if (!selectedDate) {
-      // Reset filter if cleared
       openModal(modalAttempts[0]?.quiz_id, selectedQuizTitle);
       return;
     }
 
-    // Filter modalAttempts by matching start date (date part only)
     const filteredByDate = attempts
       .filter((a) => {
         if (a.quiz_id !== modalAttempts[0]?.quiz_id) return false;
@@ -100,32 +98,32 @@ const QuizHistory = () => {
         <p>No quiz attempts yet.</p>
       ) : (
         <div className="attempts-grid">
-  {latestAttempts.map((attempt) => {
-    // Count attempts for this quiz_id
-    const attemptsForQuiz = attempts.filter(a => a.quiz_id === attempt.quiz_id);
+        {latestAttempts.map((attempt) => {
 
-    return (
-      <div
-        key={attempt.attempt_id}
-        className="attempt-card"
-      >
-        <h3 className="quiz-title">{attempt.quiz_title}</h3>
-        <p><strong>Score:</strong> {attempt.score}</p>
-        <p><strong>Start:</strong> {new Date(attempt.attempt_time).toLocaleString()}</p>
-        <p><strong>End:</strong> {new Date(attempt.end_time).toLocaleString()}</p>
-        <p><strong>Duration:</strong> {formatDuration(attempt.attempt_time, attempt.end_time)}</p>
+            const attemptsForQuiz = attempts.filter(a => a.quiz_id === attempt.quiz_id);
 
-        {attemptsForQuiz.length > 1 && (
-          <p
-            className="show-all-attempts"
-            onClick={() => openModal(attempt.quiz_id, attempt.quiz_title)}
-          >
-            Show all {attemptsForQuiz.length} attempts
-          </p>
-        )}
-      </div>
-    );
-  })}
+            return (
+            <div
+                key={attempt.attempt_id}
+                className="attempt-card"
+            >
+                <h3 className="quiz-title">{attempt.quiz_title}</h3>
+                <p><strong>Score:</strong> {attempt.score}</p>
+                <p><strong>Start:</strong> {new Date(attempt.attempt_time).toLocaleString()}</p>
+                <p><strong>End:</strong> {new Date(attempt.end_time).toLocaleString()}</p>
+                <p><strong>Duration:</strong> {formatDuration(attempt.attempt_time, attempt.end_time)}</p>
+
+                {attemptsForQuiz.length > 1 && (
+                <p
+                    className="show-all-attempts"
+                    onClick={() => openModal(attempt.quiz_id, attempt.quiz_title)}
+                >
+                    Show all {attemptsForQuiz.length} attempts
+                </p>
+                )}
+            </div>
+            );
+        })}
 </div>
 
       )}

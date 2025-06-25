@@ -33,6 +33,7 @@ const DisplayQuiz = () => {
             },
           }
         );
+        console.log("Quiz Data:", response.data);  // Add this
         setQuizData(response.data);
       } catch (err) {
         console.error("Error fetching quiz details:", err);

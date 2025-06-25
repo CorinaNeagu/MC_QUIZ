@@ -14,7 +14,7 @@
   align-items: flex-end;
   gap: 10px;
   padding: 20px 30px;
-  width: fit-content; /* shrink-wrap the container */
+  width: fit-content; 
 }
 
 .join-group {
@@ -28,7 +28,7 @@
   border-radius: 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
-  flex-direction: column; /* stack input-row and second button */
+  flex-direction: column; 
   gap: 10px;
   z-index: 1000;
   font-size: 16px;
@@ -76,7 +76,7 @@
 .btn-display-professors {
   width: 500px;
   height: 40px;
-  margin: 0 auto; /* centers horizontally */
+  margin: 0 auto; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,18 +96,29 @@
 }
 
 .groups-page {
-  padding-top: 80px;
+  padding-top: 200px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; 
 }
 
 .group-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap; 
   gap: 20px;
-  margin-top: 20px;
-  max-width: 1200px;
-  width: 100%;
   padding: 20px;
+  padding-bottom: 50px;
+  margin-top: 20px;
+  max-width: 100%;
+  width: 100%;
+  position: sticky;
+  top: 80px;
+  z-index: 999;
+  overflow-x: visible; 
+  scroll-snap-type: none;
 }
+
 
 .group-card {
   background-color: #fff;
@@ -135,33 +146,52 @@
 
 .message-container {
   position: fixed;
-  top: 80px;
-  left: 33%;
-  padding-top: 30px;
+  top: 180px;
+  left: 38%; 
   transform: translateX(-50%);
+  padding-top: 30px;
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: 640px;
+  pointer-events: none; 
   animation: fadeInUp 0.5s ease forwards;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .message {
+  pointer-events: auto; 
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 12px;
   font-weight: 600;
-  font-size: 1rem;
-  max-width: 600px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 1.125rem; 
+  max-width: 100%;
+  padding: 16px 24px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  background-color: #fff;
+  color: #333;
   animation: fadeIn 0.5s ease forwards;
+  transition: box-shadow 0.3s ease;
+}
+
+.message:hover {
+  box-shadow:
+    0 8px 12px rgba(0, 0, 0, 0.15),
+    0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .message-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
+  width: 24px;
+  height: 24px;
+  margin-right: 14px;
   flex-shrink: 0;
+  stroke-width: 2.5;
+  color: inherit; /* inherit text color */
 }
+
 
 .message-error {
   background-color: #fdecea;
@@ -179,10 +209,24 @@
 
 .assigned-quizzes {
   display: grid;
+  margin-top: 10px;
+  margin-bottom: 10px;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   justify-content: flex-start;
   flex-wrap: wrap;
+  max-height: 60vh;   
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.assigned-quizzes::-webkit-scrollbar {
+  width: 8px;
+}
+
+.assigned-quizzes::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
 
 .quiz-card {
@@ -285,12 +329,14 @@
   background-color: #9a0007 !important;
 }
 
+
 h2 {
   text-align: center;
   font-size: 1.5rem;
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 20px;
+  margin-top: 100px;
   padding: 10px 0;
   border-bottom: 2px solid #3498db;
   letter-spacing: 0.05em;

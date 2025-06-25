@@ -151,27 +151,28 @@ const UserProfile = ({ embedded = false }) => {
       </div>
 
       <div className="file-upload-container">
-        <label htmlFor="file-upload" className="file-upload-label">
-          Choose Image
-        </label>
-        <input
-          id="file-upload"
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="file-upload-input"
-        />
-        <div className="file-name">
-          {selectedFile ? selectedFile.name : "No file chosen"}
-        </div>
-        <button
-          onClick={handleUpload}
-          className="upload-button"
-          disabled={!selectedFile}
-        >
-          Upload
-        </button>
-      </div>
+  <label htmlFor="file-upload" className="file-upload-label">
+    📁 Choose Image
+  </label>
+  <input
+    id="file-upload"
+    type="file"
+    accept="image/*"
+    onChange={handleFileChange}
+    className="file-upload-input"
+  />
+  <div className="file-name" title={selectedFile ? selectedFile.name : "No file chosen"}>
+    {selectedFile ? selectedFile.name : "No file chosen"}
+  </div>
+  <button
+    onClick={handleUpload}
+    className="upload-button"
+    disabled={!selectedFile}
+  >
+    ⬆️ Upload
+  </button>
+</div>
+
     </div>
   );
 };
