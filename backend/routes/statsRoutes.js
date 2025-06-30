@@ -289,15 +289,10 @@ router.get('/group-leaderboard/:groupId', authenticateJWT, async (req, res) => {
   const { groupId } = req.params;
   const { quizId } = req.query; 
 
-  console.log('--- Group Leaderboard Request ---');
-  console.log('Group ID:', groupId);
-  console.log('Quiz ID filter:', quizId);
-
   let query;
   let queryParams;
 
   if (quizId) {
-    // Query to get leaderboard filtered by quizId
     query = `
       SELECT 
         s.student_id,
@@ -363,8 +358,6 @@ router.get('/group-leaderboard/:groupId', authenticateJWT, async (req, res) => {
     queryParams = [groupId];
   }
 
-  console.log('SQL Query:', query);
-  console.log('Query Parameters:', queryParams);
 
   try {
     const results = await queryAsync(query, queryParams);

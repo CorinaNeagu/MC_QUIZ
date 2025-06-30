@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts';
 import './GroupLeaderboard.css';
 
 const GroupLeaderboard = () => {
@@ -19,26 +11,24 @@ const GroupLeaderboard = () => {
   const [selectedQuiz, setSelectedQuiz] = useState('');
   const [useSingleQuiz, setUseSingleQuiz] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  // Redirect if no token
   useEffect(() => {
     if (!token) navigate('/');
-  }, [navigate, token]);
+  }, [token, navigate]);
 
-  // Fetch groups on mount or token change
   useEffect(() => {
     if (!token) return;
 
     const fetchGroups = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/groups/professor-groups', {
+        const { data } = await axios.get('http://localhost:5000/api/groups/professor-groups', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setGroups(res.data);
+        setGroups(data);
       } catch {
         setGroups([]);
       }
@@ -47,7 +37,6 @@ const GroupLeaderboard = () => {
     fetchGroups();
   }, [token]);
 
-  // Fetch quizzes when group changes and single quiz toggle is on
   useEffect(() => {
     if (!token || !selectedGroup || !useSingleQuiz) {
       setQuizzes([]);
@@ -57,11 +46,11 @@ const GroupLeaderboard = () => {
 
     const fetchQuizzes = async () => {
       try {
-        const res = await axios.get(
+        const { data } = await axios.get(
           `http://localhost:5000/api/groups/student-assigned-quizzes/${selectedGroup}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setQuizzes(res.data);
+        setQuizzes(data);
       } catch {
         setQuizzes([]);
       }
@@ -70,7 +59,6 @@ const GroupLeaderboard = () => {
     fetchQuizzes();
   }, [token, selectedGroup, useSingleQuiz]);
 
-  // Fetch leaderboard when dependencies change
   useEffect(() => {
     if (!token || !selectedGroup) {
       setLeaderboard([]);
@@ -82,14 +70,14 @@ const GroupLeaderboard = () => {
       setLoading(true);
       try {
         const params = useSingleQuiz && selectedQuiz ? { quizId: selectedQuiz } : {};
-        const res = await axios.get(
+        const { data } = await axios.get(
           `http://localhost:5000/api/stats/group-leaderboard/${selectedGroup}`,
           {
             headers: { Authorization: `Bearer ${token}` },
             params,
           }
         );
-        setLeaderboard(res.data);
+        setLeaderboard(data);
       } catch {
         setLeaderboard([]);
       } finally {
@@ -100,15 +88,21 @@ const GroupLeaderboard = () => {
     fetchLeaderboard();
   }, [token, selectedGroup, selectedQuiz, useSingleQuiz]);
 
-  const formatUsername = (name) => (name.length > 10 ? name.slice(0, 10) + '…' : name);
+  const formatUsername = (name) => (name.length > 10 ? `${name.slice(0, 10)}…` : name);
+
+  const handleGroupChange = (e) => {
+    setSelectedGroup(e.target.value);
+    setSelectedQuiz('');
+    setUseSingleQuiz(false);
+    setLeaderboard([]);
+  };
 
   return (
     <div className="leaderboard-wrapper">
       <h3 className="leaderboard-title">Group Leaderboard</h3>
 
       <div className="controls">
-        {/* Group Selector */}
-        <div className="control-group">
+        <div className="control-group full-width">
           <label htmlFor="group-select" className="control-label">Select Group:</label>
           <select
             id="group-select"
@@ -120,46 +114,45 @@ const GroupLeaderboard = () => {
               setLeaderboard([]);
             }}
           >
-            <option value="">Choose a group</option>
-            {groups.map(group => (
-              <option key={group.group_id} value={group.group_id}>
-                {group.group_name}
+            <option value="" disabled>Choose a group</option>
+            {groups.map(({ group_id, group_name }) => (
+              <option key={group_id} value={group_id}>
+                {group_name}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Single Quiz Toggle */}
-        <div className="control-group checkbox-group">
-          <input
-            type="checkbox"
-            id="quiz-toggle"
-            className="checkbox-input"
-            checked={useSingleQuiz}
-            onChange={e => setUseSingleQuiz(e.target.checked)}
-          />
-          <label htmlFor="quiz-toggle" className="checkbox-label">
-            View leaderboard for a specific quiz
-          </label>
-        </div>
+        {selectedGroup && (
+          <div className="controls-inline">
+            <div className="control-group checkbox-group inline-checkbox">
+              <input
+                type="checkbox"
+                id="quiz-toggle"
+                className="checkbox-input"
+                checked={useSingleQuiz}
+                onChange={e => setUseSingleQuiz(e.target.checked)}
+              />
+              <label htmlFor="quiz-toggle" className="checkbox-label">
+                View leaderboard for a specific quiz
+              </label>
+            </div>
 
-        {/* Quiz Selector */}
-        {useSingleQuiz && quizzes.length > 0 && (
-          <div className="control-group">
-            <label htmlFor="quiz-select" className="control-label">Select Quiz:</label>
-            <select
-              id="quiz-select"
-              className="control-select"
-              value={selectedQuiz}
-              onChange={e => setSelectedQuiz(e.target.value)}
-            >
-              <option value="">Choose a quiz</option>
-              {quizzes.map(quiz => (
-                <option key={quiz.quiz_id} value={quiz.quiz_id}>
-                  {quiz.title}
-                </option>
-              ))}
-            </select>
+            <div className="control-group quiz-select-inline">
+              <label htmlFor="quiz-select" className="control-label">Select Quiz:</label>
+              <select
+                id="quiz-select"
+                className="control-select"
+                value={selectedQuiz}
+                onChange={e => setSelectedQuiz(e.target.value)}
+                disabled={!useSingleQuiz}
+              >
+                <option value="" disabled>Choose a quiz</option>
+                {quizzes.map(({ quiz_id, title }) => (
+                  <option key={quiz_id} value={quiz_id}>{title}</option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
       </div>
@@ -188,14 +181,17 @@ const GroupLeaderboard = () => {
               />
               <YAxis domain={[0, 100]} className="y-axis" />
               <Tooltip
-                formatter={value => (typeof value === 'number' ? value.toFixed(1) : value)}
-                labelFormatter={label => `User: ${label}`}
+                formatter={(value) =>
+                  typeof value === 'number' ? value.toFixed(1) : value
+                }
+                labelFormatter={(label) => `User: ${label}`}
               />
               <Bar
                 dataKey="average_score"
+                name = "Score"
                 fill="#4a90e2"
                 radius={[6, 6, 0, 0]}
-                isAnimationActive={true}
+                isAnimationActive
                 barSize={40}
               />
             </BarChart>

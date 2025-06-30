@@ -9,6 +9,7 @@ const ModalManageQuiz = ({
   answers,
   answersVisible,
   toggleAnswersVisibility,
+  inspectQuiz,   
 
   showSettingsModal,
   onCloseSettings,
@@ -26,7 +27,7 @@ const ModalManageQuiz = ({
           <div 
             className="modal-content modal-content-inspect" 
             onClick={(e) => e.stopPropagation()}>
-            <h3>Questions for Quiz: {selectedQuizId}</h3>
+            <h3>Questions for Quiz: {inspectQuiz?.title}</h3>
 
             {questions.length === 0 ? (
               <p>No questions found.</p>
@@ -72,7 +73,7 @@ const ModalManageQuiz = ({
             className={`modal-backdrop ${editableSettings ? 'settings-centered' : ''}`}
             onClick={onCloseSettings}
         >
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content-edit" onClick={(e) => e.stopPropagation()}>
             <h3>Settings for Quiz: {quiz?.title}</h3>
 
             {editableSettings ? (
@@ -110,6 +111,7 @@ const ModalManageQuiz = ({
                     />
                 </div>
 
+                <div className = "row">
                 <div className="form-group checkbox-group">
                     <label>
                     <input
@@ -132,6 +134,7 @@ const ModalManageQuiz = ({
                     />
                     Is Active
                     </label>
+                </div>
                 </div>
 
                 <button onClick={() => handleSaveSettings(quiz.quiz_id)}>

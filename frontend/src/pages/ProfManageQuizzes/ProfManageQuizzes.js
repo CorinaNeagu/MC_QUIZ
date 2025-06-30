@@ -258,6 +258,7 @@ const ProfManageQuizzes = () => {
         answers={answers}
         answersVisible={answersVisible}
         toggleAnswersVisibility={toggleAnswersVisibility}
+        inspectQuiz={quizzes.find(q => q.quiz_id === selectedQuizId)} 
 
         showSettingsModal={activeQuizId !== null}
         onCloseSettings={() => setActiveQuizId(null)}

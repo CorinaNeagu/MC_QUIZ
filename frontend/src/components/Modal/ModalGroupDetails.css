@@ -79,7 +79,6 @@
   transform: scale(1.1);
 }
 
-/* Image preview backdrop */
 .image-preview-backdrop {
   position: fixed;
   top: 0;
@@ -103,8 +102,6 @@
   display: flex;
   flex-direction: column;
 }
-
-
 
 .student-item {
   padding: 12px 16px !important;
