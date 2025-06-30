@@ -65,6 +65,47 @@
   margin: 0 !important;
 }
 
+.student-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+  border: 2px solid #4a90e2;
+  cursor: pointer;
+}
+
+.student-profile-pic:hover {
+  transform: scale(1.1);
+}
+
+/* Image preview backdrop */
+.image-preview-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  cursor: pointer;
+}
+
+.image-preview {
+  max-width: 90%;
+  max-height: 90%;
+  cursor: default;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
 .student-item {
   padding: 12px 16px !important;
   gap: 100px;

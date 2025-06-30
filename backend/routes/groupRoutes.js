@@ -108,7 +108,7 @@ router.get('/group-members/:groupId', authenticateJWT, (req, res) => {
   const groupId = req.params.groupId;
 
   const query = `
-    SELECT s.student_id, s.username, s.email 
+    SELECT s.student_id, s.username, s.email, s.profile_picture
     FROM groupMembers gm
     JOIN student s ON gm.student_id = s.student_id
     WHERE gm.group_id = ?
