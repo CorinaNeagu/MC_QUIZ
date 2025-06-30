@@ -2,22 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, } from "recharts";
 
-const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
+const BarChartComponent = ({ selectedCategory, selectedSubcategory, categories = [] }) => {
   const [quizData, setQuizData] = useState([]);
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [studentId, setStudentId] = useState(null);
+  
 
   const navigate = useNavigate();
 
@@ -37,7 +29,7 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
       navigate("/");
     } else {
       setUserType(decodedToken.userType);
-      setStudentId(decodedToken.id); // 👈 assuming 'id' is the studentId
+      setStudentId(decodedToken.id); 
     }
   } catch (err) {
     console.error("Invalid or expired token:", err);
@@ -48,7 +40,7 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userType) return; // wait for userType before fetching
+      if (!userType) return; 
       setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -106,11 +98,7 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
 
   return (
   <div className="bar-chart-wrapper">
-    <h3>
-      {userType === "student"
-        ? `Quiz Scores for Category: ${selectedCategory || "All"}`
-        : "Average Grades for Your Quizzes"}
-    </h3>
+
     <div className="bar-chart-container">
       <ResponsiveContainer width="100%" height={350}>
         <BarChart
@@ -128,12 +116,14 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory }) => {
             tickFormatter={(str) => (str.length > 10 ? str.slice(0, 10) + "…" : str)}
             className="x-axis"
           />
-          <YAxis domain={[0, 100]} className="y-axis" />
+          <YAxis domain={[0, 120]} className="y-axis" />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ transform: 'translateY(20px)',}} />
+
           <Bar 
             dataKey="realScore" 
             fill="#4a90e2" 
+            name="Score"  
             radius={[4, 4, 0, 0]}
             isAnimationActive={true}
             barSize={40}

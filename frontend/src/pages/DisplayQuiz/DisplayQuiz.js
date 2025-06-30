@@ -14,6 +14,7 @@ const DisplayQuiz = () => {
   const [error, setError] = useState("");
   const [quizStarted, setQuizStarted] = useState(false);
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -33,7 +34,7 @@ const DisplayQuiz = () => {
             },
           }
         );
-        console.log("Quiz Data:", response.data);  // Add this
+        console.log("Quiz Data:", response.data);  
         setQuizData(response.data);
       } catch (err) {
         console.error("Error fetching quiz details:", err);
@@ -58,21 +59,39 @@ const DisplayQuiz = () => {
   }, [quizId]);
 
   useEffect(() => {
-    if (!quizStarted || timeLeft === null || timeLeft <= 0) return;
+  if (!quizStarted) return;
 
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleSubmit(); // Auto-submit when time is up
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+  const TOTAL_TIME = quizSettings?.time_limit * 60; // in seconds
+  if (!TOTAL_TIME) return;
 
-    return () => clearInterval(interval);
-  }, [quizStarted, timeLeft]);
+  let storedStartTime = localStorage.getItem(`quizStartTime_${quizId}`);
+  const now = Date.now();
+
+  if (!storedStartTime) {
+    storedStartTime = now.toString();
+    localStorage.setItem(`quizStartTime_${quizId}`, storedStartTime);
+  }
+
+  const startTime = parseInt(storedStartTime, 10);
+  const endTime = startTime + TOTAL_TIME * 1000;
+
+  const updateTime = () => {
+    const remaining = Math.max(Math.floor((endTime - Date.now()) / 1000), 0);
+    setTimeLeft(remaining);
+
+    if (remaining <= 0) {
+      clearInterval(interval);
+      localStorage.removeItem(`quizStartTime_${quizId}`);
+      handleSubmit();
+    }
+  };
+
+  updateTime(); // run once immediately
+  const interval = setInterval(updateTime, 1000);
+
+  return () => clearInterval(interval);
+}, [quizStarted, quizSettings]);
+
 
   const startQuiz = async () => {
     try {
@@ -104,7 +123,7 @@ const DisplayQuiz = () => {
           return;
         }
         setTimeLeft(quizSettings.time_limit * 60); 
-        setStartTime(Date.now()); // Start time
+        setStartTime(Date.now()); 
   
         navigate(`/display-question/${quizId}/${response.data.attemptId}?timeLeft=${quizSettings.time_limit * 60}&startTime=${Date.now()}`);
       }

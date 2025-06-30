@@ -31,11 +31,7 @@ const upload = multer({
   },
 });
 
-router.post(
-  "/upload-profile-pic",
-  authenticateJWT,
-  upload.single("profilePic"),
-  (req, res) => {
+router.post("/upload-profile-pic", authenticateJWT, upload.single("profilePic"), (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
@@ -86,7 +82,6 @@ router.post(
   }
 );
 
-// Error handling middleware for multer errors (optional)
 router.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     console.error("Multer Error:", err);
@@ -302,7 +297,6 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
             console.log(`QuizSettings deleted for quizId: ${quizId}`);
   
             // Step 5: Delete questions
-            // Step 5: Delete questions
             db.query("DELETE FROM Questions WHERE quiz_id = ?", [quizId], (err, result) => {
               if (err) {
                 console.error(`Error deleting questions: ${err.message}`);
@@ -379,9 +373,8 @@ router.get('/deadlines', authenticateJWT, (req, res) => {
 
 // Get student quiz attempt history
 router.get('/history', authenticateJWT, (req, res) => {
-  const { id, userType } = req.user; // ID from the JWT token
+  const { id, userType } = req.user; 
 
-  // Only allow students to access this route
   if (userType !== 'student') {
     return res.status(403).json({ error: 'Access denied. Only students can view history.' });
   }

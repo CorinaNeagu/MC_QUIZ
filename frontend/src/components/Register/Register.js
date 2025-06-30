@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import './Register.css';
 
-const Register = () => {
+const Register = ({ onSuccess }) => {  // receive onSuccess as a prop
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("student"); 
-  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -30,7 +28,10 @@ const Register = () => {
 
       if (response.ok) {
         localStorage.setItem("user_id", data.user_id);
-        navigate("/");
+        // Instead of navigate here, notify parent of success:
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         alert(data.message);
       }

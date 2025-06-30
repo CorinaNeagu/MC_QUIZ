@@ -1,5 +1,5 @@
 import React from 'react';
-import './ModalManageQuiz.css'; // optional CSS for styling
+import './ModalManageQuiz.css'; 
 
 const ModalManageQuiz = ({
   showInspectModal,
@@ -21,7 +21,6 @@ const ModalManageQuiz = ({
 }) => {
   return (
     <>
-      {/* Inspect Modal */}
       {showInspectModal && (
         <div className="modal-backdrop" onClick={onCloseInspect}>
           <div 
@@ -68,7 +67,6 @@ const ModalManageQuiz = ({
         </div>
       )}
 
-      {/* Settings Modal */}
       {showSettingsModal && (
         <div
             className={`modal-backdrop ${editableSettings ? 'settings-centered' : ''}`}

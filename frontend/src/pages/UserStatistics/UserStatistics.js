@@ -117,47 +117,54 @@ const UserStatistics = () => {
           className="accordion-header"
           onClick={() => toggleSection('barChart')}
         >
-          Bar Chart {expandedSections.includes('barChart') ? '  ▲' : '  ▼'}
+          Bar Chart {expandedSections.includes('barChart') ? '▲' : '▼'}
         </button>
-        {expandedSections.includes('barChart') && (
-          <div className="accordion-content">
-            <p>Select a Category</p>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">Select a Category</option>
-              {categories.map((cat) => (
-                <option key={cat.category_id} value={cat.category_id}>
-                  {cat.category_name}
-                </option>
-              ))}
-            </select>
 
-            <select
-              id="subcategorySelect"
-              value={selectedSubcategory}
-              onChange={(e) => setSelectedSubcategory(e.target.value)}
-            >
-              <option value="">All Subcategories</option>
-              {subcategories.map((sub, idx) => (
-                <option key={idx} value={sub}>
-                  {sub}
-                </option>
-              ))}
-            </select>
+          {expandedSections.includes('barChart') && (
+            <div className="accordion-content">
+              <div className = "dropdown">
+              <label className="select-label" htmlFor="categorySelect">Select a Category</label>
+              <select
+                id="categorySelect"
+                className="custom-select"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">Select a Category</option>
+                {categories.map((cat) => (
+                  <option key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
 
-            {selectedCategory ? (
-              <BarChart
-                selectedCategory={selectedCategory}
-                selectedSubcategory={selectedSubcategory}
-                margin ={{bottom: 200}}
-              />
-            ) : (
-              <p>Select a category to see quizzes</p>
-            )}
-          </div>
-        )}
+              <label className="select-label" htmlFor="subcategorySelect">Select a Subcategory</label>
+              <select
+                id="subcategorySelect"
+                className="custom-select"
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+              >
+                <option value="">All Subcategories</option>
+                {subcategories.map((sub, idx) => (
+                  <option key={idx} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+              </select>
+              </div>
+
+              {selectedCategory ? (
+                <BarChart
+                  selectedCategory={selectedCategory}
+                  selectedSubcategory={selectedSubcategory}
+                  margin={{ bottom: 200 }}
+                />
+              ) : (
+                <p className="info-text">Select a category to see quizzes</p>
+              )}
+            </div>
+          )}
       </div>
     </div>
   );

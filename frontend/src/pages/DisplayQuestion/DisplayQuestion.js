@@ -17,7 +17,12 @@ const DisplayQuestion = () => {
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => {
+  const storedIndex = localStorage.getItem(`quizIndex_${quizId}_${attemptId}`);
+    return storedIndex ? Number(storedIndex) : 0;
+  });
+
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,55 +31,103 @@ const DisplayQuestion = () => {
   const user_id = localStorage.getItem("user_id");
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const timeLeftFromUrl = parseInt(params.get("timeLeft"), 10);
-    const startTimeFromUrl = parseInt(params.get("startTime"), 10);
+    const storedStart = localStorage.getItem(`quizStartTime_${quizId}`);
+    const storedAttempt = localStorage.getItem(`quizAttemptId_${quizId}`);
 
-    if (timeLeftFromUrl) {
-      setTimeLeft(timeLeftFromUrl);
-    }
-    if (startTimeFromUrl) {
-      setStartTime(startTimeFromUrl);
+    if (storedStart && storedAttempt === attemptId) {
+      const start = parseInt(storedStart, 10);
+      const now = Date.now();
+      const totalDurationSeconds = parseInt(localStorage.getItem(`quizDuration_${quizId}`), 10);
+      const timePassed = Math.floor((now - start) / 1000);
+      const remaining = totalDurationSeconds - timePassed;
+
+      if (remaining <= 0) {
+        submitQuiz(true);
+      } else {
+        setStartTime(start);
+        setTimeLeft(remaining);
+      }
+    } else {
+      const params = new URLSearchParams(location.search);
+      const timeLeftFromUrl = parseInt(params.get("timeLeft"), 10);
+      const startTimeFromUrl = parseInt(params.get("startTime"), 10);
+
+      if (timeLeftFromUrl && startTimeFromUrl) {
+        setStartTime(startTimeFromUrl);
+        setTimeLeft(timeLeftFromUrl);
+
+        localStorage.setItem(`quizStartTime_${quizId}`, startTimeFromUrl);
+        localStorage.setItem(`quizAttemptId_${quizId}`, attemptId);
+        localStorage.setItem(`quizDuration_${quizId}`, timeLeftFromUrl);
+      }
     }
 
     const fetchQuestions = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          alert("You must be logged in to take the quiz.");
-          return;
-        }
+        const storedQuestions = localStorage.getItem(`quizQuestions_${quizId}_${attemptId}`);
+        const storedAnswers = localStorage.getItem(`quizAnswers_${quizId}_${attemptId}`);
+        const storedIndex = localStorage.getItem(`quizIndex_${quizId}_${attemptId}`);
 
-        const response = await axios.get(
-          `http://localhost:5000/api/takeQuiz/quiz/${quizId}/questions`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
 
-        const shuffledQuestions = shuffleArray(response.data);
+        if (storedQuestions) {
+    const parsedQuestions = JSON.parse(storedQuestions);
+    setQuestions(parsedQuestions);
 
-        shuffledQuestions.forEach(question => {
-          question.answers = shuffleArray(question.answers);
-        });
-
-        const initialAnswers = shuffledQuestions.reduce((acc, question) => {
-          acc[question.question_id] = [];
-          return acc;
-        }, {});
-
-        setQuestions(shuffledQuestions);
-        setAnswers(initialAnswers);  
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching questions:", err);
-        setError("Error loading quiz questions.");
-        setLoading(false);
+    if (storedAnswers) {
+      setAnswers(JSON.parse(storedAnswers));
+    } else {
+      const initialAnswers = parsedQuestions.reduce((acc, question) => {
+        acc[question.question_id] = [];
+        return acc;
+      }, {});
+      setAnswers(initialAnswers);
+    }
+    setLoading(false);
+    return;
+  }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to take the quiz.");
+        return;
       }
-    };
 
-    fetchQuestions();
-  }, [quizId, location.search]);
+      const response = await axios.get(
+        `http://localhost:5000/api/takeQuiz/quiz/${quizId}/questions`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const shuffledQuestions = shuffleArray(response.data);
+      shuffledQuestions.forEach((q) => {
+        q.answers = shuffleArray(q.answers);
+      });
+
+      localStorage.setItem(`quizQuestions_${quizId}_${attemptId}`, JSON.stringify(shuffledQuestions));
+
+      const initialAnswers = shuffledQuestions.reduce((acc, question) => {
+        acc[question.question_id] = [];
+        return acc;
+      }, {});
+
+      setQuestions(shuffledQuestions);
+      setAnswers(initialAnswers);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+      setError("Error loading quiz questions.");
+      setLoading(false);
+    }
+  };
+
+  fetchQuestions();
+}, [quizId, attemptId, location.search]);
+
+useEffect(() => {
+  localStorage.setItem(`quizIndex_${quizId}_${attemptId}`, currentQuestionIndex);
+}, [currentQuestionIndex, quizId, attemptId]);
+
+
 
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0) return;
@@ -92,6 +145,13 @@ const DisplayQuestion = () => {
 
     return () => clearInterval(interval);
   }, [timeLeft]);
+
+  useEffect(() => {
+    if (Object.keys(answers).length > 0) {
+      localStorage.setItem(`quizAnswers_${quizId}_${attemptId}`, JSON.stringify(answers));
+    }
+  }, [answers, quizId, attemptId]);
+
 
   const handleAnswerSelect = (questionId, selectedOption) => {
     setAnswers((prevAnswers) => {
@@ -113,69 +173,74 @@ const DisplayQuestion = () => {
   };
 
   const submitQuiz = async (forceSubmit = false) => {
-    const lastQuestionId = questions[questions.length - 1].question_id;
-    const lastQuestionAnswer = answers[lastQuestionId];
+  const lastQuestionId = questions[questions.length - 1].question_id;
+  const lastQuestionAnswer = answers[lastQuestionId];
 
-     if (!forceSubmit && (!lastQuestionAnswer || lastQuestionAnswer.length === 0)) {
+  if (!forceSubmit && (!lastQuestionAnswer || lastQuestionAnswer.length === 0)) {
     alert("Please answer the last question before submitting the quiz.");
     return;
   }
 
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Unauthorized: Please log in again.");
-        return;
-      }
-  
-      const formattedAnswers = {};
-  
-      // Collect all the answers in a proper format
-      for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
-        const sanitizedQuestionId = Number(questionId);
-        const sanitizedAnswerIds = selectedAnswerIds.map((answerId) => {
-          const sanitizedAnswerId = Number(answerId);
-          return isNaN(sanitizedAnswerId) ? null : sanitizedAnswerId;
-        }).filter((answerId) => answerId !== null);
-  
-        // Only include answers that have been selected
-        if (sanitizedAnswerIds.length > 0) {
-          formattedAnswers[sanitizedQuestionId] = sanitizedAnswerIds;
-        }
-      }
-  
-      // For unanswered questions, assign them a score of 0
-      const unansweredQuestions = questions.filter((question) => !formattedAnswers[question.question_id]);
-      unansweredQuestions.forEach((question) => {
-        formattedAnswers[question.question_id] = [0]; // Assign 0 for unanswered questions
-      });
-  
-      // Calculate time taken for quiz submission
-      const endTime = new Date().getTime();
-      const timeTaken = Math.floor((endTime - startTime) / 1000);
-  
-      // Send the quiz answers to the server along with the time taken and other data
-      const response = await axios.post(
-        `http://localhost:5000/api/score/quiz_attempts/${attemptId}/submit`,
-        {
-          answers: formattedAnswers,
-          quiz_id: quizId,
-          student_id: user_id,
-          start_time: startTime,
-          end_time: endTime,
-          time_taken: timeTaken,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-  
-      // Redirect to the display score page after submission
-      navigate(`/display-score/${attemptId}`);
-    } catch (err) {
-      console.error("Error submitting quiz:", err);
-      setError("Error submitting the quiz.");
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Unauthorized: Please log in again.");
+      return;
     }
-  };
+
+    const formattedAnswers = {};
+    for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
+      const sanitizedQuestionId = Number(questionId);
+      const sanitizedAnswerIds = selectedAnswerIds.map((answerId) => {
+        const sanitizedAnswerId = Number(answerId);
+        return isNaN(sanitizedAnswerId) ? null : sanitizedAnswerId;
+      }).filter((answerId) => answerId !== null);
+
+      if (sanitizedAnswerIds.length > 0) {
+        formattedAnswers[sanitizedQuestionId] = sanitizedAnswerIds;
+      }
+    }
+
+    // Add zero score for unanswered questions
+    const unansweredQuestions = questions.filter(
+      (question) => !formattedAnswers[question.question_id]
+    );
+    unansweredQuestions.forEach((question) => {
+      formattedAnswers[question.question_id] = [0];
+    });
+
+    const endTime = new Date().getTime();
+    const timeTaken = Math.floor((endTime - startTime) / 1000);
+
+    await axios.post(
+      `http://localhost:5000/api/score/quiz_attempts/${attemptId}/submit`,
+      {
+        answers: formattedAnswers,
+        quiz_id: quizId,
+        student_id: user_id,
+        start_time: startTime,
+        end_time: endTime,
+        time_taken: timeTaken,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // ✅ Clean up localStorage
+    localStorage.removeItem(`quizQuestions_${quizId}_${attemptId}`);
+    localStorage.removeItem(`quizStartTime_${quizId}`);
+    localStorage.removeItem(`quizAttemptId_${quizId}`);
+    localStorage.removeItem(`quizDuration_${quizId}`);
+    localStorage.removeItem(`quizAnswers_${quizId}_${attemptId}`);
+    localStorage.removeItem(`quizIndex_${quizId}_${attemptId}`);
+
+    // ✅ Navigate after cleanup
+    navigate(`/display-score/${attemptId}`);
+  } catch (err) {
+    console.error("Error submitting quiz:", err);
+    setError("Error submitting the quiz.");
+  }
+};
+
   
   // Handle navigation to next question
   const handleNextQuestion = () => {
@@ -197,7 +262,6 @@ const DisplayQuestion = () => {
     }
   };
 
-  // Format the timer
   const formatTime = (seconds) => {
     const min = Math.floor(seconds / 60).toString().padStart(2, "0");
     const sec = (seconds % 60).toString().padStart(2, "0");

@@ -10,8 +10,8 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    padding: 30px;
     max-width: 500px; 
-    padding: 50px;
     border-radius: 8px;
     background-color: rgb(255, 255, 255); 
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 

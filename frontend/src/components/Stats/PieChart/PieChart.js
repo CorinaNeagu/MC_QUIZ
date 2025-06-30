@@ -18,7 +18,6 @@ const PieChartComponent = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState(null);
 
-  // Fetch quiz categories on mount
   useEffect(() => {
     const fetchQuizCategories = async () => {
       setLoading(true);
@@ -53,7 +52,6 @@ const PieChartComponent = () => {
     fetchQuizCategories();
   }, []);
 
-  // Memoize transformed data for PieChart
   const pieChartData = useMemo(() => {
     return quizStats.map(({ category_name, quizzes_taken, category_id }) => ({
       name: category_name,

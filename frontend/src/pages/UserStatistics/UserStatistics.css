@@ -51,6 +51,47 @@
 
 }
 
+.select-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 16px;
+}
+
+.custom-select {
+  width: 100%;
+  max-width: 350px;
+  padding: 10px 14px;
+  border: 1.8px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  outline: none;
+  cursor: pointer;
+}
+
+.custom-select:hover,
+.custom-select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.5);
+}
+
+.dropdown {
+  display: flex;
+  flex-direction: row; 
+  gap: 16px; 
+  align-items: center; 
+  margin-bottom: 50px;
+}
+
+
+.info-text {
+  margin-top: 16px;
+  font-style: italic;
+  color: #666;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;

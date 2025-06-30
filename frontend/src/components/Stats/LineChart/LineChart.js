@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
 
 const RetakeLineChart = ({ studentId }) => {
   const [data, setData] = useState([]);
@@ -39,8 +30,6 @@ const RetakeLineChart = ({ studentId }) => {
       }
     );
 
-    console.log("Retake data response:", res.data);  // <-- add this log
-
     if (!Array.isArray(res.data)) {
       console.error("Expected an array from API but got:", res.data);
       setData([]);
@@ -64,20 +53,12 @@ const RetakeLineChart = ({ studentId }) => {
     setLoading(false);
   }
 };
-
-  fetchRetakeData();  // <---- CALL IT HERE
-
+  fetchRetakeData();  
 }, [studentId]);
-
-
-
-
-   
 
   if (loading) return <div>Loading retake data...</div>;
   if (data.length === 0) return <div>No retake attempts found.</div>;
 
-  
   return (
     <ResponsiveContainer width="100%" height={350}>
       <LineChart

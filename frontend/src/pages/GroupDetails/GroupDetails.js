@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import ModalGroupDetails from '../../components/Modal/ModalGroupDetails'
-import Sidebar from '../../components/Sidebar/Sidebar'
+import Sidebar from '../../components/Sidebar/Sidebar';
 import './GroupDetails.css';
 
 const GroupDetails = () => {
@@ -13,7 +12,6 @@ const GroupDetails = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -74,8 +72,23 @@ const GroupDetails = () => {
     setAttemptsError(null);
   };
 
-  const handleBackToGroups= () => {
+  const handleBackToGroups = () => {
     navigate(`/groups`);
+  };
+
+  const ModalGroupDetails = ({ isOpen, onClose, title, children }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="modal-backdrop" onClick={onClose}>
+        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>{title}</h2>
+          </div>
+          <div className="modal-content">{children}</div>
+        </div>
+      </div>
+    );
   };
 
   if (loading) return <p>Loading assigned quizzes...</p>;
@@ -86,11 +99,10 @@ const GroupDetails = () => {
     <div className="group-details-page">
       <Sidebar showBackButton />
 
-      <button className = "btn-back" 
-                  onClick={handleBackToGroups}>
-          ❮❮ Back to Your Groups
-          </button>
-      <h3>Assigned Quizzes</h3>
+      <button className="btn-back" onClick={handleBackToGroups}>
+        ❮❮ Back to Your Groups
+      </button>
+      <h2>Assigned Quizzes</h2>
 
       <ul className="quiz-list assigned-quizzes">
         {quizzes.map(({ quiz_id, title, category_name, subcategory_name, deadline }) => (
@@ -105,25 +117,17 @@ const GroupDetails = () => {
             <p>
               <strong>Deadline:</strong> {new Date(deadline).toLocaleDateString()}
             </p>
-            <button className = "btn-more" 
-                    onClick={() => openModal({ quiz_id, title })}>
+            <button className="btn-more" onClick={() => openModal({ quiz_id, title })}>
               See more
             </button>
           </li>
         ))}
       </ul>
 
-
-      <ModalGroupDetails
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={selectedQuiz?.title}
-      >
+      <ModalGroupDetails isOpen={isModalOpen} onClose={closeModal} title={selectedQuiz?.title}>
         {attemptsLoading && <p>Loading attempts...</p>}
         {attemptsError && <p className="error-text">{attemptsError}</p>}
-        {!attemptsLoading && !attemptsError && attempts.length === 0 && (
-          <p>No attempts found.</p>
-        )}
+        {!attemptsLoading && !attemptsError && attempts.length === 0 && <p>No attempts found.</p>}
         {!attemptsLoading && attempts.length > 0 && (
           <table className="attempts-table">
             <thead>

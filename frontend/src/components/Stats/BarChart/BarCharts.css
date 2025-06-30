@@ -1,135 +1,107 @@
-/* === BAR CHART WRAPPER === */
+/* === WRAPPER === */
 .bar-chart-wrapper {
-  padding: 40px 30px;
-  background: linear-gradient(135deg, #eaf3fb, #f6fdff);
-  border-radius: 16px;
-  box-shadow:
-    0 4px 8px rgba(74, 144, 226, 0.12),
-    0 8px 20px rgba(74, 144, 226, 0.15);
+  padding: 2.5rem 2rem;
+  background: #f0f6fc;
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px rgba(36, 99, 235, 0.1);
   max-width: 960px;
-  margin: 50px auto;
+  margin: 3rem auto;
   font-family: 'Inter', sans-serif;
   text-align: center;
   transition: box-shadow 0.3s ease;
 }
 
 .bar-chart-wrapper:hover {
-  box-shadow:
-    0 6px 14px rgba(74, 144, 226, 0.18),
-    0 12px 28px rgba(74, 144, 226, 0.25);
+  box-shadow: 0 10px 24px rgba(36, 99, 235, 0.15);
 }
 
 /* === TITLE === */
 .bar-chart-wrapper h3 {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 30px;
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  color: #1e40af;
+  margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(30, 64, 175, 0.2);
   text-transform: uppercase;
-  user-select: none;
 }
 
 /* === CHART CONTAINER === */
 .bar-chart-container {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 30px;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
   max-width: 900px;
   margin: 0 auto;
-  box-shadow:
-    0 6px 12px rgba(50, 50, 93, 0.06),
-    0 6px 18px rgba(50, 50, 93, 0.08);
+  box-shadow: 0 4px 12px rgba(50, 50, 93, 0.08);
   transition: box-shadow 0.3s ease;
 }
 
 .bar-chart-container:hover {
-  box-shadow:
-    0 10px 20px rgba(50, 50, 93, 0.1),
-    0 14px 28px rgba(74, 144, 226, 0.25);
+  box-shadow: 0 10px 28px rgba(50, 50, 93, 0.12);
 }
 
-/* === BAR STYLING === */
+/* === BAR HOVER EFFECTS === */
 .bar-chart-container svg rect {
-  fill: url(#barGradient);
-  transition: transform 0.3s ease, fill 0.3s ease;
-  stroke: none;
-  outline: none;
-  rx: 6; /* rounded corners */
+  fill: #4a90e2;
+  rx: 6;
   ry: 6;
+  transition: all 0.3s ease;
   cursor: pointer;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
 .bar-chart-container svg rect:hover {
-  fill: url(#barGradientHover);
-  transform: scaleY(1.08);
-  filter: drop-shadow(0 4px 10px rgba(60, 130, 250, 0.25));
+  fill: #2563eb;
+  transform: scaleY(1.05);
+  filter: drop-shadow(0 6px 12px rgba(37, 99, 235, 0.25));
 }
 
 /* === AXIS LABELS === */
-.bar-chart-container svg text {
-  font-size: 14px;
-  font-weight: 600;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  fill: #334155;
-}
-
-.bar-chart-container svg .x-axis text,
-.bar-chart-container svg .y-axis text {
-  fill: #2563eb;
+.x-axis text,
+.y-axis text {
+  fill: #1e3a8a;
+  font-size: 0.9rem;
+  font-weight: 500;
+  user-select: none;
 }
 
 /* === GRID LINES === */
 .bar-chart-container svg line {
-  stroke: #e0e7ff;
+  stroke: #e2e8f0;
   stroke-width: 1;
 }
 
-/* === RESPONSIVENESS === */
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-/* === CUSTOM TOOLTIP === */
+/* === TOOLTIP === */
 .recharts-tooltip-wrapper {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
-  padding: 16px !important;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #1f2937;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #ffffff !important;
   border: 1px solid #dbeafe !important;
-  pointer-events: none; /* avoid pointer issues */
+  border-radius: 0.75rem !important;
+  padding: 0.75rem !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+  pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
 /* === MOBILE === */
 @media (max-width: 768px) {
   .bar-chart-wrapper {
-    padding: 24px 16px;
+    padding: 1.5rem 1rem;
   }
 
   .bar-chart-wrapper h3 {
-    font-size: 22px;
-    margin-bottom: 24px;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
   }
 
   .bar-chart-container {
-    padding: 20px;
+    padding: 1.25rem;
   }
 
-  .bar-chart-container svg text {
-    font-size: 12px;
+  .x-axis text,
+  .y-axis text {
+    font-size: 0.75rem;
   }
-}
-
-/* === SVG GRADIENTS === */
-.bar-chart-container svg defs {
-  pointer-events: none;
 }
