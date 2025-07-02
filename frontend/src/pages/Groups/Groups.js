@@ -4,7 +4,8 @@ import axios from 'axios';
 
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Modal from '../../components/Modal/Modal'; 
-import ModalStudentList from "../../components/Modal/ModalGroupDetails"
+import ModalStud from "../../components/Modal/ModalStud"
+import ModalProf from '../../components/Modal/ModalProf';
 import { ErrorMessage, SuccessMessage } from '../../components/Message/Message';
 
 import "./Groups.css";
@@ -41,6 +42,8 @@ const Groups = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [professorGroups, setProfessorGroups] = useState([]);
   const [showProfessorModal, setShowProfessorModal] = useState(false);
+
+  const [isProfessorsModalOpen, setProfessorsModalOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -369,42 +372,41 @@ const Groups = () => {
       }
     };
 
-    const handleDisplayProfessors = async () => {
-  try {
+  const handleDisplayProfessors = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/groups/professors-with-groups', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProfessorGroups(res.data.professors);
+      setProfessorsModalOpen(true);
+    } catch (err) {
+      console.error("Error fetching professor groups:", err);
+      alert("Failed to load professors and their groups.");
+    }
+  };
+
+    useEffect(() => {
+      if (error || success) {
+        const timer = setTimeout(() => {
+          setError(null);
+          setSuccess('');
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [error, success]);
+
+    useEffect(() => {
+      if (joinError || joinSuccess) {
+        const timer = setTimeout(() => {
+          setJoinError('');
+          setJoinSuccess('');
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [joinError, joinSuccess]);
+
     const token = localStorage.getItem('token');
-    const res = await axios.get('http://localhost:5000/api/groups/professors-with-groups', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setProfessorGroups(res.data);
-    setShowProfessorModal(true);
-  } catch (err) {
-    console.error("Error fetching professor groups:", err);
-    alert("Failed to load professors and their groups.");
-  }
-};
-
-useEffect(() => {
-  if (error || success) {
-    const timer = setTimeout(() => {
-      setError(null);
-      setSuccess('');
-    }, 3000);
-    return () => clearTimeout(timer);
-  }
-}, [error, success]);
-
-// Auto clear joinError and joinSuccess after 5 seconds (student)
-useEffect(() => {
-  if (joinError || joinSuccess) {
-    const timer = setTimeout(() => {
-      setJoinError('');
-      setJoinSuccess('');
-    }, 3000);
-    return () => clearTimeout(timer);
-  }
-}, [joinError, joinSuccess]);
-
-
   return (
   <div className="groups-page">
     <Sidebar showBackButton={true} />
@@ -415,6 +417,7 @@ useEffect(() => {
           <div className="input-row">
           <input
             type="text"
+            className = "input-group-name"
             placeholder="New group name"
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
@@ -473,11 +476,15 @@ useEffect(() => {
           <div className="input-row">
             <input
               type="text"
+              className = "input-join-group"
               placeholder="Enter group code"
               value={groupCodeToJoin}
               onChange={(e) => setGroupCodeToJoin(e.target.value)}
             />
-            <button onClick={handleJoinGroup}>Join Group</button>
+            <button 
+              className = "btn-join-group"
+              onClick={handleJoinGroup}>Join Group
+            </button>
           </div>
           
           <button className="btn-display-professors" onClick={handleDisplayProfessors}>
@@ -567,6 +574,14 @@ useEffect(() => {
       </>
     )}
 
+      <ModalProf
+        isOpen={isProfessorsModalOpen}
+        onClose={() => setProfessorsModalOpen(false)}
+        professorGroups={professorGroups}
+         token={token}
+      />
+
+
     <Modal
       showAssignModal={showAssignModal}
       closeAssignModal={closeAssignModal}
@@ -581,7 +596,7 @@ useEffect(() => {
       handleAssignQuiz={handleAssignQuiz}
     />
 
-    <ModalStudentList
+    <ModalStud
       isOpen={selectedGroupId !== null}
       onClose={() => {
         setSelectedGroupId(null);
@@ -590,7 +605,11 @@ useEffect(() => {
       students={groupMembers}
     />
   </div>
+
+
 );
+
+
 
 };
 

@@ -127,4 +127,49 @@ select {
   border: 1px solid #ccc; 
   width: 100%; 
 }
+@media (max-width: 768px) {
+  .statistics-container {
+    padding: 1rem;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .header {
+    width: 100%;
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .accordion-header {
+    font-size: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.75rem 1rem;
+  }
+
+  .accordion-content {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .dropdown {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .custom-select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  select {
+    width: 100%;
+  }
+
+  .info-text {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+}
 

@@ -7,7 +7,7 @@ router.get('/professor-groups', authenticateJWT, (req, res) => {
    if (req.user.userType !== 'professor') {
     return res.status(403).json({ message: 'Forbidden: Professors only' });
   }
-  console.log("Authenticated user:", req.user);  // Log user object
+  console.log("Authenticated user:", req.user);  
   if (req.user.userType !== 'professor') {
     return res.status(403).json({ error: 'Unauthorized' });
   }
@@ -262,16 +262,17 @@ router.delete('/delete-group/:groupId', authenticateJWT, (req, res) => {
 
 router.get('/professors-with-groups', authenticateJWT, (req, res) => {
   const query = `
-  SELECT 
-    p.professor_id, 
-    p.username AS professor_name, 
-    sg.group_id, 
-    sg.group_name
-  FROM Professor p
-  LEFT JOIN studyGroup sg ON sg.professor_id = p.professor_id
-  ORDER BY p.professor_id, sg.group_name;
-`;
-
+    SELECT 
+      p.professor_id, 
+      p.profile_picture,
+      p.email,
+      p.username AS professor_name, 
+      sg.group_id, 
+      sg.group_name
+    FROM Professor p
+    LEFT JOIN studyGroup sg ON sg.professor_id = p.professor_id
+    ORDER BY p.professor_id, sg.group_name;
+  `;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -280,25 +281,26 @@ router.get('/professors-with-groups', authenticateJWT, (req, res) => {
     }
 
     const aggregated = results.reduce((acc, row) => {
-      const existing = acc.find(p => p.professor_id === row.professor_id);
-      if (existing) {
+      let existingProfessor = acc.find(p => p.professor_id === row.professor_id);
+      if (existingProfessor) {
         if (row.group_id) {
-          existing.groups.push({ group_id: row.group_id, group_name: row.group_name });
+          existingProfessor.groups.push({ group_id: row.group_id, group_name: row.group_name });
         }
       } else {
         acc.push({
           professor_id: row.professor_id,
+          email: row.email,
           professor_name: row.professor_name,
+          profile_picture: row.profile_picture,
           groups: row.group_id ? [{ group_id: row.group_id, group_name: row.group_name }] : []
         });
       }
       return acc;
     }, []);
 
-    res.json({ professors: aggregated });
+    return res.status(200).json({ professors: aggregated });
   });
 });
-
 
 
 module.exports = router;

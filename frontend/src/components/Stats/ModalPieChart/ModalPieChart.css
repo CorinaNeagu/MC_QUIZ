@@ -6,7 +6,7 @@
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(4px);
-  z-index: 999;
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -54,7 +54,7 @@
   color: #004085;
   padding: 8px 20px;
   font-size: 15px;
-  border-radius: 9999px; /* fully rounded pill shape */
+  border-radius: 9999px; 
   border: 1.5px solid #007bff;
   cursor: default;
   white-space: nowrap;
@@ -119,3 +119,5 @@
     transform: scale(1);
   }
 }
+
+

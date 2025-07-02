@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './ModalGroupDetails.css';
+import './ModalStud.css';
 
 const ModalStudentsList = ({ isOpen, onClose, groupName = '', students = [] }) => {
   const [previewImage, setPreviewImage] = useState(null);

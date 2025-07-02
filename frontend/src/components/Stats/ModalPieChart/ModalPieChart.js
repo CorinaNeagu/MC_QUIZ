@@ -1,18 +1,24 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import './ModalPieChart.css';
 
 const ModalPieChart = ({ isOpen, onClose, position, selectedCategory, quizzesInCategory }) => {
   if (!isOpen) return null;
 
   const handleContentClick = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
   };
+  
 
-  return (
+  return ReactDOM.createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal-container"
-        style={{ left: `${position.x + 10}px`, top: `${position.y + 10}px`, position: 'absolute' }}
+        style={{ 
+          left: `${position.x + 10}px`, 
+          top: `${position.y + 10}px`, 
+          position: 'fixed'  
+        }}
         onClick={handleContentClick}
       >
         <h2>Quizzes in Category: {selectedCategory}</h2>
@@ -26,7 +32,8 @@ const ModalPieChart = ({ isOpen, onClose, position, selectedCategory, quizzesInC
           <p>No quizzes found in this category.</p>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

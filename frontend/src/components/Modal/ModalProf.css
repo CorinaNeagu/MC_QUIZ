@@ -1,0 +1,185 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-container {
+  background-color: #fff;
+  padding: 2rem 2.5rem !important;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeInScale 0.3s ease-in-out;
+  overflow-y: auto;
+  max-height: 90vh;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: #222;
+  margin: 0;
+}
+
+.modal-content {
+  font-family: Arial, sans-serif !important;
+  color: #444 !important;
+  flex-grow: 1 !important;
+  overflow-y: auto !important;
+}
+
+.professor-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 12px !important;
+}
+
+.professor-item {
+  padding: 12px 16px !important;
+  gap: 100px;
+  border-bottom: 1px solid #eee !important;
+  border-left: 4px solid #007bff !important;
+  border-radius: 6px !important;
+  margin-bottom: 10px !important;
+  transition: background-color 0.2s ease !important;
+  width: 1500px;
+}
+
+.professor-item:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+
+.professor-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.professor-profile-pic:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.professor-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.professor-name {
+font-weight: 600;
+  padding-left: 25px;
+  color: #333;
+  margin: 0;
+  margin-right: 30px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.professor-email {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  margin-right: 8px;
+  word-break: break-all;
+  margin-bottom: 25px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.prof-group-list {
+  padding: 0;
+  margin: 0;
+}
+
+.prof-group-item {
+  margin-bottom: 4px;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #007bff;
+  gap: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;  
+  position: relative;
+}
+
+
+.btn-join-group-modal {
+    width: 50px !important;
+}
+
+.prof-group-item::after,
+.prof-group-item::before {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.no-professors,
+.no-groups {
+  font-style: italic !important;
+  color: #777 !important;
+  margin-top: 1rem !important;
+  text-align: center !important;
+}
+
+.image-preview-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.image-preview {
+  max-width: 90%;
+  max-height: 90%;
+  cursor: default;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.7);
+}

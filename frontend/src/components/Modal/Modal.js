@@ -32,10 +32,9 @@ const Modal = ({
 
         if (userType !== 'professor') {
           console.log('User is not a professor, skipping quiz fetch');
-          return; // Don't fetch quizzes if the user is not a professor
+          return; 
         }
 
-        // Fetch quizzes if the user is a professor
         const res = await axios.get('http://localhost:5000/api/user/professor/quizzes', {
           headers: { Authorization: `Bearer ${token}` }
         });

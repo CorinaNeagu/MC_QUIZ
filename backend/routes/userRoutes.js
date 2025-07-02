@@ -139,12 +139,12 @@ router.get('/professor/quizzes', authenticateJWT, (req, res) => {
     s.subcategory_name, 
     qs.is_active, 
     qs.retake_allowed
-  FROM Quiz q
-  JOIN Category c ON q.category_id = c.category_id
-  LEFT JOIN Subcategory s ON q.subcategory_id = s.subcategory_id
-  JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
-  WHERE q.professor_id = ?;
-  `;
+    FROM Quiz q
+    JOIN Category c ON q.category_id = c.category_id
+    LEFT JOIN Subcategory s ON q.subcategory_id = s.subcategory_id
+    JOIN QuizSettings qs ON q.quiz_id = qs.quiz_id
+    WHERE q.professor_id = ?;
+    `;
   
   db.query(query, [id], (err, result) => {
     if (err) {
@@ -403,6 +403,7 @@ router.get('/history', authenticateJWT, (req, res) => {
     res.json({ history: results });
   });
 });
+
 
 
 module.exports = router;

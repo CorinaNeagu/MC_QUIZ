@@ -19,7 +19,7 @@
 
 .join-group {
   position: fixed;
-  top: 20px;
+  top: 50px;
   left: 50%;
   transform: translateX(-50%);
   width: 1000px; 
@@ -39,38 +39,25 @@
   gap: 10px;
 }
 
-.input-row input {
-  flex-grow: 1;
+.btn-join-group, .btn-create-group {
+  display: flex; 
+  align-items: center;
+  justify-content: center;
   height: 40px;
-  padding: 10px 15px;
+  padding: 0 20px; 
   font-size: 16px;
-  border-radius: 25px;
-  border: 1px solid #ccc;
-  transition: border-color 0.3s ease;
-}
-
-.input-row input:focus {
-  border-color: #007bff;
-  outline: none;
-}
-
-.input-row button {
-  height: 40px;
-  padding: 0 20px;
-  font-size: 16px;
-  border-radius: 25px;
+  border-radius: 30px;
   background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s ease;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
-.input-row button:hover {
-  background-color: #0056b3;
+.input-join-group, .input-group-name {
+  height: 40px;
+  border-radius: 30px;
 }
 
 .btn-display-professors {
@@ -118,7 +105,6 @@
   overflow-x: visible; 
   scroll-snap-type: none;
 }
-
 
 .group-card {
   background-color: #fff;
@@ -190,9 +176,7 @@
   margin-right: 14px;
   flex-shrink: 0;
   stroke-width: 2.5;
-  color: inherit; /* inherit text color */
 }
-
 
 .message-error {
   background-color: #fdecea;
@@ -272,7 +256,7 @@
   margin-top: 10px;
 }
 
-.btn-take-quizn {
+.btn-take-quiz {
   margin-top: auto;
   margin-bottom: 0.5rem;
   align-self: flex-start;
@@ -366,26 +350,76 @@ h2 {
   }
 }
 
-@media (max-width: 768px) {
-  .group-cards,
+/* Mobile Devices (up to 600px) */
+@media (max-width: 600px) {
+  .join-group {
+    width: 90%;
+    padding: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-join-group, .btn-create-group, .btn-display-professors {
+    width: 100%;
+    font-size: 14px;
+    height: 40px;
+  }
+
+  .input-join-group, .input-group-name {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .btn-display-professors {
+    width: 100%;
+  }
+
+  .group-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .group-card, .quiz-card {
+    width: 90%;
+  }
+
   .assigned-quizzes {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(1, 1fr);
+    max-height: none;
+  }
+
+  .message-container {
+    left: 50%;
+    width: 90%;
+  }
+
+  h2 {
+    font-size: 1.25rem;
   }
 }
 
-@media (max-width: 480px) {
-  .group-cards,
+@media (min-width: 601px) and (max-width: 900px) {
+  .join-group {
+    width: 95%;
+  }
+
+  .group-card, .quiz-card {
+    width: 45%;
+  }
+
   .assigned-quizzes {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .quiz-card,
-  .group-card {
-    padding: 1rem;
-  }
-
-  .message {
-    padding: 0.75rem;
-    font-size: 0.9rem;
+  .btn-display-professors {
+    width: 80%;
   }
 }
+
+
+

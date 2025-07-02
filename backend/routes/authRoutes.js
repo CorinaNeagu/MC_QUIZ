@@ -1,14 +1,13 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const db = require("../db"); // Assuming you have a DB connection file
+const db = require("../db"); 
 const router = express.Router();
 
 // REGISTER USER (Student or Professor)
 router.post("/register", async (req, res) => {
     const { username, email, password, userType } = req.body;
 
-    // Validate input fields
     if (!username || !email || !password || !userType) {
         return res.status(400).json({ message: "All fields are required" });
     }
@@ -69,7 +68,6 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     const { email, password, userType } = req.body;
 
-    // Validate input fields
     if (!email || !password || !userType) {
         return res.status(400).json({ message: "All fields are required" });
     }
