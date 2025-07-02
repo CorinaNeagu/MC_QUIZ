@@ -128,7 +128,10 @@ const UserStatistics = () => {
                 id="categorySelect"
                 className="custom-select"
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedSubcategory('');  // reset subcategory when category changes
+                }}
               >
                 <option value="">Select a Category</option>
                 {categories.map((cat) => (

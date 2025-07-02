@@ -254,6 +254,8 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
   });
 });
 
+
+
   router.delete("/delete-quiz/:quizId", authenticateJWT, (req, res) => {
     const { quizId } = req.params;
   

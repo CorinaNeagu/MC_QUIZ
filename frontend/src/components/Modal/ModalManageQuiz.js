@@ -111,6 +111,17 @@ const ModalManageQuiz = ({
                     />
                 </div>
 
+                <div className="form-group">
+                  <label htmlFor="deadline">Deadline:</label>
+                  <input
+                    type="datetime-local"
+                    name="deadline"
+                    id="deadline"
+                    value={editableSettings.deadline || ''}
+                    onChange={handleSettingChange}
+                  />
+                </div>
+
                 <div className = "row">
                 <div className="form-group checkbox-group">
                     <label>
