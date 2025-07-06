@@ -1,3 +1,4 @@
+/* Reset and base styles */
 html, body {
   height: 100%;
   margin: 0;
@@ -12,6 +13,7 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Container for creating questions */
 .create-question-container {
   display: flex;
   flex-direction: column;
@@ -19,12 +21,12 @@ html, body {
   padding: 20px;
   background-color: #ffffff;
   width: 1200px;
-  margin-top: 150px;
-  margin-bottom: 50px;
-  scrollbar-width: none; 
+  margin: 150px auto 50px auto; /* Center horizontally */
+  scrollbar-width: none; /* Firefox */
   scroll-behavior: smooth;
 }
 
+/* Wrapper for quiz content */
 .quiz-content-wrapper {
   display: flex;
   flex-direction: row;
@@ -34,6 +36,7 @@ html, body {
   margin-top: 20px;
 }
 
+/* Form wrapper */
 .create-question-form-wrapper {
   flex: 1;
   max-width: 800px;
@@ -46,9 +49,9 @@ html, body {
   height: 100%;
 }
 
+/* Form groups */
 .form-group {
   margin-bottom: 20px;
-
 }
 
 .form-group label {
@@ -56,9 +59,11 @@ html, body {
   margin-bottom: 10px;
   color: #333;
   font-weight: 600;
+  display: block;
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
   padding: 12px;
   font-size: 1.1em;
   border-radius: 8px;
@@ -70,13 +75,15 @@ html, body {
   color: #333;
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
   background-color: #ffffff;
 }
 
+/* Buttons */
 button {
   padding: 12px 20px;
   font-size: 1.1em;
@@ -106,13 +113,14 @@ button:active {
   transform: translateY(1px);
 }
 
+/* Added questions container */
 .added-questions {
   max-width: 600px;
-  overflow-y: auto; 
-  max-height: 100vh; 
-  padding-right: 10px; 
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Individual question */
 .added-question {
   margin-bottom: 30px;
   padding: 20px;
@@ -134,7 +142,7 @@ button:active {
 
 .added-questions ul {
   list-style-type: none;
-  padding-left: 40;
+  padding-left: 40px;
 }
 
 .added-question li {
@@ -143,14 +151,14 @@ button:active {
   color: #444;
 }
 
- .checkbox-wrapper {
+/* Checkbox styles */
+.checkbox-wrapper {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
- 
- .checkbox-custom {
+.checkbox-custom {
   width: 20px;
   height: 20px;
   border: 2px solid #333;
@@ -161,7 +169,7 @@ button:active {
 }
 
 .checkbox-input:checked + .checkbox-custom {
-  background-color: #007bff; 
+  background-color: #007bff;
 }
 
 .checkbox-input:checked + .checkbox-custom::after {
@@ -176,27 +184,21 @@ button:active {
   transform: rotate(45deg);
 }
 
- .checkbox-label-text {
+.checkbox-label-text {
   font-size: 14px;
-  color: #333;  
+  color: #333;
   cursor: pointer;
   transition: color 0.3s ease;
 }
 
-
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  justify-content: center; 
-}
-
+/* Buttons container inside questions */
 .buttons-container {
-  display: flex; 
+  display: flex;
   align-items: center;
-  justify-content: flex-end; 
-  gap: 10px; 
+  justify-content: flex-end;
+  gap: 10px;
+  width: 150px;
+  margin-left: auto; /* Push to right */
 }
 
 .edit-button,
@@ -208,14 +210,14 @@ button:active {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  width: auto; 
-  justify-content: left; 
-  display: inline-flex; 
-  align-items: center; 
+  width: auto;
+  justify-content: left;
+  display: inline-flex;
+  align-items: center;
 }
 
 .edit-button {
-  background-color: #007bff; 
+  background-color: #007bff;
   color: white;
 }
 
@@ -224,7 +226,7 @@ button:active {
 }
 
 .delete-button {
-  background-color: #e53935; 
+  background-color: #e53935;
   color: white;
 }
 
@@ -232,7 +234,7 @@ button:active {
   background-color: #eb4949 !important;
 }
 
-.save-edit-button{
+.save-edit-button {
   background-color: #007bff;
   color: white;
 }
@@ -246,37 +248,58 @@ button:active {
   color: white;
 }
 
-.discard-edit-button::hover {
+.discard-edit-button:hover {
   background-color: #3986d9;
 }
 
+/* Question text */
+.question-text preformatted {
+  margin-right: 10px;
+}
 
+/* Questions list */
+.questions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
+.question-item {
+  padding: 1rem 0 !important;
+  cursor: default;
+}
+
+.question-item:hover {
+  background-color: inherit !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Remove border on last question */
+.question-item:last-child {
+  border-bottom: none;
+}
+
+/* Horizontal divider */
+hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .quiz-content-wrapper {
     flex-direction: column;
     gap: 20px;
   }
 
-  .create-question-form-wrapper, .added-questions {
+  .create-question-form-wrapper,
+  .added-questions {
     width: 100%;
   }
 
   h2 {
     font-size: 2em;
   }
-}
-
-.question-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd; 
-}
-
-.question-item:last-child {
-  border-bottom: none; 
-}
-hr {
-  border: 0;
-  border-top: 1px solid #ddd;
-  margin: 10px 0;
 }

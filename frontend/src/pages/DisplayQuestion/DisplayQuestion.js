@@ -225,7 +225,6 @@ useEffect(() => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    // ✅ Clean up localStorage
     localStorage.removeItem(`quizQuestions_${quizId}_${attemptId}`);
     localStorage.removeItem(`quizStartTime_${quizId}`);
     localStorage.removeItem(`quizAttemptId_${quizId}`);
@@ -233,7 +232,6 @@ useEffect(() => {
     localStorage.removeItem(`quizAnswers_${quizId}_${attemptId}`);
     localStorage.removeItem(`quizIndex_${quizId}_${attemptId}`);
 
-    // ✅ Navigate after cleanup
     navigate(`/display-score/${attemptId}`);
   } catch (err) {
     console.error("Error submitting quiz:", err);
@@ -242,17 +240,15 @@ useEffect(() => {
 };
 
   
-  // Handle navigation to next question
   const handleNextQuestion = () => {
     const currentQuestion = questions[currentQuestionIndex];
     const selectedAnswers = answers[currentQuestion.question_id];
 
-    // Check if the user has selected an answer
     if (!selectedAnswers || selectedAnswers.length === 0) {
       alert("Please select an answer before moving to the next question.");
-      return; // Do not proceed to the next question
+      return; 
     } else {
-      setError(""); // Clear the error message
+      setError(""); 
       setCurrentQuestionIndex((prevIndex) => {
         if (prevIndex < questions.length - 1) {
           return prevIndex + 1;
@@ -281,8 +277,9 @@ useEffect(() => {
         {questions.length > 0 ? (
           <div className = "container">
             <h2>Question {currentQuestionIndex + 1} of {questions.length}</h2>
-            <p>{questions[currentQuestionIndex].question_content}</p>
-  
+            <div className = "pre-container">
+                <pre className="preformatted">{questions[currentQuestionIndex].question_content}</pre>
+            </div>  
             <div className="options">
               {questions[currentQuestionIndex].answers.map((answer) => {
                 const isSelected = answers[questions[currentQuestionIndex].question_id]?.includes(answer.answer_id);
@@ -301,7 +298,7 @@ useEffect(() => {
                       htmlFor={`answer-${answer.answer_id}`}
                       className={`checkbox-label ${isSelected ? "selected-answer" : ""}`}
                     >
-                      {answer.answer_content}
+                      <pre className="preformatted">{answer.answer_content}</pre>
                     </label>
                   </div>
                 );

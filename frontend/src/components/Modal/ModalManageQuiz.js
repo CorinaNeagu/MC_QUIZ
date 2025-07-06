@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
 
+
 import './ModalManageQuiz.css'; 
 
 const ModalManageQuiz = ({
@@ -109,21 +110,16 @@ setSelectedGroupId(Number(e.target.value));};
               <div className="modal-questions-wrapper">
                 {questions.map((question) => (
                   <div key={question.question_id} className="question-card">
-                    <h4>{question.question_content}</h4>
-                    <button
-                      onClick={() => toggleAnswersVisibility(question.question_id)}
-                      className="btn-fetch-answers"
-                    >
-                      {answersVisible[question.question_id] ? 'Hide Answers' : 'Fetch Answers'}
-                    </button>
-
+                    <pre className="preformatted">{question.question_content}</pre>
+                    
                     {answersVisible[question.question_id] && answers[question.question_id] && (
                       <div className="answers-container">
                         <h5>Answers:</h5>
                         <ul className="answers-list">
                           {answers[question.question_id].map((a, idx) => (
                             <li key={idx}>
-                              {a.answer_content}{' '}
+                              <pre className="preformatted">{a.answer_content}</pre>
+                              {' '}
                               {a.is_correct ? (
                                 <span className="correct-tag">✅</span>
                               ) : (
@@ -134,6 +130,13 @@ setSelectedGroupId(Number(e.target.value));};
                         </ul>
                       </div>
                     )}
+
+                    <button
+                      onClick={() => toggleAnswersVisibility(question.question_id)}
+                      className="btn-fetch-answers"
+                    >
+                      {answersVisible[question.question_id] ? 'Hide Answers' : 'Fetch Answers'}
+                    </button>
                   </div>
                 ))}
               </div>

@@ -353,6 +353,11 @@
   margin-bottom: 0.3rem;
 }
 
+.preformatted {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;  
+  white-space: pre-wrap;  
+}
 
 
 @media (max-width: 900px) {

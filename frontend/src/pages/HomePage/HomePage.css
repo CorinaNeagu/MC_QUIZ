@@ -352,6 +352,10 @@ button {
   background-color: transparent;
 }
 
+.preformatted {
+  white-space: pre-wrap;       
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
 @keyframes dropdownFadeIn {
   to {

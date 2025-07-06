@@ -100,7 +100,7 @@ const QuizPreview = () => {
         <ul>
           {quizDetails.map((question) => (
             <li key={question.question_id}>
-              <h3>{question.question_content}</h3>
+              <pre className="preformatted">{question.question_content}</pre>
               {question.answers && question.answers.length > 0 ? (
                 <ul>
                   {question.answers.map((answer) => (
@@ -108,8 +108,9 @@ const QuizPreview = () => {
                       key={answer.answer_id}
                       className={answer.is_correct ? 'correct' : 'incorrect'}
                     >
-                      {answer.answer_content} - 
-                      <strong>{answer.is_correct ? "Correct" : "Incorrect"}</strong> - 
+                      <pre className="preformatted">{answer.answer_content}</pre>
+                      -  
+                      <strong>{answer.is_correct ? " Correct" : " Incorrect"}</strong> - 
                       Score: {answer.is_correct ? answer.score : "0.00"}
                     </li>
                   ))}

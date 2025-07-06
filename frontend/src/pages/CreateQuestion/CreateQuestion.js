@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import './CreateQuestion.css';
+import CodeMirror from '@uiw/react-codemirror';
+import { html } from '@codemirror/lang-html';
 
 const CreateQuestion = () => {
   const navigate = useNavigate();
@@ -10,7 +12,8 @@ const CreateQuestion = () => {
   const { quizId, professor_id, noQuestions, category} = location.state;
   const modalGroupId = location.state?.assignToGroupId;
 
-  const [questionContent, setQuestionContent] = useState("");
+  const [questionContent, setQuestionContent] = React.useState("");
+
   const [isMultipleChoice, setIsMultipleChoice] = useState(false);
   const [answers, setAnswers] = useState([
     { answerContent: "", isCorrect: false, score: 0 },
@@ -158,7 +161,6 @@ const CreateQuestion = () => {
         );
       }
   
-      // Reset state after successful question
       setQuestionContent("");
       setAnswers([
         { answerContent: "", isCorrect: false, score: 0 },
@@ -239,13 +241,11 @@ const CreateQuestion = () => {
       return alert("At least one answer must be marked as correct.");
     }
 
-    // Recalculate the score for each correct answer
     const correctAnswers = answers.filter(a => a.isCorrect);
     const scorePerCorrectAnswer = correctAnswers.length > 0
       ? pointsPerQuestion / correctAnswers.length
       : 0;
 
-    // Update the answers with recalculated score
     const updatedAnswers = answers.map(a => ({
       ...a,
       score: a.isCorrect ? scorePerCorrectAnswer : 0,
@@ -330,11 +330,17 @@ const handleDiscardChanges = () => {
         <form onSubmit={handleAddQuestion} className="create-question-form-wrapper">
           <div className="form-group">
             <label>Question Content</label>
-            <textarea
-              value={questionContent}
-              onChange={(e) => setQuestionContent(e.target.value)}
-              required
-            />
+        <CodeMirror
+          value={questionContent}
+          height="200px"
+          width="500px"
+          extensions={[html()]} 
+          onChange={(value) => setQuestionContent(value)}
+          basicSetup={{ lineNumbers: true }}
+        />
+
+
+
           </div>
 
           <div className="form-group">
@@ -353,12 +359,17 @@ const handleDiscardChanges = () => {
 
           {answers.map((answer, index) => (
             <div key={index} className="answer-group">
-              <textarea
-                name="answerContent"
+              <CodeMirror
                 value={answer.answerContent}
-                onChange={(e) => handleAnswerChange(index, e)}
-                placeholder={`Answer ${index + 1}`}
-                required
+                height="100px"
+                width="700px"
+                extensions={[html()]}
+                onChange={(value) => {
+                  const newAnswers = [...answers];
+                  newAnswers[index].answerContent = value;
+                  setAnswers(newAnswers);
+                }}
+                basicSetup={{ lineNumbers: true }}
               />
               <label className="checkboxLabel">
                 
@@ -386,89 +397,84 @@ const handleDiscardChanges = () => {
             >
               Add Answer
             </button>
-          </div>
-
-          {error && <p className="error-message">{error}</p>}
-
-          <div className="form-group">
             <button 
               type="submit" 
               disabled={!canAddMore}>
               {canAddMore ? "Submit Question" : "Maximum Questions Reached"}
             </button>
-          </div>
 
-          <div className="form-group">
             <button type="button" onClick={handleSubmitQuiz}>
               Submit Quiz
             </button>
           </div>
+
+          {error && <p className="error-message">{error}</p>}
+
+            
         </form>
 
       
 
-        <div className="added-questions">
-            <h3>Added Questions:</h3>
-            {questions.length > 0 ? (
+    <div className="added-questions">
+  <h3>Added Questions:</h3>
 
-              <ul>
-                {questions.map((q, index) => (
-                  <div key={q.question_id}>
-                    <li key={q.question_id}>
-            <div className="question-content-wrapper">
-              <strong>{q.question_content}</strong>
+  {questions.length > 0 ? (
+    <ul className="questions-list">
+      {questions.map((q, index) => (
+        <li key={q.question_id} className="question-item">
+          <div className="question-content-wrapper">
+            <pre className="question-text preformatted">{q.question_content}</pre>
 
-              <div className="buttons-container">
-                {editingQuestionId === q.question_id ? (
-                  <>
-                    <button 
-                      onClick={handleSaveEdit}
-                      className="save-edit-button">
-                      Save Changes
-                    </button>
-
-                    <button 
-                      onClick={handleDiscardChanges}
-                      className="discard-edit-button">
-                      Discard Changes
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => handleEditQuestion(q.question_id)}
-                      className="edit-button"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteQuestion(q.question_id)}
-                      className="delete-button"
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </div>
+            <div className="buttons-container">
+              {editingQuestionId === q.question_id ? (
+                <>
+                  <button onClick={handleSaveEdit} className="btn btn-save">
+                    Save Changes
+                  </button>
+                  <button onClick={handleDiscardChanges} className="btn btn-discard">
+                    Discard Changes
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleEditQuestion(q.question_id)}
+                    className="btn btn-edit"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteQuestion(q.question_id)}
+                    className="btn btn-delete"
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
+          </div>
 
-              <ul>
-                {(questionAnswers[q.question_id] || []).map((a) => (
-                  <li key={a.answer_id}>
-                    {a.answer_content} - {a.is_correct ? "Correct" : "Incorrect"} - Score: {a.score}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          {index < questions.length - 1 && <hr />} 
-        </div>
+          <ul className="answers-list">
+            {(questionAnswers[q.question_id] || []).map((a) => (
+              <li key={a.answer_id} className={`answer-item ${a.is_correct ? "correct" : "incorrect"}`}>
+                <pre className="answer-text preformatted">{a.answer_content}</pre>
+                <div className="answer-meta">
+                  <span className="answer-correctness">{a.is_correct ? "Correct" : "Incorrect"}</span> - 
+                  <span className="answer-score"> Score: {a.score}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {index < questions.length - 1 && <hr className="question-divider" />}
+        </li>
       ))}
     </ul>
   ) : (
-    <p>No questions added yet.</p>
+    <p className="no-questions-msg">No questions added yet.</p>
   )}
 </div>
+
 
 
 
