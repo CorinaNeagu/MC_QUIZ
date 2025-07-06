@@ -340,37 +340,82 @@ router.put('/update-quiz-settings/:quizId', authenticateJWT, (req, res) => {
     });
   });
   
-router.get('/deadlines', authenticateJWT, (req, res) => {
-  const studentId = req.user.id;
+  router.get('/deadlines', authenticateJWT, (req, res) => {
+    const studentId = req.user.id;
 
-  const query = `
-    SELECT 
-      gq.assignment_id, 
-      q.quiz_id, 
-      q.title, 
-      gq.deadline,
-      qs.retake_allowed AS allowRetake,
-      EXISTS (
-        SELECT 1 
-        FROM QuizAttempt qa 
-        WHERE qa.quiz_id = q.quiz_id AND qa.student_id = ?
-      ) AS taken
-    FROM groupQuiz gq
-    JOIN quiz q ON q.quiz_id = gq.quiz_id
-    JOIN groupMembers gm ON gm.group_id = gq.group_id
-    LEFT JOIN QuizSettings qs ON qs.quiz_id = q.quiz_id
-    WHERE gm.student_id = ? AND gq.deadline > NOW()
-    ORDER BY gq.deadline ASC;
-  `;
+   const query = `
+      SELECT 
+        gq.assignment_id, 
+        q.quiz_id, 
+        q.title, 
+        gq.deadline,
+        gq.group_id,
+        sg.group_name,
+        qs.retake_allowed AS allowRetake,
+        EXISTS (
+          SELECT 1 
+          FROM QuizAttempt qa 
+          WHERE qa.quiz_id = q.quiz_id AND qa.student_id = ?
+        ) AS taken
+      FROM groupQuiz gq
+      JOIN quiz q ON q.quiz_id = gq.quiz_id
+      JOIN groupMembers gm ON gm.group_id = gq.group_id
+      JOIN studyGroup sg ON sg.group_id = gq.group_id
+      LEFT JOIN QuizSettings qs ON qs.quiz_id = q.quiz_id
+      WHERE gm.student_id = ? AND gq.deadline > NOW()
+      ORDER BY gq.deadline ASC;
+    `;
 
-  db.query(query, [studentId, studentId], (err, results) => {
+    db.query(query, [studentId, studentId], (err, results) => {
+      if (err) {
+        console.error('Error fetching deadlines:', err);
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+      res.json({ deadlines: results });
+    });
+  });
+
+router.put('/update-deadline/:quizId/:groupId', authenticateJWT, (req, res) => {
+  const { quizId, groupId } = req.params;
+  const { deadline } = req.body;
+
+  const query = `UPDATE groupQuiz SET deadline = ? WHERE quiz_id = ? AND group_id = ?`;
+
+  db.query(query, [deadline, quizId, groupId], (err, result) => {
     if (err) {
-      console.error('Error fetching deadlines:', err);
-      return res.status(500).json({ error: 'Database query failed' });
+      console.error('Error updating deadline:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
     }
-    res.json({ deadlines: results });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Quiz not found for this group.' });
+    }
+
+    res.json({ message: 'Deadline updated for the selected group!' });
   });
 });
+
+router.get('/quiz-groups/:quizId', authenticateJWT, (req, res) => {
+  const { quizId } = req.params;
+
+  const query = `
+    SELECT g.group_id, g.group_name, q.deadline
+    FROM groupQuiz q
+    JOIN studyGroup g ON g.group_id = q.group_id
+    WHERE q.quiz_id = ?
+  `;
+
+  db.query(query, [quizId], (err, results) => {
+    if (err) {
+      console.error("Error fetching quiz groups:", err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    res.json(results);
+  });
+});
+
+
 
 
 // Get student quiz attempt history

@@ -155,11 +155,67 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: black;
 }
+
 .row {
   display: flex;
   gap: 2rem;
   justify-content: flex-start;
   margin-top: 1rem;
+}
+
+.group-deadline-row {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  align-items: center;
+  flex-wrap: nowrap; 
+  width: 100%; 
+}
+
+.group-deadline-row .column {
+  display: flex;
+  flex-direction: column; 
+}
+
+.group-deadline-row .select-column label,
+.group-deadline-row .deadline-column label {
+  white-space: nowrap;
+  font-weight: 600;
+  color: #222;
+  min-width: 110px;
+  flex-shrink: 0; 
+}
+
+.group-deadline-row select,
+.group-deadline-row input {
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.group-deadline-row select:focus,
+.group-deadline-row input[type="datetime-local"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.5);
+}
+
+.group-deadline-row button {
+  padding: 6px 14px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 1rem;
+  flex-shrink: 0; 
+}
+
+.group-deadline-row button:hover {
+  background-color: #0056b3;
 }
 
 .form-group.checkbox-group {
@@ -261,6 +317,42 @@
 .modal-content > ul li strong {
   color: #007bff;
 }
+
+.settings-list {
+  list-style-type: none;
+  padding-left: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  max-width: 400px;
+  margin: 0;
+}
+
+.settings-list > li {
+  margin-bottom: 0.5rem;
+}
+
+.settings-list > li:last-child {
+  margin-bottom: 1rem;
+}
+
+.settings-list .group-deadlines-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.25rem;
+}
+
+.group-deadlines-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  color: #555;
+  margin: 0;
+}
+
+.group-deadlines-list > li {
+  margin-bottom: 0.3rem;
+}
+
 
 
 @media (max-width: 900px) {

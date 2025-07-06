@@ -32,6 +32,9 @@ const HomePage = () => {
     profilePic: "",
   });
 
+  const [studentGroups, setStudentGroups] = useState([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -108,6 +111,29 @@ const HomePage = () => {
       setDeadlinesLoading(false);
     });
 }, [loading, userType]);
+
+  useEffect(() => {
+  if (loading || userType !== "student") return;
+
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  axios
+    .get("http://localhost:5000/api/groups/student-groups", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      setStudentGroups(response.data || []);
+      setGroupsLoading(false);
+    })
+    .catch((error) => {
+      console.error("Failed to fetch student groups:", error);
+      setGroupsLoading(false);
+    });
+}, [loading, userType]);
+
+
+
 
 const toggleMenu = (assignmentId) => {
   if (openMenuId === assignmentId) {
@@ -236,56 +262,58 @@ const handleGoToQuiz = (quizId) => {
                         return 0;
                     }
                   })
-                  .map((deadline) => (
-                    <div key={deadline.assignment_id} className="deadline-card">
-  <div className="deadline-header-menu-container flex justify-between items-center">
-    
-    {/* Left: Title and optional badge */}
-    <div className="deadline-header">
-      <div className="deadline-title font-semibold text-lg">{deadline.title}</div>
+                  .map((deadline) => {
+                    // Find the group object matching this deadline's group id
+                    const group = studentGroups.find(
+                      (grp) => grp.group_id === deadline.group_id
+                    );
 
-      {deadline.taken && !deadline.allowRetake ? (
-        <div className="taken-badge-row mt-1">
-          <span className="taken-badge text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-            Cannot be retaken
-          </span>
-        </div>
-      ) : null}
-    </div>
+                    return (
+                      <div key={deadline.assignment_id} className="deadline-card">
+                        <div className="deadline-header-menu-container flex justify-between items-center">
+                          <div className="deadline-header">
+                            <div className="deadline-title">{deadline.title}</div>
 
-    {/* Right: Menu button and dropdown */}
-    <div className="menu-container">
-  <button
-    className="btn-menu text-xl px-2"
-    onClick={() => toggleMenu(deadline.assignment_id)}
-    aria-label="Open menu"
-  >
-    ⋮
-  </button>
+                            <div className="deadline-group">
+                              Group: {group ? group.group_name : "Unknown Group"}
+                            </div>
 
-  {openMenuId === deadline.assignment_id && (
-    <div className="menu-dropdown">
-      <button
-        className="start-quiz-btn"
-        onClick={() => handleGoToQuiz(deadline.quiz_id)}
-        disabled={!deadline.allowRetake && deadline.taken}
-      >
-        Go to Quiz
-      </button>
-    </div>
-  )}
-</div>
+                            {deadline.taken && !deadline.allowRetake ? (
+                              <div className="taken-badge-row">
+                                <span className="taken-badge">Cannot be retaken</span>
+                              </div>
+                            ) : null}
+                          </div>
 
-  </div>
+                          <div className="menu-container">
+                            <button
+                              className="btn-menu"
+                              onClick={() => toggleMenu(deadline.assignment_id)}
+                              aria-label="Open menu"
+                            >
+                              ⋮
+                            </button>
 
-  <div className="deadline-date text-sm text-gray-500 mt-2">
-    Due on {new Date(deadline.deadline).toLocaleDateString()}
-  </div>
-</div>
+                            {openMenuId === deadline.assignment_id && (
+                              <div className="menu-dropdown">
+                                <button
+                                  className="start-quiz-btn"
+                                  onClick={() => handleGoToQuiz(deadline.quiz_id)}
+                                  disabled={!deadline.allowRetake && deadline.taken}
+                                >
+                                  Go to Quiz
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-
-
-                  ))}
+                        <div className="deadline-date">
+                          Due on {new Date(deadline.deadline).toLocaleDateString()}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>

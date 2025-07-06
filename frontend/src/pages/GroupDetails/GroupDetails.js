@@ -18,6 +18,11 @@ const GroupDetails = () => {
   const [attemptsLoading, setAttemptsLoading] = useState(false);
   const [attemptsError, setAttemptsError] = useState(null);
 
+  const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
+  const [deadlineValue, setDeadlineValue] = useState('');
+  const [deadlineQuiz, setDeadlineQuiz] = useState(null);
+
+
   useEffect(() => {
     if (!groupId) return;
 
@@ -41,6 +46,35 @@ const GroupDetails = () => {
 
     fetchAssignedQuizzes();
   }, [groupId]);
+
+  const handleDeadlineSave = async () => {
+  if (!deadlineQuiz) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.put(
+      `http://localhost:5000/api/user/update-deadline/${deadlineQuiz.quiz_id}`,
+      { deadline: deadlineValue },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    if (response.status === 200) {
+      setQuizzes((prevQuizzes) =>
+        prevQuizzes.map((q) =>
+          q.quiz_id === deadlineQuiz.quiz_id ? { ...q, deadline: deadlineValue } : q
+        )
+      );
+      alert('Deadline updated successfully!');
+      closeDeadlineModal();
+    }
+  } catch (error) {
+    console.error("Failed to update deadline:", error);
+    alert('Failed to update deadline. Please try again.');
+  }
+};
+
 
   const openModal = async (quiz) => {
     setSelectedQuiz(quiz);
@@ -72,6 +106,19 @@ const GroupDetails = () => {
     setAttemptsError(null);
   };
 
+  const openDeadlineModal = (quiz) => {
+  setDeadlineQuiz(quiz);
+  setDeadlineValue(quiz.deadline ? new Date(quiz.deadline).toISOString().slice(0,16) : '');
+  setIsDeadlineModalOpen(true);
+};
+
+const closeDeadlineModal = () => {
+  setIsDeadlineModalOpen(false);
+  setDeadlineQuiz(null);
+  setDeadlineValue('');
+};
+
+
   const handleBackToGroups = () => {
     navigate(`/groups`);
   };
@@ -84,6 +131,10 @@ const GroupDetails = () => {
         <div className="modal-container" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <h2>{title}</h2>
+            <button 
+              className = "btn-display-bar">
+                Chart 
+            </button>
           </div>
           <div className="modal-content">{children}</div>
         </div>
@@ -120,6 +171,12 @@ const GroupDetails = () => {
             <button className="btn-more" onClick={() => openModal({ quiz_id, title })}>
               See more
             </button>
+
+            <button className="btn-more" onClick={() => openDeadlineModal({ quiz_id, title, deadline })}>
+              Update Deadline
+            </button>
+            
+
           </li>
         ))}
       </ul>
@@ -129,26 +186,47 @@ const GroupDetails = () => {
         {attemptsError && <p className="error-text">{attemptsError}</p>}
         {!attemptsLoading && !attemptsError && attempts.length === 0 && <p>No attempts found.</p>}
         {!attemptsLoading && attempts.length > 0 && (
-          <table className="attempts-table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Score</th>
-                <th>Attempted At</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attempts.map(({ student_id, username, score, attempted_at }) => (
-                <tr key={student_id}>
-                  <td>{username}</td>
-                  <td>{score}</td>
-                  <td>{new Date(attempted_at).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                <table className="attempts-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Score</th>
+                      <th>Attempted At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attempts.map(({ student_id, username, score, attempted_at }) => (
+                      <tr key={student_id}>
+                        <td>{username}</td>
+                        <td>{score}</td>
+                        <td>{new Date(attempted_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
         )}
       </ModalGroupDetails>
+
+      {isDeadlineModalOpen && (
+        <div className="modal-backdrop" onClick={closeDeadlineModal}>
+          <div className="modal-container" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Update Deadline for: {deadlineQuiz?.title}</h2>
+            </div>
+            <div className="modal-content">
+              <input
+                type="datetime-local"
+                className = "datetime"
+                value={deadlineValue}
+                onChange={e => setDeadlineValue(e.target.value)}
+              />
+              <div style={{ marginTop: '1rem' }}>
+                <button onClick={handleDeadlineSave}>Save Deadline</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

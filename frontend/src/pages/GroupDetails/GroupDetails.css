@@ -8,7 +8,6 @@
   margin-top: 20px;
 }
 
-
 .quiz-item.quiz-card {
   background: #fff;
   border-radius: 12px;
@@ -91,8 +90,32 @@
 .attempts-table td {
   border: 1px solid #ccc;
   padding: 8px;
+  text-align: center;     
+  vertical-align: middle; 
 }
 
+.btn-display-bar {
+  width: 150px !important;
+  background-color: #007bff;
+  color: white !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.btn-display-bar :hover {
+  background-color: #0056b3 !important;
+}
+
+.datetime { 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 90px;  
+}
 
 @media (max-width: 600px) {
   .group-details-page {

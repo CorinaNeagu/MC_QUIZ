@@ -277,6 +277,7 @@ button {
 
 .deadline-date {
   font-size: 0.9rem;
+  margin-top: 10px;
   color: #7f8c8d;
 }
 
@@ -290,11 +291,10 @@ button {
 
 .menu-container {
   position: absolute;
-  top: 10px;
+  top: -15px;
   right: 10px;
   z-index: 10;
 }
-
 
 .btn-menu {
   background-color: transparent;
@@ -316,9 +316,9 @@ button {
   top: 100%;
   right: 0;
   margin-top: 10px;
-  background-color: #ffffff;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background-color: white;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   padding: 10px;
   z-index: 100;

@@ -455,7 +455,7 @@ const Groups = () => {
                 </button>
                 <button className = "btn-group-details"
                         onClick={() => handleGroupDetails(group.group_id)}>
-                  Group Details
+                  Group Deadlines
                 </button>
                 <button className = "btn-delete"
                   onClick={() => handleDeleteGroup(group.group_id)}

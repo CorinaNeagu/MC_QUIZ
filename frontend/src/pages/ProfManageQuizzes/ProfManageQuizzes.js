@@ -18,6 +18,7 @@ const ProfManageQuizzes = () => {
   const [editSettingsQuizId, setEditSettingsQuizId] = useState(null);
   const [editableSettings, setEditableSettings] = useState({});
   const [showInspectModal, setShowInspectModal] = useState(false);
+  const [quizGroups, setQuizGroups] = useState([]);
 
   const navigate = useNavigate();
 
@@ -78,6 +79,20 @@ const ProfManageQuizzes = () => {
       });
   };
 
+  const fetchQuizGroups = async (quizId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`http://localhost:5000/api/user/quiz-groups/${quizId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setQuizGroups(response.data);
+  } catch (err) {
+    console.error("Error fetching quiz groups:", err);
+  }
+};
+
+
+
   const toggleAnswersVisibility = (questionId) => {
     const alreadyFetched = answers[questionId];
 
@@ -98,35 +113,48 @@ const ProfManageQuizzes = () => {
 
   const handleSeeDetails = async (quizId) => {
   if (activeQuizId === quizId) {
-    setActiveQuizId(null); // Close modal
+    setActiveQuizId(null);
     return;
   }
 
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
+
+    // Fetch quiz settings
+    const settingsResponse = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // Fetch group deadlines
+    const groupsResponse = await axios.get(`http://localhost:5000/api/user/quiz-groups/${quizId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     setSelectedQuizSettings((prev) => ({
       ...prev,
-      [quizId]: response.data,
+      [quizId]: settingsResponse.data,
     }));
 
     setEditableSettings({
       title: quizzes.find(q => q.quiz_id === quizId)?.title || '',
-      time_limit: response.data.time_limit,
-      deduction_percentage: response.data.deduction_percentage,
-      retake_allowed: response.data.retake_allowed,
-      is_active: response.data.is_active,
+      time_limit: settingsResponse.data.time_limit,
+      deduction_percentage: settingsResponse.data.deduction_percentage,
+      retake_allowed: settingsResponse.data.retake_allowed,
+      is_active: settingsResponse.data.is_active,
+      selectedGroupId: '',        
+      groupDeadline: ''  
+      
     });
 
-    setEditSettingsQuizId(quizId); 
-    setActiveQuizId(quizId);       
+    setQuizGroups(groupsResponse.data); 
+
+    setEditSettingsQuizId(quizId);
+    setActiveQuizId(quizId);
   } catch (error) {
-    console.error("Failed to fetch quiz settings:", error);
+    console.error("Failed to fetch quiz settings or groups:", error);
   }
 };
+
 
 
   const handleToggleEdit = (quizId) => {
@@ -268,6 +296,8 @@ const ProfManageQuizzes = () => {
         handleToggleEdit={handleToggleEdit}
         handleSaveSettings={handleSaveSettings}
         quiz={quizzes.find((q) => q.quiz_id === activeQuizId)}
+        quizGroups={quizGroups}
+        setQuizGroups={setQuizGroups}
       />
       </div>
     </div>
