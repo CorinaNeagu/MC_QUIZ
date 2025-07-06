@@ -304,7 +304,7 @@ const handleDiscardChanges = () => {
       alert(`You must add exactly ${noQuestions} question(s) before submitting.`);
       return;
     }
-    navigate("/quizPreview", { state: { assignToGroupId: modalGroupId, quizId } });
+    navigate("/quizPreview", { state:{ quizId } });
   };
 
   const canAddMore = questions.length < noQuestions;
@@ -330,20 +330,17 @@ const handleDiscardChanges = () => {
         <form onSubmit={handleAddQuestion} className="create-question-form-wrapper">
           <div className="form-group">
             <label>Question Content</label>
-        <CodeMirror
-          value={questionContent}
-          height="200px"
-          width="500px"
-          extensions={[html()]} 
-          onChange={(value) => setQuestionContent(value)}
-          basicSetup={{ lineNumbers: true }}
-        />
-
-
-
+              <CodeMirror
+                value={questionContent}
+                height="200px"
+                width="500px"
+                extensions={[html()]} 
+                onChange={(value) => setQuestionContent(value)}
+                basicSetup={{ lineNumbers: true }}
+              />
           </div>
 
-          <div className="form-group">
+          <div className="form-group-check">
             <label>Is this a multiple-choice question?</label>
             <div className="checkbox-wrapper">
               <input
@@ -362,7 +359,7 @@ const handleDiscardChanges = () => {
               <CodeMirror
                 value={answer.answerContent}
                 height="100px"
-                width="700px"
+                width="500px"
                 extensions={[html()]}
                 onChange={(value) => {
                   const newAnswers = [...answers];
@@ -379,10 +376,10 @@ const handleDiscardChanges = () => {
                     id={`correctCheckbox-${index}`}
                     checked={answer.isCorrect}
                     onChange={() => handleCheckboxChange(index)}
-                          className="checkbox-input"
+                    className="checkbox-custom"
                   />
-                  Correct:
-                  <label htmlFor={`correctCheckbox-${index}`} className="checkbox-custom"></label>
+                  Correct
+                  <label htmlFor={`correctCheckbox-${index}`}></label>
                 </div>
               </label>
             </div>
@@ -416,63 +413,63 @@ const handleDiscardChanges = () => {
       
 
     <div className="added-questions">
-  <h3>Added Questions:</h3>
+      <h3>Added Questions:</h3>
 
-  {questions.length > 0 ? (
-    <ul className="questions-list">
-      {questions.map((q, index) => (
-        <li key={q.question_id} className="question-item">
-          <div className="question-content-wrapper">
-            <pre className="question-text preformatted">{q.question_content}</pre>
+      {questions.length > 0 ? (
+        <ul className="questions-list">
+          {questions.map((q, index) => (
+            <li key={q.question_id} className="question-item">
+              <div className="question-content-wrapper">
+                <pre className="question-text preformatted">{q.question_content}</pre>
 
-            <div className="buttons-container">
-              {editingQuestionId === q.question_id ? (
-                <>
-                  <button onClick={handleSaveEdit} className="btn btn-save">
-                    Save Changes
-                  </button>
-                  <button onClick={handleDiscardChanges} className="btn btn-discard">
-                    Discard Changes
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => handleEditQuestion(q.question_id)}
-                    className="btn btn-edit"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteQuestion(q.question_id)}
-                    className="btn btn-delete"
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          <ul className="answers-list">
-            {(questionAnswers[q.question_id] || []).map((a) => (
-              <li key={a.answer_id} className={`answer-item ${a.is_correct ? "correct" : "incorrect"}`}>
-                <pre className="answer-text preformatted">{a.answer_content}</pre>
-                <div className="answer-meta">
-                  <span className="answer-correctness">{a.is_correct ? "Correct" : "Incorrect"}</span> - 
-                  <span className="answer-score"> Score: {a.score}</span>
+                <div className="buttons-container">
+                  {editingQuestionId === q.question_id ? (
+                    <>
+                      <button onClick={handleSaveEdit} className="btn btn-save">
+                        Save Changes
+                      </button>
+                      <button onClick={handleDiscardChanges} className="btn btn-discard">
+                        Discard Changes
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleEditQuestion(q.question_id)}
+                        className="btn btn-edit"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteQuestion(q.question_id)}
+                        className="btn btn-delete"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
-              </li>
-            ))}
-          </ul>
+              </div>
 
-          {index < questions.length - 1 && <hr className="question-divider" />}
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p className="no-questions-msg">No questions added yet.</p>
-  )}
+              <ul className="answers-list">
+                {(questionAnswers[q.question_id] || []).map((a) => (
+                  <li key={a.answer_id} className={`answer-item ${a.is_correct ? "correct" : "incorrect"}`}>
+                    <pre className="answer-text preformatted">{a.answer_content}</pre>
+                    <div className="answer-meta">
+                      <span className="answer-correctness">{a.is_correct ? "Correct" : "Incorrect"}</span> - 
+                      <span className="answer-score"> Score: {a.score}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {index < questions.length - 1 && <hr className="question-divider" />}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="no-questions-msg">No questions added yet.</p>
+      )}
 </div>
 
 

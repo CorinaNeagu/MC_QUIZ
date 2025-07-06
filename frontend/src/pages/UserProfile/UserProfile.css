@@ -279,7 +279,6 @@ h2 {
 .file-upload-label:hover,
 .file-upload-label:focus {
   background-color: #0056b3;
-  transform: translateY(-2px);
 }
 
 .file-upload-input {

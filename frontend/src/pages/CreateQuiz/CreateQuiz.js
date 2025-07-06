@@ -8,8 +8,6 @@ import './CreateQuiz.css';
 const CreateQuiz = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const modalGroupId = location.state?.assignToGroupId;
-  console.log('Assigning quiz to group:', modalGroupId);
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -22,12 +20,9 @@ const CreateQuiz = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [deductionPercentage, setDeductionPercentage] = useState(0);
 
-
-  // Get user details from localStorage
   const user_id = localStorage.getItem("user_id"); 
 
   useEffect(() => {
-    // Fetch categories from the backend
     const fetchCategories = async () => {
       try {
          const [catRes, subcatRes] = await Promise.all([
@@ -53,7 +48,6 @@ const CreateQuiz = () => {
       return;
     }
 
-    // Validate input fields
     const validTimeLimit = parseInt(timeLimit, 10);
     if (isNaN(validTimeLimit) || validTimeLimit <= 0) {
       alert("Please provide a valid time limit greater than 0.");
@@ -75,7 +69,6 @@ const CreateQuiz = () => {
       return;
     }
 
-    // Construct the form data to send to the server
     const formData = {
       title,
       category,
@@ -90,7 +83,6 @@ const CreateQuiz = () => {
     console.log("Form Data:", formData);
 
     try {
-      // API call to create a quiz
       const response = await axios.post("http://localhost:5000/api/quizzes", formData, {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -102,11 +94,10 @@ const CreateQuiz = () => {
         const quizId = response.data.quizId;
         navigate(`/create-question/${quizId}`, {
           state: {
-            professor_id: user_id,  // Pass user_id to create question
+            professor_id: user_id,  
             noQuestions: validNoQuestions,
-            category, // Pass selected category
+            category, 
             quizId,
-            assignToGroupId: modalGroupId,
           },
         });
       }
@@ -116,10 +107,9 @@ const CreateQuiz = () => {
     }
   };
 
-  // Filter subcategories based on selected category
-const filteredSubcategories = subcategories.filter(
-  (subcat) => subcat.category_id === categories.find((cat) => cat.category_name === category)?.category_id
-);
+    const filteredSubcategories = subcategories.filter(
+      (subcat) => subcat.category_id === categories.find((cat) => cat.category_name === category)?.category_id
+    );
 
   return (
     <div className="create-quiz-container">

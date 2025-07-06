@@ -83,7 +83,21 @@ html, body {
   background-color: #ffffff;
 }
 
-/* Buttons */
+.answers-list {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.answers-list:hover {
+  background-color: transparent !important;
+  cursor: default;
+  pointer-events: none !important;
+}
+
+.answer-item:hover {
+  background-color: rgb(205, 231, 240) !important;
+}
+ 
 button {
   padding: 12px 20px;
   font-size: 1.1em;
@@ -113,21 +127,18 @@ button:active {
   transform: translateY(1px);
 }
 
-/* Added questions container */
 .added-questions {
   max-width: 600px;
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Individual question */
 .added-question {
   margin-bottom: 30px;
   padding: 20px;
   width: 800px;
   background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
@@ -151,7 +162,6 @@ button:active {
   color: #444;
 }
 
-/* Checkbox styles */
 .checkbox-wrapper {
   display: flex;
   align-items: center;
@@ -191,14 +201,13 @@ button:active {
   transition: color 0.3s ease;
 }
 
-/* Buttons container inside questions */
 .buttons-container {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
   width: 150px;
-  margin-left: auto; /* Push to right */
+  margin-left: auto; 
 }
 
 .edit-button,
@@ -252,12 +261,10 @@ button:active {
   background-color: #3986d9;
 }
 
-/* Question text */
 .question-text preformatted {
   margin-right: 10px;
 }
 
-/* Questions list */
 .questions-list {
   list-style: none;
   padding: 0;
@@ -275,19 +282,16 @@ button:active {
   border-color: transparent !important;
 }
 
-/* Remove border on last question */
 .question-item:last-child {
   border-bottom: none;
 }
 
-/* Horizontal divider */
 hr {
   border: 0;
   border-top: 1px solid #ddd;
   margin: 10px 0;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .quiz-content-wrapper {
     flex-direction: column;

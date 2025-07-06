@@ -7,18 +7,25 @@ import ModalManageQuiz from '../../components/Modal/ModalManageQuiz';
 
 const ProfManageQuizzes = () => {
   const [quizzes, setQuizzes] = useState([]);
+  const [quizGroups, setQuizGroups] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [answersVisible, setAnswersVisible] = useState({});
+
   const [selectedQuizId, setSelectedQuizId] = useState(null);
   const [activeQuizId, setActiveQuizId] = useState(null);
+
   const [selectedQuizSettings, setSelectedQuizSettings] = useState({});
   const [editSettingsQuizId, setEditSettingsQuizId] = useState(null);
   const [editableSettings, setEditableSettings] = useState({});
+
   const [showInspectModal, setShowInspectModal] = useState(false);
-  const [quizGroups, setQuizGroups] = useState([]);
+
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const [selectedGroupDeadline, setSelectedGroupDeadline] = useState('');
 
   const navigate = useNavigate();
 
@@ -80,18 +87,16 @@ const ProfManageQuizzes = () => {
   };
 
   const fetchQuizGroups = async (quizId) => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get(`http://localhost:5000/api/user/quiz-groups/${quizId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setQuizGroups(response.data);
-  } catch (err) {
-    console.error("Error fetching quiz groups:", err);
-  }
-};
-
-
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`http://localhost:5000/api/user/quiz-groups/${quizId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setQuizGroups(response.data);
+      } catch (err) {
+        console.error("Error fetching quiz groups:", err);
+      }
+    };
 
   const toggleAnswersVisibility = (questionId) => {
     const alreadyFetched = answers[questionId];
@@ -112,50 +117,109 @@ const ProfManageQuizzes = () => {
   };
 
   const handleSeeDetails = async (quizId) => {
-  if (activeQuizId === quizId) {
-    setActiveQuizId(null);
-    return;
-  }
+    if (activeQuizId === quizId) {
+      setActiveQuizId(null);
+      return;
+    }
 
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    // Fetch quiz settings
-    const settingsResponse = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const settingsResponse = await axios.get(`http://localhost:5000/api/user/settings/${quizId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    // Fetch group deadlines
-    const groupsResponse = await axios.get(`http://localhost:5000/api/user/quiz-groups/${quizId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const groupsResponse = await axios.get(`http://localhost:5000/api/user/quiz-groups/${quizId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    setSelectedQuizSettings((prev) => ({
-      ...prev,
-      [quizId]: settingsResponse.data,
-    }));
+      setSelectedQuizSettings((prev) => ({
+        ...prev,
+        [quizId]: settingsResponse.data,
+      }));
 
-    setEditableSettings({
-      title: quizzes.find(q => q.quiz_id === quizId)?.title || '',
-      time_limit: settingsResponse.data.time_limit,
-      deduction_percentage: settingsResponse.data.deduction_percentage,
-      retake_allowed: settingsResponse.data.retake_allowed,
-      is_active: settingsResponse.data.is_active,
-      selectedGroupId: '',        
-      groupDeadline: ''  
-      
-    });
+      setEditableSettings({
+        title: quizzes.find(q => q.quiz_id === quizId)?.title || '',
+        time_limit: settingsResponse.data.time_limit,
+        deduction_percentage: settingsResponse.data.deduction_percentage,
+        retake_allowed: settingsResponse.data.retake_allowed,
+        is_active: settingsResponse.data.is_active,
+        selectedGroupId: '',        
+        groupDeadline: ''  
+        
+      });
 
-    setQuizGroups(groupsResponse.data); 
+      setQuizGroups(groupsResponse.data); 
 
-    setEditSettingsQuizId(quizId);
-    setActiveQuizId(quizId);
-  } catch (error) {
-    console.error("Failed to fetch quiz settings or groups:", error);
-  }
+      setEditSettingsQuizId(quizId);
+      setActiveQuizId(quizId);
+    } catch (error) {
+      console.error("Failed to fetch quiz settings or groups:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (quizGroups && quizGroups.length > 0) {
+      if (!selectedGroupId) {
+        const firstGroup = quizGroups[0];
+        setSelectedGroupId(firstGroup.group_id);
+        setSelectedGroupDeadline(formatDeadline(firstGroup.deadline));
+      } else {
+        const group = quizGroups.find(g => g.group_id === selectedGroupId);
+        if (group) {
+          setSelectedGroupDeadline(formatDeadline(group.deadline));
+        } else {
+          setSelectedGroupDeadline('');
+        }
+      }
+    }
+  }, [quizGroups, selectedGroupId]);
+
+const formatDeadline = (deadline) => {
+  if (!deadline) return '';
+  const date = new Date(deadline);
+  if (isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 16);
 };
 
+const handleGroupChange = (e) => {
+  setSelectedGroupId(Number(e.target.value));
+};
 
+const handleDeadlineChange = (e) => {
+  setSelectedGroupDeadline(e.target.value);
+};
+
+const saveDeadlineForSelectedGroup = async () => {
+    if (!selectedGroupId) return;
+
+    const token = localStorage.getItem("token");
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/user/update-deadline/${activeQuizId}/${selectedGroupId}`,
+        { deadline: selectedGroupDeadline },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const updatedGroups = quizGroups.map(group =>
+        group.group_id === selectedGroupId
+          ? { ...group, deadline: selectedGroupDeadline }
+          : group
+      );
+      setQuizGroups(updatedGroups);
+
+      alert(`Deadline for the selected group updated.`);
+    } catch (err) {
+      console.error("Error updating deadline:", err);
+      alert("Failed to update deadline.");
+    }
+  };
 
   const handleToggleEdit = (quizId) => {
     if (editSettingsQuizId === quizId) {
@@ -181,41 +245,51 @@ const ProfManageQuizzes = () => {
     }));
   };
 
-  const handleSaveSettings = async (quizId) => {
-    const token = localStorage.getItem('token');
+  const handleSaveSettings = async (quizId, groupId, deadline) => {
+    const token = localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const updateResponse = await axios.put(
+      await axios.put(
         `http://localhost:5000/api/user/update-quiz-settings/${quizId}`,
         editableSettings,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } }
       );
 
-      if (updateResponse.status === 200) {
-        setSelectedQuizSettings((prev) => ({
-          ...prev,
-          [quizId]: {
-            ...prev[quizId],
-            ...editableSettings,
-          },
-        }));
-
-        setQuizzes((prev) =>
-          prev.map((q) => (q.quiz_id === quizId ? { ...q, title: editableSettings.title } : q))
+      if (groupId && deadline) {
+        await axios.put(
+          `http://localhost:5000/api/user/update-deadline/${quizId}/${groupId}`,
+          { deadline },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        setEditSettingsQuizId(null);
-        alert('Quiz settings updated successfully!');
+        const updatedGroups = quizGroups.map(group =>
+          group.group_id === groupId ? { ...group, deadline } : group
+        );
+        setQuizGroups(updatedGroups);
       }
+
+      setSelectedQuizSettings(prev => ({
+        ...prev,
+        [quizId]: { ...prev[quizId], ...editableSettings }
+      }));
+
+      setQuizzes(prev =>
+        prev.map(q =>
+          q.quiz_id === quizId ? { ...q, title: editableSettings.title } : q
+        )
+      );
+
+      setEditSettingsQuizId(null);
+      alert('Settings updated successfully!');
     } catch (err) {
-      console.error('Error updating quiz settings:', err);
-      alert('Error while saving settings. Please try again later.');
+      console.error('Error saving settings:', err);
+      alert('Failed to update settings.');
     }
   };
 
@@ -298,6 +372,12 @@ const ProfManageQuizzes = () => {
         quiz={quizzes.find((q) => q.quiz_id === activeQuizId)}
         quizGroups={quizGroups}
         setQuizGroups={setQuizGroups}
+        selectedGroupId={selectedGroupId}
+        setSelectedGroupId={setSelectedGroupId}
+        selectedGroupDeadline={selectedGroupDeadline}
+        setSelectedGroupDeadline={setSelectedGroupDeadline}
+        handleGroupChange={handleGroupChange}
+        handleDeadlineChange={handleDeadlineChange}
       />
       </div>
     </div>

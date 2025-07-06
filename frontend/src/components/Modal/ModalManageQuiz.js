@@ -23,32 +23,12 @@ const ModalManageQuiz = ({
   handleSaveSettings,
   quiz,
   quizGroups,
-  setQuizGroups
+  setQuizGroups,
+  selectedGroupId,
+  setSelectedGroupId,
+  selectedGroupDeadline,
+  setSelectedGroupDeadline
 }) => {
-
-  // Initialize selectedGroupId to first group or null
-  const [selectedGroupId, setSelectedGroupId] = useState(null);
-
-  // Store the deadline of selected group in local state
-  const [selectedGroupDeadline, setSelectedGroupDeadline] = useState('');
-
-  // When selectedGroupId or quizGroups changes, update selectedGroupDeadline accordingly
-  useEffect(() => {
-  if (quizGroups && quizGroups.length > 0) {
-    if (!selectedGroupId) {
-      const firstGroup = quizGroups[0];
-      setSelectedGroupId(firstGroup.group_id);
-      setSelectedGroupDeadline(formatDeadline(firstGroup.deadline));
-    } else {
-      const group = quizGroups.find(g => g.group_id === selectedGroupId);
-      if (group) {
-        setSelectedGroupDeadline(formatDeadline(group.deadline));
-      } else {
-        setSelectedGroupDeadline('');
-      }
-    }
-  }
-}, [quizGroups, selectedGroupId]);
 
 function formatDeadline(deadline) {
   if (!deadline) return '';
@@ -57,43 +37,15 @@ function formatDeadline(deadline) {
   return date.toISOString().slice(0, 16);
 }
 
-const handleGroupChange = (e) => {
-setSelectedGroupId(Number(e.target.value));};
+    const handleGroupChange = (e) => {
+    setSelectedGroupId(Number(e.target.value));
+  };
 
   const handleDeadlineChange = (e) => {
     setSelectedGroupDeadline(e.target.value);
   };
 
-  const saveDeadlineForSelectedGroup = async () => {
-    if (!selectedGroupId) return;
 
-    const token = localStorage.getItem("token");
-
-    try {
-      await axios.put(
-        `http://localhost:5000/api/user/update-deadline/${quiz.quiz_id}/${selectedGroupId}`,
-        { deadline: selectedGroupDeadline },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const updatedGroups = quizGroups.map(group =>
-        group.group_id === selectedGroupId
-          ? { ...group, deadline: selectedGroupDeadline }
-          : group
-      );
-      setQuizGroups(updatedGroups);
-
-      alert(`Deadline for the selected group updated.`);
-    } catch (err) {
-      console.error("Error updating deadline:", err);
-      alert("Failed to update deadline.");
-    }
-  };
 
   return (
     <>
@@ -216,11 +168,12 @@ setSelectedGroupId(Number(e.target.value));};
                   </div>
                 </div>
 
-                <h4>Select a group, then modify a deadline</h4>
+                
                 {quizGroups && quizGroups.length > 0 && (
                   <div className="form-group group-deadline-row">
                     <div className = "row">
                       <div className="column select-column">
+                         <h4>Select a group, then modify a deadline</h4>
                         <label htmlFor="groupSelect">Select Group:</label>
                         <select
                           id="groupSelect"
@@ -245,16 +198,14 @@ setSelectedGroupId(Number(e.target.value));};
                         />
                       </div>
                     </div>
-                  <button type="button" onClick={saveDeadlineForSelectedGroup}>
-                      Save Deadline
-                  </button>
                 </div>
                 )}
                 <button
-                  onClick={() => handleSaveSettings(quiz.quiz_id)}
+                  onClick={() => handleSaveSettings(quiz.quiz_id, selectedGroupId, selectedGroupDeadline)}
                 >
-                  Save General Settings
+                  Save Settings
                 </button>
+
               </div>
             ) : (
               <ul className="settings-list">

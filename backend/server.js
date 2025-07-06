@@ -4,8 +4,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require('path');
 
-const authRoutes = require("./routes/authRoutes"); // Authentication-related routes (register, login)
-const userRoutes = require("./routes/userRoutes"); // User-related routes (profile, etc.)
+const authRoutes = require("./routes/authRoutes"); 
+const userRoutes = require("./routes/userRoutes"); 
 const quizRoutes = require("./routes/quizRoutes");
 const takeQuizRoutes = require("./routes/takeQuizRoutes");
 const scoreRoutes = require("./routes/scoreRoutes");

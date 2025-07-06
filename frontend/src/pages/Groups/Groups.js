@@ -180,7 +180,6 @@ const Groups = () => {
     setGroupCodeToJoin('');
     fetchGroups();
   } catch (err) {
-    // Handle 404 specifically
     if (err.response && err.response.status === 404) {
       setJoinError('No such group code exists.');
     } else if (err.response && err.response.status === 400) {
@@ -206,8 +205,6 @@ const Groups = () => {
       setGroupMembers(res.data);
       setIsModalOpen(true);
 
-      console.log(groupId);
-      console.log(res.data)
     } catch (err) {
       setGroupMembers([]);
       console.error("Error fetching group members:", err);
