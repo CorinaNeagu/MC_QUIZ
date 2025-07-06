@@ -86,7 +86,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(4px); /* Optional: adds a subtle blur effect */
+  backdrop-filter: blur(4px); 
 }
 
 .modal-container {
@@ -97,6 +97,24 @@
   width: 90%;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   animation: fadeInScale 0.3s ease-in-out;
+}
+
+.search-results ul {
+  list-style: none;
+  padding: 0;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-results li:hover {
+  background-color: #f0f0f0;
+}
+
+
+.deadline-modal {
+  padding-top: 10px;
+  margin-top: 50px;
 }
 
 @keyframes fadeInScale {

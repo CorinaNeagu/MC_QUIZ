@@ -16,38 +16,38 @@ const Modal = ({
   quizzes,
   handleAssignQuiz
 }) => {
+
+  // TEMP states for input and selection
+  const [tempSearchTerm, setTempSearchTerm] = useState('');
+  const [tempSelectedQuiz, setTempSelectedQuiz] = useState(null);
+
   const navigate = useNavigate();
 
+  // Reset temp state when modal closes
   useEffect(() => {
-    const fetchQuizzes = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token found');
-        return;
-      }
-
-      try {
-        const decodedToken = JSON.parse(atob(token.split('.')[1])); 
-        const userType = decodedToken.userType;
-
-        if (userType !== 'professor') {
-          console.log('User is not a professor, skipping quiz fetch');
-          return; 
-        }
-
-        const res = await axios.get('http://localhost:5000/api/user/professor/quizzes', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        quizzes = res.data; 
-      } catch (err) {
-        console.error('Error fetching quizzes:', err);
-      }
-    };
-
-    if (modalMode === 'choose') {
-      fetchQuizzes(); 
+    if (!showAssignModal) {
+      setTempSearchTerm('');
+      setTempSelectedQuiz(null);
     }
-  }, [modalMode]);
+  }, [showAssignModal]);
+
+  // Update temp input and temp selection on input change
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setTempSearchTerm(val);
+
+    const selected = quizzes.find(q => q.title === val);
+    setTempSelectedQuiz(selected || null);
+  };
+
+  // Commit temp selection and call assign handler
+  const handleAssign = () => {
+    if (tempSelectedQuiz) {
+      setSelectedQuizId(tempSelectedQuiz.quiz_id);  // commit selection here
+    }
+    handleAssignQuiz();
+    closeAssignModal();
+  };
 
   return (
     showAssignModal && (
@@ -74,27 +74,30 @@ const Modal = ({
           {modalMode === 'choose' ? (
             <div className="choose-quiz">
               <label>Select a quiz</label>
-              <select value={selectedQuizId} onChange={(e) => setSelectedQuizId(e.target.value)}>
-                <option value="">Select a quiz</option>
-                {quizzes.length > 0 ? (
-                  quizzes.map((quiz) => (
-                    <option key={quiz.quiz_id} value={quiz.quiz_id}>
-                      {quiz.title} - {quiz.category_name} - {quiz.subcategory_name || 'No Subcategory'}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No quizzes available</option>
-                )}
-              </select>
+              <input
+                list="quiz-options"
+                placeholder="Type or select a quiz"
+                value={tempSearchTerm}
+                onChange={handleInputChange}
+              />
 
-              <label>Deadline (optional)</label>
+              <datalist id="quiz-options">
+                {quizzes.map((quiz) => (
+                  <option key={quiz.quiz_id} value={quiz.title}>
+                    {quiz.title} - {quiz.category_name} - {quiz.subcategory_name || 'No Subcategory'}
+                  </option>
+                ))}
+              </datalist>
+
+              <label>Deadline</label>
               <input
                 type="datetime-local"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
               />
-              <button className = "btn-modal" onClick={handleAssignQuiz}>Assign</button>
-              <button className = "btn-modal" onClick={() => navigate('/manage-quizzes')}>Go to Manage Quizzes</button>
+
+              <button className="btn-modal" onClick={handleAssign}>Assign</button>
+              <button className="btn-modal" onClick={() => navigate('/manage-quizzes')}>Go to Manage Quizzes</button>
             </div>
           ) : (
             <div className="create-quiz">
@@ -104,6 +107,7 @@ const Modal = ({
               </button>
             </div>
           )}
+
         </div>
       </div>
     )
