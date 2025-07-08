@@ -209,25 +209,25 @@ function formatDeadline(deadline) {
               </div>
             ) : (
               <ul className="settings-list">
-  <li><strong>Time Limit:</strong> {selectedQuizSettings.time_limit} minutes</li>
-  <li><strong>Deduction Percentage:</strong> {selectedQuizSettings.deduction_percentage}%</li>
-  <li><strong>Retake Allowed:</strong> {selectedQuizSettings.retake_allowed ? 'Yes' : 'No'}</li>
-  <li><strong>Is Active:</strong> {selectedQuizSettings.is_active ? 'Yes' : 'No'}</li>
+                <li><strong>Time Limit:</strong> {selectedQuizSettings.time_limit} minutes</li>
+                <li><strong>Deduction Percentage:</strong> {selectedQuizSettings.deduction_percentage}%</li>
+                <li><strong>Retake Allowed:</strong> {selectedQuizSettings.retake_allowed ? 'Yes' : 'No'}</li>
+                <li><strong>Is Active:</strong> {selectedQuizSettings.is_active ? 'Yes' : 'No'}</li>
 
-  {quizGroups?.length > 0 && (
-    <>
-      <li className="group-deadlines-title">Group Deadlines:</li>
-      <ul className="group-deadlines-list">
-        {quizGroups.map(group => (
-          <li key={group.group_id}>
-            <strong>{group.group_name}:</strong>{" "}
-            {group.deadline ? new Date(group.deadline).toLocaleString() : 'No deadline'}
-          </li>
-        ))}
-      </ul>
-    </>
-  )}
-</ul>
+                {quizGroups?.length > 0 && (
+                  <>
+                    <li className="group-deadlines-title">Group Deadlines:</li>
+                    <ul className="group-deadlines-list">
+                      {quizGroups.map(group => (
+                        <li key={group.group_id}>
+                          <strong>{group.group_name}:</strong>{" "}
+                          {group.deadline ? new Date(group.deadline).toLocaleString() : 'No deadline'}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </ul>
 
             )}
           </div>

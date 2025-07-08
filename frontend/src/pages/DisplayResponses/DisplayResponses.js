@@ -30,7 +30,7 @@ const DisplayResponses = () => {
 
         if (data) {
           setResponses(data.responses);
-          setDeductionPercentage(data.deduction_percentage || 0);
+          setDeductionPercentage(data.deduction_percentage);
           console.log("Fetched responses:", data.responses);
         }
       } catch (err) {
@@ -119,50 +119,122 @@ const DisplayResponses = () => {
   
 
 
-  const calculateDeduction = (points, wrongAnswersCount) => {
-    console.log("Calculating deduction - Points:", points, "Wrong Answers Count:", wrongAnswersCount);
-    if (wrongAnswersCount > 0 && deductionPercentage > 0) {
-      const deductionPerWrongAnswer = (deductionPercentage / 100) * points;
-      return deductionPerWrongAnswer * wrongAnswersCount;
-    }
+ const calculateDeductionPoints = (response, deductionPercentage) => {
+  const userAnswers = normalizeAnswers(response.studentAnswer);
+  const correctAnswers = normalizeAnswers(response.correctAnswers);
+
+  const uniqueCorrectAnswers = removeDuplicates(correctAnswers);
+  if (uniqueCorrectAnswers.length === 0) return 0;
+
+  const pointsPerQuestion = response.points;
+
+  const correctSelections = userAnswers.filter(ans => uniqueCorrectAnswers.includes(ans)).length;
+  const wrongSelections = userAnswers.filter(ans => !uniqueCorrectAnswers.includes(ans)).length;
+
+  const deductionPct = parseFloat(deductionPercentage) || 0;
+
+  if (correctSelections > 0) {
+    return Math.round(pointsPerQuestion * (deductionPct / 100) * wrongSelections * 100) / 100;
+  } else {
+    return 0; // no deduction if no correct answer selected
+  }
+};
+
+const calculatePointsBeforeDeduction = (response) => {
+  const userAnswers = normalizeAnswers(response.studentAnswer);
+  const correctAnswers = normalizeAnswers(response.correctAnswers);
+
+  const uniqueCorrectAnswers = removeDuplicates(correctAnswers);
+  if (uniqueCorrectAnswers.length === 0) return 0;
+
+  const pointsPerQuestion = response.points;
+  const correctSelections = userAnswers.filter(ans => uniqueCorrectAnswers.includes(ans)).length;
+  const pointsPerCorrectAnswer = pointsPerQuestion / uniqueCorrectAnswers.length;
+
+  const awardedPointsBeforeDeduction = pointsPerCorrectAnswer * correctSelections;
+
+  return Math.round(awardedPointsBeforeDeduction * 100) / 100;
+};
+
+const calculatePointsAwarded = (response, deductionPercentage) => {
+  const userAnswers = normalizeAnswers(response.studentAnswer);
+  const correctAnswers = normalizeAnswers(response.correctAnswers);
+
+  console.log("User Answers:", userAnswers);
+  console.log("Correct Answers:", correctAnswers);
+
+  const uniqueCorrectAnswers = removeDuplicates(correctAnswers);
+  if (uniqueCorrectAnswers.length === 0) {
+    console.log("No correct answers found, returning 0 points.");
     return 0;
-  };
+  }
 
-  const calculatePointsAwarded = (response) => {
-    const userAnswers = normalizeAnswers(response.studentAnswer);
-    const correctAnswers = normalizeAnswers(response.correctAnswers);
-  
-    const correctSelections = userAnswers.filter(answer =>
-      correctAnswers.includes(answer)
-    ).length;
-  
-    const pointsPerCorrectAnswer = response.points / correctAnswers.length;
-    let awardedPoints = pointsPerCorrectAnswer * correctSelections;
-  
-    awardedPoints = awardedPoints < 0 ? 0 : awardedPoints;
-  
-    return awardedPoints;
-  };
-  
-  
+  const pointsPerQuestion = response.points;
+  console.log("Points per Question:", pointsPerQuestion);
 
-  const getAnswerStatus = (userAnswer, correctAnswers) => {
-    const normalizedUserAnswer = normalizeAnswers(userAnswer);
-    const normalizedCorrectAnswers = normalizeAnswers(correctAnswers);
-  
-    const correctMatches = normalizedUserAnswer.filter(answer =>
-      normalizedCorrectAnswers.includes(answer)
-    );
-  
-    if (correctMatches.length === 0) {
-      return "Incorrect";
-    }
-  
-    if (correctMatches.length === normalizedCorrectAnswers.length) {
-      return "Correct";
-    }
-      return "Partially Correct";
-  };
+  const correctSelections = userAnswers.filter(ans => uniqueCorrectAnswers.includes(ans)).length;
+  const wrongSelections = userAnswers.filter(ans => !uniqueCorrectAnswers.includes(ans)).length;
+  const missedCorrect = uniqueCorrectAnswers.filter(ans => !userAnswers.includes(ans)).length;
+
+  console.log("Correct Selections:", correctSelections);
+  console.log("Wrong Selections:", wrongSelections);
+  console.log("Missed Correct Answers:", missedCorrect);
+
+  const deductionPct = parseFloat(deductionPercentage) || 0;
+  console.log("Deduction Percentage:", deductionPct);
+
+  const pointsPerCorrectAnswer = pointsPerQuestion / uniqueCorrectAnswers.length;
+
+  const awardedPointsBeforeDeduction = pointsPerCorrectAnswer * correctSelections;
+
+  let finalPoints;
+  let deductionPoints = 0;
+  if (correctSelections > 0) {
+    deductionPoints = pointsPerQuestion * (deductionPct / 100) * wrongSelections;
+    finalPoints = awardedPointsBeforeDeduction - deductionPoints;
+  } else {
+    // no correct answer selected, no deductions
+    finalPoints = 0;
+  }
+
+  console.log("Points per Correct Answer:", pointsPerCorrectAnswer);
+  console.log("Points Before Deduction:", awardedPointsBeforeDeduction);
+  console.log("Deduction Points:", deductionPoints);
+  console.log("Final Points Awarded:", finalPoints);
+
+  return Math.round(Math.max(finalPoints, 0) * 100) / 100;
+};
+
+
+  const arraysEqual = (a, b) => {
+  if (a.length !== b.length) return false;
+
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+
+  return sortedA.every((val, idx) => val === sortedB[idx]);
+};
+
+const getAnswerStatus = (userAnswer, correctAnswers) => {
+  const normalizedUserAnswer = normalizeAnswers(userAnswer).filter(a => a); // remove empty strings if any
+  const normalizedCorrectAnswers = normalizeAnswers(correctAnswers).filter(a => a);
+
+  if (normalizedUserAnswer.length === 0) return "Incorrect";
+
+  if (arraysEqual(normalizedUserAnswer, normalizedCorrectAnswers)) {
+    return "Correct";
+  }
+
+  const hasAnyCorrect = normalizedUserAnswer.some(ans =>
+    normalizedCorrectAnswers.includes(ans)
+  );
+  if (hasAnyCorrect) {
+    return "Partially Correct";
+  }
+
+  return "Incorrect";
+};
+
   
 
   const handleBackToScore = () => {
@@ -192,11 +264,27 @@ const DisplayResponses = () => {
                   <div className="your-answer">
                     <strong>Your Answer(s): </strong>
                     <div className="answer-list">
-                      <pre className="preformatted">{(normalizeAnswers(response.studentAnswer) || []).map((answer, idx) => (
-                         <div key={idx}>{answer || 'Unanswered'}</div>
-                      ))}</pre>
-                      
-                    </div>
+                       {(normalizeAnswers(response.studentAnswer) || []).map((answer, idx) => {
+                          const normalizedCorrectAnswers = removeDuplicates(normalizeAnswers(response.correctAnswers));
+                          const isCorrect = normalizedCorrectAnswers.includes(answer);
+
+    return (
+      <div key={idx} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <pre className="preformatted" style={{ margin: 0 }}>
+          {answer || 'Unanswered'}
+        </pre>
+        <span style={{ 
+          color: isCorrect ? 'green' : 'red', 
+          fontWeight: 'bold',
+          fontSize: '0.9em'
+        }}>
+          {isCorrect ? ' - Correct' : ' - Incorrect'}
+        </span>
+      </div>
+    );
+  })}
+</div>
+
                   </div>
                   <div className="correct-answers">
                     <strong>Correct Answer(s): </strong>
@@ -211,10 +299,23 @@ const DisplayResponses = () => {
                     <strong>Your Answer Was: </strong>
                     {getAnswerStatus(response.studentAnswer, response.correctAnswers)}
                   </div>
+
+                  <div className= "points-before">
+  <strong>Points Before Deduction: </strong>
+  {calculatePointsBeforeDeduction(response).toFixed(2)}
+</div>
+
+<div className="deduction-points">
+                    <strong>Deduction: </strong>
+                    -{calculateDeductionPoints(response, deductionPercentage).toFixed(2)}
+                  </div>
+
                   <div className="points-awarded">
                     <strong>Points Awarded: </strong>
-                    {calculatePointsAwarded(response)}
+                    {calculatePointsAwarded(response, deductionPercentage).toFixed(2)}
                   </div>
+
+                  
                 </div>
                 <hr />
               </li>

@@ -17,13 +17,11 @@ const Modal = ({
   handleAssignQuiz
 }) => {
 
-  // TEMP states for input and selection
   const [tempSearchTerm, setTempSearchTerm] = useState('');
   const [tempSelectedQuiz, setTempSelectedQuiz] = useState(null);
 
   const navigate = useNavigate();
 
-  // Reset temp state when modal closes
   useEffect(() => {
     if (!showAssignModal) {
       setTempSearchTerm('');
@@ -31,7 +29,6 @@ const Modal = ({
     }
   }, [showAssignModal]);
 
-  // Update temp input and temp selection on input change
   const handleInputChange = (e) => {
     const val = e.target.value;
     setTempSearchTerm(val);
@@ -40,10 +37,9 @@ const Modal = ({
     setTempSelectedQuiz(selected || null);
   };
 
-  // Commit temp selection and call assign handler
   const handleAssign = () => {
     if (tempSelectedQuiz) {
-      setSelectedQuizId(tempSelectedQuiz.quiz_id);  // commit selection here
+      setSelectedQuizId(tempSelectedQuiz.quiz_id);  
     }
     handleAssignQuiz();
     closeAssignModal();

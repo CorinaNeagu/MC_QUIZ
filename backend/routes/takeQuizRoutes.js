@@ -100,9 +100,6 @@ router.get('/quiz/:quizId', async (req, res) => {
 });
 
 
-
-
-
 router.post('/quiz_attempts', (req, res) => {
     const { quiz_id } = req.body; 
   

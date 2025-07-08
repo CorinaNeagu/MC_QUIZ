@@ -185,57 +185,98 @@ router.get('/quiz_attempts/:attempt_id/score', (req, res) => {
   const { attempt_id } = req.params;
 
   const query = `
-    SELECT 
-      qa.score AS score,
-      qs.deduction_percentage AS deduction_percentage,
-      ROUND(COALESCE((
-        SELECT SUM(a.score)
-        FROM Questions q
-        JOIN Answers a ON q.question_id = a.question_id
-        WHERE q.quiz_id = qa.quiz_id AND a.is_correct = TRUE
-      ), 0), 1) AS max_score,
-      (
-        SELECT COUNT(*) 
-        FROM StudentResponses sr
-        JOIN Answers a ON sr.answer_id = a.answer_id
-        WHERE sr.attempt_id = qa.attempt_id AND a.is_correct = FALSE
-      ) AS wrong_answer_count,
-      (
-        SELECT COUNT(*) 
-        FROM StudentResponses sr
-        JOIN Answers a ON sr.answer_id = a.answer_id
-        WHERE sr.attempt_id = qa.attempt_id AND a.is_correct = TRUE
-      ) AS correct_answer_count
-    FROM QuizAttempt qa
-    JOIN QuizSettings qs ON qa.quiz_id = qs.quiz_id
-    WHERE qa.attempt_id = ?
+   SELECT 
+  sr.question_id,
+  q.points_per_question,
+  GROUP_CONCAT(DISTINCT a.answer_content ORDER BY a.answer_content) AS student_answers,
+  GROUP_CONCAT(DISTINCT correct_a.answer_content ORDER BY correct_a.answer_content) AS correct_answers
+FROM StudentResponses sr
+JOIN Questions q ON sr.question_id = q.question_id
+JOIN Answers a ON sr.answer_id = a.answer_id
+JOIN Answers correct_a ON q.question_id = correct_a.question_id AND correct_a.is_correct = TRUE
+WHERE sr.attempt_id = ?
+GROUP BY sr.question_id, q.points_per_question;
+
+  `;
+
+  const deductionQuery = `
+    SELECT deduction_percentage FROM QuizSettings 
+    WHERE quiz_id = (SELECT quiz_id FROM QuizAttempt WHERE attempt_id = ?) LIMIT 1
   `;
 
   db.query(query, [attempt_id], (err, results) => {
     if (err) {
-      console.error("SQL Error:", err);
+      console.error("Score calc error:", err);
       return res.status(500).json({ message: 'Error fetching score.' });
     }
+
     if (results.length === 0) {
-      return res.status(404).json({ message: 'Quiz attempt not found.' });
+      return res.status(404).json({ message: 'No responses found for this attempt.' });
     }
 
-    const { score, deduction_percentage, max_score, wrong_answer_count, correct_answer_count } = results[0];
+    db.query(deductionQuery, [attempt_id], (err2, deductionRes) => {
+      const deduction_percentage = deductionRes?.[0]?.deduction_percentage || 0;
 
-    // Only apply deduction if there are wrong answers
-    let deduction = 0;
-    if (wrong_answer_count > 0) {
-      deduction = (deduction_percentage / 100) * score;
-    }
+      let totalPointsBeforeDeduction = 0;
+      let totalPointsAwarded = 0;
+      let wrongAnswers = 0;
 
-    res.status(200).json({
-      score: parseFloat(score),
-      max_score: parseFloat(max_score),
-      deduction_percentage: parseFloat(deduction_percentage),
-      wrong_answer_count: parseInt(wrong_answer_count),
-      deduction: parseFloat(deduction),  // Return the deduction value
-      correct_answer_count: parseInt(correct_answer_count),
+      results.forEach(row => {
+        const studentAnswers = row.student_answers?.split(',').map(s => s.trim()) || [];
+        const correctAnswers = row.correct_answers?.split(',').map(s => s.trim()) || [];
+
+        const allCorrect = correctAnswers.every(ans => studentAnswers.includes(ans));
+        const anyIncorrect = studentAnswers.some(ans => !correctAnswers.includes(ans));
+
+        totalPointsBeforeDeduction += parseFloat(row.points_per_question) || 0;
+
+        if (allCorrect && !anyIncorrect) {
+          totalPointsAwarded += parseFloat(row.points_per_question);
+        } else if (studentAnswers.some(ans => correctAnswers.includes(ans))) {
+          totalPointsAwarded += parseFloat(row.points_per_question) * 0.667; // example partial credit
+        } else {
+          wrongAnswers += 1;
+        }
+      });
+
+      const deductionPerWrong = (deduction_percentage / 100) * (totalPointsBeforeDeduction / results.length);
+      const totalDeduction = wrongAnswers * deductionPerWrong;
+      const finalScore = Math.max(0, totalPointsAwarded - totalDeduction);
+      const grade = (finalScore / totalPointsBeforeDeduction) * 100;
+
+      return res.status(200).json({
+        score: parseFloat(finalScore.toFixed(2)),
+        max_score: parseFloat(totalPointsBeforeDeduction.toFixed(2)),
+        grade: parseFloat(grade.toFixed(2)),
+        deduction: parseFloat(totalDeduction.toFixed(2)),
+        deduction_percentage,
+        wrong_answer_count: wrongAnswers,
+        points_before_deduction: parseFloat(totalPointsAwarded.toFixed(2)),
+      });
     });
+  });
+});
+
+
+router.get('/quiz/:quiz_id/question-points', (req, res) => {
+  const { quiz_id } = req.params;
+
+  const query = `
+    SELECT 
+      question_id,
+      question_content,
+      points_per_question
+    FROM Questions
+    WHERE quiz_id = ?
+  `;
+
+  db.query(query, [quiz_id], (err, results) => {
+    if (err) {
+      console.error("SQL Error fetching question points:", err);
+      return res.status(500).json({ message: 'Failed to fetch question points.' });
+    }
+
+    res.status(200).json(results);
   });
 });
 
@@ -244,45 +285,74 @@ router.get('/quiz_attempts/:attempt_id/score', (req, res) => {
 router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
   const { attempt_id } = req.params;
 
-  const query = `
-    SELECT q.question_content, 
-       GROUP_CONCAT(DISTINCT a.answer_content ORDER BY a.answer_content) AS student_answers, -- Collect all student answers as a comma-separated string
-       GROUP_CONCAT(DISTINCT correct_answers.answer_content ORDER BY correct_answers.answer_content) AS correct_answers, -- Collect all correct answers as a comma-separated string
-       q.points_per_question AS points
-    FROM StudentResponses sr
-    JOIN Questions q ON sr.question_id = q.question_id
-    JOIN Answers a ON sr.answer_id = a.answer_id
-    JOIN Answers correct_answers ON q.question_id = correct_answers.question_id 
-    AND correct_answers.is_correct = TRUE
-    WHERE sr.attempt_id = ?
-    GROUP BY sr.question_id, q.question_content, q.points_per_question;
-  `;
+  const quizIdQuery = `SELECT quiz_id FROM QuizAttempt WHERE attempt_id = ?`;
 
-  db.query(query, [attempt_id], (err, results) => {
+  db.query(quizIdQuery, [attempt_id], (err, quizResult) => {
     if (err) {
-      console.error("Error fetching responses:", err);
-      return res.status(500).json({ message: 'Error fetching responses.' });
+      console.error("Error fetching quiz id:", err);
+      return res.status(500).json({ message: 'Error fetching quiz id.' });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'No responses found for this attempt.' });
+    if (quizResult.length === 0) {
+      return res.status(404).json({ message: 'Quiz attempt not found.' });
     }
 
-    const responses = results.map(row => {
-      const studentAnswers = row.student_answers.split(',').map(answer => answer.trim());
-      const correctAnswers = row.correct_answers.split(',').map(answer => answer.trim());
+    const quizId = quizResult[0].quiz_id;
 
-      return {
-        questionText: row.question_content,
-        studentAnswer: studentAnswers,  
-        correctAnswers: correctAnswers,  
-        points: row.points,
-      };
+    const deductionQuery = `SELECT deduction_percentage FROM QuizSettings WHERE quiz_id = ? LIMIT 1`;
+
+    db.query(deductionQuery, [quizId], (err2, deductionResult) => {
+      if (err2) {
+        console.error("Error fetching deduction:", err2);
+        return res.status(500).json({ message: 'Error fetching deduction.' });
+      }
+
+      // Fix here: use deduction_percentage instead of deduction
+      const deduction_percentage = deductionResult.length > 0 ? deductionResult[0].deduction_percentage : 0;
+
+      const responsesQuery = `
+        SELECT 
+          q.question_content, 
+          GROUP_CONCAT(DISTINCT a.answer_content ORDER BY a.answer_content) AS student_answers,
+          GROUP_CONCAT(DISTINCT correct_answers.answer_content ORDER BY correct_answers.answer_content) AS correct_answers,
+          q.points_per_question AS points,
+          q.question_id
+        FROM StudentResponses sr
+        JOIN Questions q ON sr.question_id = q.question_id
+        JOIN Answers a ON sr.answer_id = a.answer_id
+        JOIN Answers correct_answers ON q.question_id = correct_answers.question_id AND correct_answers.is_correct = TRUE
+        WHERE sr.attempt_id = ?
+        GROUP BY sr.question_id, q.question_content, q.points_per_question;
+      `;
+
+      db.query(responsesQuery, [attempt_id], (err3, results) => {
+        if (err3) {
+          console.error("Error fetching responses:", err3);
+          return res.status(500).json({ message: 'Error fetching responses.' });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({ message: 'No responses found for this attempt.' });
+        }
+
+        const responses = results.map(row => {
+          const studentAnswers = row.student_answers ? row.student_answers.split(',').map(ans => ans.trim()) : [];
+          const correctAnswers = row.correct_answers ? row.correct_answers.split(',').map(ans => ans.trim()) : [];
+
+          return {
+            questionText: row.question_content,
+            studentAnswer: studentAnswers,
+            correctAnswers: correctAnswers,
+            points: parseFloat(row.points),
+          };
+        });
+
+        return res.status(200).json({ responses, deduction_percentage });
+      });
     });
-
-    return res.status(200).json({ responses });
   });
 });
+
 
 
 

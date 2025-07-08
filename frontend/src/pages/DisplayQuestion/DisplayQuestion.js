@@ -173,71 +173,71 @@ useEffect(() => {
   };
 
   const submitQuiz = async (forceSubmit = false) => {
-  const lastQuestionId = questions[questions.length - 1].question_id;
-  const lastQuestionAnswer = answers[lastQuestionId];
+    const lastQuestionId = questions[questions.length - 1].question_id;
+    const lastQuestionAnswer = answers[lastQuestionId];
 
-  if (!forceSubmit && (!lastQuestionAnswer || lastQuestionAnswer.length === 0)) {
-    alert("Please answer the last question before submitting the quiz.");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Unauthorized: Please log in again.");
+    if (!forceSubmit && (!lastQuestionAnswer || lastQuestionAnswer.length === 0)) {
+      alert("Please answer the last question before submitting the quiz.");
       return;
     }
 
-    const formattedAnswers = {};
-    for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
-      const sanitizedQuestionId = Number(questionId);
-      const sanitizedAnswerIds = selectedAnswerIds.map((answerId) => {
-        const sanitizedAnswerId = Number(answerId);
-        return isNaN(sanitizedAnswerId) ? null : sanitizedAnswerId;
-      }).filter((answerId) => answerId !== null);
-
-      if (sanitizedAnswerIds.length > 0) {
-        formattedAnswers[sanitizedQuestionId] = sanitizedAnswerIds;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Unauthorized: Please log in again.");
+        return;
       }
+
+      const formattedAnswers = {};
+      for (const [questionId, selectedAnswerIds] of Object.entries(answers)) {
+        const sanitizedQuestionId = Number(questionId);
+        const sanitizedAnswerIds = selectedAnswerIds.map((answerId) => {
+          const sanitizedAnswerId = Number(answerId);
+          return isNaN(sanitizedAnswerId) ? null : sanitizedAnswerId;
+        }).filter((answerId) => answerId !== null);
+
+        if (sanitizedAnswerIds.length > 0) {
+          formattedAnswers[sanitizedQuestionId] = sanitizedAnswerIds;
+        }
+      }
+
+      // Add zero score for unanswered questions
+      const unansweredQuestions = questions.filter(
+        (question) => !formattedAnswers[question.question_id]
+      );
+      unansweredQuestions.forEach((question) => {
+        formattedAnswers[question.question_id] = [0];
+      });
+
+      const endTime = new Date().getTime();
+      const timeTaken = Math.floor((endTime - startTime) / 1000);
+
+      await axios.post(
+        `http://localhost:5000/api/score/quiz_attempts/${attemptId}/submit`,
+        {
+          answers: formattedAnswers,
+          quiz_id: quizId,
+          student_id: user_id,
+          start_time: startTime,
+          end_time: endTime,
+          time_taken: timeTaken,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      localStorage.removeItem(`quizQuestions_${quizId}_${attemptId}`);
+      localStorage.removeItem(`quizStartTime_${quizId}`);
+      localStorage.removeItem(`quizAttemptId_${quizId}`);
+      localStorage.removeItem(`quizDuration_${quizId}`);
+      localStorage.removeItem(`quizAnswers_${quizId}_${attemptId}`);
+      localStorage.removeItem(`quizIndex_${quizId}_${attemptId}`);
+
+      navigate(`/display-score/${attemptId}`);
+    } catch (err) {
+      console.error("Error submitting quiz:", err);
+      setError("Error submitting the quiz.");
     }
-
-    // Add zero score for unanswered questions
-    const unansweredQuestions = questions.filter(
-      (question) => !formattedAnswers[question.question_id]
-    );
-    unansweredQuestions.forEach((question) => {
-      formattedAnswers[question.question_id] = [0];
-    });
-
-    const endTime = new Date().getTime();
-    const timeTaken = Math.floor((endTime - startTime) / 1000);
-
-    await axios.post(
-      `http://localhost:5000/api/score/quiz_attempts/${attemptId}/submit`,
-      {
-        answers: formattedAnswers,
-        quiz_id: quizId,
-        student_id: user_id,
-        start_time: startTime,
-        end_time: endTime,
-        time_taken: timeTaken,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    localStorage.removeItem(`quizQuestions_${quizId}_${attemptId}`);
-    localStorage.removeItem(`quizStartTime_${quizId}`);
-    localStorage.removeItem(`quizAttemptId_${quizId}`);
-    localStorage.removeItem(`quizDuration_${quizId}`);
-    localStorage.removeItem(`quizAnswers_${quizId}_${attemptId}`);
-    localStorage.removeItem(`quizIndex_${quizId}_${attemptId}`);
-
-    navigate(`/display-score/${attemptId}`);
-  } catch (err) {
-    console.error("Error submitting quiz:", err);
-    setError("Error submitting the quiz.");
-  }
-};
+  };
 
   
   const handleNextQuestion = () => {

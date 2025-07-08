@@ -92,7 +92,9 @@
 }
 
 .answer-status,
-.points-awarded {
+.points-awarded,
+.deduction-points,
+.points-before {
   font-size: 1.15rem;
   color: #718096;
   font-style: italic;
