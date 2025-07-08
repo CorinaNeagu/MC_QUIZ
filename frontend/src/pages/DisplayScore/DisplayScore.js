@@ -61,7 +61,6 @@ const calculateDeductionPoints = (response, deductionPercentage) => {
   return Math.round((before - awarded) * 100) / 100;
 };
 
-// Main Component
 const DisplayScore = () => {
   const { attemptId } = useParams();
   const navigate = useNavigate();
@@ -72,6 +71,9 @@ const DisplayScore = () => {
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [deduction, setDeduction] = useState(0);
   const [error, setError] = useState("");
+  const [updateMessage, setUpdateMessage] = useState("");
+  const [updating, setUpdating] = useState(false);
+  const [hasUpdatedScore, setHasUpdatedScore] = useState(false);
 
   useEffect(() => {
     const fetchScoreAndResponses = async () => {
@@ -107,7 +109,6 @@ const DisplayScore = () => {
         );
 
         setResponses(responseRes.data.responses || []);
-
       } catch (err) {
         console.error("Error loading score or responses:", err);
         setError("Error loading your score.");
@@ -136,54 +137,115 @@ const DisplayScore = () => {
 
   const handleGoToDashboard = () => navigate("/home");
 
-  return (
-    <div className="page-wrapper">
-      <Sidebar showBackButton={true} />
-      <div className="score-page-container">
-        {error && <p>{error}</p>}
-        {maxScore !== null ? (
-          <>
-            <h1>Quiz Completed</h1>
+  const updateAwardedScore = async (score) => {
+    try {
+      setUpdating(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUpdateMessage("You must be logged in to update the score.");
+        setUpdating(false);
+        return;
+      }
 
+      await axios.put(
+        `http://localhost:5000/api/score/quiz_attempts/${attemptId}/update_awarded_score`,
+        { awardedScore: score },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setUpdateMessage("Score updated successfully!");
+      setHasUpdatedScore(true);
+    } catch (error) {
+      console.error("Failed to update awarded score:", error);
+      setUpdateMessage("Failed to update the score.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      maxScore !== null &&
+      responses.length > 0 &&
+      !hasUpdatedScore
+    ) {
+      updateAwardedScore(totals.awarded);
+    }
+  }, [maxScore, responses, hasUpdatedScore, totals.awarded]);
+
+return (
+  <div className="page-wrapper">
+    <Sidebar showBackButton={true} />
+
+    <div className="score-page-container">
+      {error && <p className="error-message">{error}</p>}
+
+      {maxScore !== null ? (
+        <>
+          <h1 className="score-title">Quiz Completed</h1>
+
+          <div className="score-summary">
             <div className="score-value">
-              Your Score: {totals.awarded.toFixed(2)} / {maxScore}
+              <span>Your Score:</span>{" "}
+              <strong>
+                {totals.awarded.toFixed(2)} / {maxScore}
+              </strong>
             </div>
 
-            <div>
-              <strong>Calculated From Responses:</strong>
-              <p>Points Before Deduction: {totals.before.toFixed(2)}</p>
-              <p>Deduction Points: -{totals.deduction.toFixed(2)}</p>
-            </div>
-
-            <div className="grade">
-              Grade: {calculateGrade()} / 100
-            </div>
-
-            {deduction > 0 ? (
+            <section className="score-details">
+              <h2>Calculated From Responses</h2>
               <p>
-                {/* Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answer
-                {wrongAnswers !== 1 ? "s" : ""} */}
+                <strong>Points Before Deduction:</strong>{" "}
+                {totals.before.toFixed(2)}
               </p>
-            ) : wrongAnswers > 0 && totals.awarded === 0 ? (
-              <p>You didn’t answer any questions, so no deductions were applied.</p>
-            ) : (
-              <p>No deductions applied!</p>
-            )}
+              <p>
+                <strong>Deduction Points:</strong> -{totals.deduction.toFixed(2)}
+              </p>
+            </section>
 
-            <button onClick={handleGoToDashboard}>Go to Dashboard</button>
+            <div className="grade-container">
+              <strong>Grade:</strong> {calculateGrade()} / 100
+            </div>
+
+            <div className="deduction-message">
+              {deduction > 0 ? (
+                <p>
+                  {/* Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answer
+                  {wrongAnswers !== 1 ? "s" : ""} */}
+                </p>
+              ) : wrongAnswers > 0 && totals.awarded === 0 ? (
+                <p>You didn’t answer any questions, so no deductions were applied.</p>
+              ) : (
+                <p>No deductions applied!</p>
+              )}
+            </div>
+
+            {updateMessage && (
+              <p className={`update-message ${updating ? "updating" : ""}`}>
+                {updateMessage}
+              </p>
+            )}
+          </div>
+
+          <div className="button-group">
+            <button className="btn primary" onClick={handleGoToDashboard}>
+              Go to Dashboard
+            </button>
             <button
-              className="view-responses-btn"
+              className="btn secondary view-responses-btn"
               onClick={() => navigate(`/responses/${attemptId}`)}
             >
               View My Responses
             </button>
-          </>
-        ) : (
-          <p>Loading your score...</p>
-        )}
-      </div>
+          </div>
+        </>
+      ) : (
+        <p>Loading your score...</p>
+      )}
     </div>
-  );
+  </div>
+);
+
 };
 
 export default DisplayScore;

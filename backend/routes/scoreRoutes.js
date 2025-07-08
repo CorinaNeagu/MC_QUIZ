@@ -354,6 +354,25 @@ router.get('/quiz_attempts/:attempt_id/responses', (req, res) => {
 });
 
 
+router.put('/quiz_attempts/:attemptId/update_awarded_score', async (req, res) => {
+  const { attemptId } = req.params;
+  const { awardedScore } = req.body;
+
+  try {
+    const query = "UPDATE QuizAttempt SET score = ? WHERE attempt_id = ?";
+    const result = await db.execute(query, [awardedScore, attemptId]); // db.execute is your MySQL query executor
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Attempt not found" });
+    }
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 
 
 

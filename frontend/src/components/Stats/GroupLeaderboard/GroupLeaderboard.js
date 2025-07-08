@@ -125,7 +125,7 @@ const GroupLeaderboard = () => {
 
         {selectedGroup && (
           <div className="controls-inline">
-            <div className="control-group checkbox-group inline-checkbox">
+            <div className="checkbox-group">
               <input
                 type="checkbox"
                 id="quiz-toggle"
@@ -133,7 +133,7 @@ const GroupLeaderboard = () => {
                 checked={useSingleQuiz}
                 onChange={e => setUseSingleQuiz(e.target.checked)}
               />
-              <label htmlFor="quiz-toggle" className="checkbox-label">
+              <label htmlFor="quiz-toggle">
                 View leaderboard for a specific quiz
               </label>
             </div>
