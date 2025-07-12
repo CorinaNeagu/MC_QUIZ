@@ -12,30 +12,32 @@ const DisplayResponses = () => {
   const [error, setError] = useState(null);
   const [deductionPercentage, setDeductionPercentage] = useState(0);
 
-  useEffect(() => {
+  const [loading, setLoading] = useState(true);
+
+   useEffect(() => {
     const fetchResponses = async () => {
+      setLoading(true);                       // ① start spinner
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          alert("You must be logged in to view your responses.");
+          setError("Please log in to view your responses.");
           return;
         }
 
         const { data } = await axios.get(
           `http://localhost:5000/api/score/quiz_attempts/${attemptId}/responses`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` }, timeout: 15000 }
         );
 
-        if (data) {
-          setResponses(data.responses);
-          setDeductionPercentage(data.deduction_percentage);
-          console.log("Fetched responses:", data.responses);
-        }
+        setResponses(data.responses ?? []);
+        setDeductionPercentage(data.deduction_percentage ?? 0);
       } catch (err) {
-        console.error("Error fetching responses:", err);
-        setError("Error loading your responses.");
+        if (err.code !== "ERR_CANCELED") {
+          console.error(err);
+          setError("Error loading your responses.");
+        }
+      } finally {
+        setLoading(false);                    
       }
     };
 
@@ -241,6 +243,11 @@ const getAnswerStatus = (userAnswer, correctAnswers) => {
     navigate(`/display-score/${attemptId}`);
   };
 
+
+if (loading)  return <p>Loading responses…</p>;
+if (error)    return <p>{error}</p>;
+if (!responses.length) return <p>No responses were recorded for this attempt.</p>;
+
   return (
     <div>
       <Sidebar showBackButton />
@@ -289,11 +296,10 @@ const getAnswerStatus = (userAnswer, correctAnswers) => {
                   <div className="correct-answers">
                     <strong>Correct Answer(s): </strong>
                     <div className="answer-list">
-                      <pre className="preformatted">{removeDuplicates(normalizeAnswers(response.correctAnswers)).map((answer, idx) => (
-                        <div key={idx} className="correct-answer">{answer}</div>
-                      ))}</pre>
-                      
-                    </div>
+  {removeDuplicates(normalizeAnswers(response.correctAnswers)).map((answer, idx) => (
+    <pre key={idx} className="preformatted correct-answer">{answer}</pre>
+  ))}
+</div>
                   </div>
                   <div className="answer-status">
                     <strong>Your Answer Was: </strong>

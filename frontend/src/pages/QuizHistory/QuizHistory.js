@@ -94,10 +94,13 @@ const QuizHistory = () => {
 
   if (loading) return <div>Loading quiz history...</div>;
 
-  const evolutionData = modalAttempts.map(a => ({
+const evolutionData = [...modalAttempts]
+  .sort((a, b) => new Date(a.attempt_time) - new Date(b.attempt_time))
+  .map(a => ({
     date: new Date(a.attempt_time).toLocaleDateString(),
-    score: a.score,
-  })).sort((a, b) => new Date(a.date) - new Date(b.date));
+    grade: a.max_points ? ((a.score / a.max_points) * 100).toFixed(1) : null,
+  }));
+
 
   
   return (
@@ -119,6 +122,7 @@ const QuizHistory = () => {
             >
                 <h3 className="quiz-title">{attempt.quiz_title}</h3>
                 <p><strong>Score:</strong> {attempt.score}</p>
+                <p><strong>Grade:</strong> {((attempt.score / attempt.max_points) * 100).toFixed(1)} / 100</p>
                 <p><strong>Start:</strong> {new Date(attempt.attempt_time).toLocaleString()}</p>
                 <p><strong>End:</strong> {new Date(attempt.end_time).toLocaleString()}</p>
                 <p><strong>Duration:</strong> {formatDuration(attempt.attempt_time, attempt.end_time)}</p>
@@ -168,7 +172,7 @@ const QuizHistory = () => {
                       <XAxis dataKey="date" />
                       <YAxis domain={[0, 100]} />
                       <Tooltip />
-                      <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                      <Line type="monotone" dataKey="grade" stroke="#007bff" activeDot={{ r: 8 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -180,6 +184,7 @@ const QuizHistory = () => {
                     modalAttempts.map((a) => (
                       <li key={a.attempt_id} className="modal-attempt-card">
                         <p><strong>Score:</strong> {a.score}</p>
+                        <p><strong>Grade:</strong> {((a.score / a.max_points) * 100).toFixed(1)} / 100</p>
                         <p><strong>Start:</strong> {new Date(a.attempt_time).toLocaleString()}</p>
                         <p><strong>End:</strong> {new Date(a.end_time).toLocaleString()}</p>
                         <p>

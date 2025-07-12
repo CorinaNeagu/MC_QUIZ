@@ -74,7 +74,6 @@ h2 {
   z-index: 1000;
 }
 
-/* Modal Container */
 .modal {
   background: #fff;
   width: 90%;
@@ -87,7 +86,6 @@ h2 {
   position: relative;
 }
 
-/* Modal Header */
 .modal-header {
   display: flex;
   justify-content: space-between;

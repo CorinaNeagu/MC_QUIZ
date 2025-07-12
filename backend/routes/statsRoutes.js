@@ -14,7 +14,7 @@ function queryAsync(query, values) {
   });
 }
 
-// GET quiz attempts per category for logged-in student
+// quiz attempts per category for logged-in student
 router.get('/pie-chart/quiz-category', authenticateJWT, async (req, res) => {
   const studentId = req.user.id;  
   console.log("Student ID:", studentId);  
@@ -35,7 +35,6 @@ GROUP BY c.category_name, c.category_id
   try {
     const results = await queryAsync(query, [studentId]);
 
-    console.log("📊 Results:", results); 
 
     if (results.length > 0) {
       res.status(200).json(results);
@@ -48,40 +47,33 @@ GROUP BY c.category_name, c.category_id
   }
 });
 
-router.get('/quizzes-by-category/:category_id', (req, res) => {
-  const categoryId = req.params.category_id;
-  console.log("From URL:", categoryId);
+router.get('/quizzes-by-category/:categoryId', authenticateJWT, async (req, res) => {
+  const { categoryId } = req.params;
+  const studentId      = req.user.id;
 
-  const query = `
-    SELECT 
+  const sql = `
+    SELECT DISTINCT
       q.quiz_id,
       q.title AS quiz_title,
       c.category_name,
       c.category_id
-    FROM 
-      Quiz q
-    JOIN 
-      Category c ON q.category_id = c.category_id
-    JOIN
-      QuizSettings qs ON q.quiz_id = qs.quiz_id
-    WHERE 
-      c.category_id = ? AND
-      qs.is_active = 1;
+    FROM QuizAttempt qa
+    JOIN Quiz        q ON qa.quiz_id    = q.quiz_id
+    JOIN Category    c ON q.category_id = c.category_id
+    WHERE qa.student_id  = ?   -- same filter as the pie
+      AND c.category_id  = ?
   `;
 
-  db.query(query, [categoryId], (err, results) => {
-    if (err) {
-      console.error('Error fetching quizzes for category:', err);
-      return res.status(500).json({ message: 'Error fetching quizzes' });
+  try {
+    const rows = await queryAsync(sql, [studentId, categoryId]);
+    if (!rows.length) {
+      return res.status(404).json({ message: 'No attempted quizzes in this category' });
     }
-
-    console.log("Results from DB:", results);
-    if (results.length > 0) {
-      res.json(results);
-    } else {
-      res.status(404).json({ message: 'No active quizzes found for this category' });
-    }
-  });
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching quizzes for category:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 
@@ -433,6 +425,126 @@ router.get('/retake-scores-history/:studentId', authenticateJWT, async (req, res
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+router.get('/quiz-averages', authenticateJWT, async (req, res) => {
+  const professorId    = req.user.id;
+  const userType       = req.user.userType;
+  const subcategoryId  = req.query.subcategory_id;
+
+  if (userType !== 'professor') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  if (!subcategoryId) {
+    return res.status(400).json({ error: 'subcategory_id query param required' });
+  }
+
+  const sql = `
+    SELECT
+      q.title               AS quiz_title,
+      ROUND(
+        AVG((qa.score / (qs.no_questions * qp.points_per_question)) * 100),
+        2
+      ) AS avg_percentage
+    FROM Quiz q
+    JOIN QuizAttempt qa   ON qa.quiz_id = q.quiz_id
+    JOIN QuizSettings qs  ON qs.quiz_id = q.quiz_id
+    JOIN (
+      SELECT quiz_id, MAX(points_per_question) AS points_per_question
+      FROM Questions
+      GROUP BY quiz_id
+    ) qp                  ON qp.quiz_id = q.quiz_id
+    WHERE q.professor_id   = ?
+      AND q.subcategory_id = ?
+      AND qa.attempt_id = (
+        SELECT MAX(sub.attempt_id)
+        FROM QuizAttempt sub
+        WHERE sub.quiz_id = qa.quiz_id
+          AND sub.student_id = qa.student_id
+      )
+    GROUP BY q.title
+    ORDER BY q.title;
+  `;
+
+  try {
+    const rows = await queryAsync(sql, [professorId, subcategoryId]);
+    res.json(rows.map(r => ({ quiz_title: r.quiz_title, avg_percentage: r.avg_percentage })));
+  } catch (err) {
+    console.error('Error fetching quiz averages:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/subcategory-averages', authenticateJWT, async (req, res) => {
+  const { id: professorId, userType } = req.user;
+
+  if (userType !== 'professor') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const query = `
+    SELECT
+      sc.subcategory_name,
+      ROUND(
+        AVG((qa.score / (qs.no_questions * qp.points_per_question)) * 100),
+        2
+      ) AS avg_percentage
+    FROM Quiz q
+    JOIN Subcategory sc ON q.subcategory_id = sc.subcategory_id
+    JOIN QuizAttempt qa ON qa.quiz_id = q.quiz_id
+    JOIN QuizSettings qs ON qs.quiz_id = q.quiz_id
+    JOIN (
+      SELECT quiz_id, MAX(points_per_question) AS points_per_question
+      FROM Questions
+      GROUP BY quiz_id
+    ) qp ON qp.quiz_id = q.quiz_id
+    WHERE q.professor_id = ?
+      AND qa.attempt_id = (
+        SELECT MAX(sub.attempt_id)
+        FROM QuizAttempt sub
+        WHERE sub.quiz_id = qa.quiz_id
+          AND sub.student_id = qa.student_id
+      )
+    GROUP BY sc.subcategory_name
+    ORDER BY sc.subcategory_name;
+  `;
+
+  try {
+    const rows = await queryAsync(query, [professorId]);
+
+    const formatted = rows.map(({ subcategory_name, avg_percentage }) => ({
+      subcategory_name,
+      avg_percentage,
+    }));
+
+    res.status(200).json(formatted);
+  } catch (err) {
+    console.error('Error fetching subcategory averages:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/subcategories/:categoryId', async (req, res) => {
+  const categoryId = req.params.categoryId;
+
+  const query = `
+    SELECT *
+    FROM Subcategory
+    WHERE category_id = ?
+  `;
+
+  try {
+    const results = await queryAsync(query, [categoryId]);
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No subcategories found for this category' });
+    }
+    res.json(results);
+  } catch (err) {
+    console.error('Error fetching subcategories:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 
 module.exports = router;

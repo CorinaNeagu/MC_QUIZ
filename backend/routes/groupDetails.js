@@ -37,36 +37,38 @@ router.get('/student-assigned-quizzes/:groupId', authenticateJWT, (req, res) => 
   });
 });
 
-// Get latest quiz attempts by students in a group for a specific quiz
+// GET latest quiz attempts by students in a group for a specific quiz
 router.get('/quiz-attempts/:groupId/:quizId', authenticateJWT, (req, res) => {
   const { groupId, quizId } = req.params;
 
   const sql = `
     SELECT 
-      st.student_id,
-      st.username,
-      ROUND((qa.score / total_score.total_points) * 100, 2) AS score,
-      qa.end_time AS attempted_at
+        s.student_id,
+        s.username,
+        qa.score AS raw_score,
+        ROUND((qa.score / (qs.no_questions * qn.points_per_question)) * 100, 2) AS percentage_score,
+        qa.end_time AS attempted_at
     FROM QuizAttempt qa
-    JOIN Student st ON qa.student_id = st.student_id
-    JOIN groupMembers gm ON gm.student_id = st.student_id AND gm.group_id = ?
+    JOIN Student s ON s.student_id = qa.student_id
+    JOIN groupMembers gm ON gm.student_id = s.student_id
+    JOIN QuizSettings qs ON qs.quiz_id = qa.quiz_id
     JOIN (
-      SELECT quiz_id, SUM(points_per_question) AS total_points
-      FROM Questions
-      WHERE quiz_id = ?
-      GROUP BY quiz_id
-    ) AS total_score ON total_score.quiz_id = qa.quiz_id
-    WHERE qa.quiz_id = ?
-      AND gm.group_id = ?
+        SELECT quiz_id, MAX(points_per_question) AS points_per_question
+        FROM Questions
+        WHERE quiz_id = ?
+        GROUP BY quiz_id
+    ) qn ON qn.quiz_id = qa.quiz_id
+    WHERE gm.group_id = ?
+      AND qa.quiz_id = ?
       AND qa.end_time = (
-        SELECT MAX(end_time) 
-        FROM QuizAttempt 
-        WHERE student_id = st.student_id AND quiz_id = ?
+          SELECT MAX(end_time)
+          FROM QuizAttempt
+          WHERE student_id = s.student_id AND quiz_id = ?
       )
-    ORDER BY qa.end_time DESC
+    ORDER BY qa.end_time DESC;
   `;
 
-  db.query(sql, [groupId, quizId, quizId, groupId, quizId], (err, results) => {
+  db.query(sql, [quizId, groupId, quizId, quizId], (err, results) => {
     if (err) {
       console.error('Error fetching quiz attempts:', err);
       return res.status(500).json({ message: 'Error fetching quiz attempts' });
@@ -75,6 +77,7 @@ router.get('/quiz-attempts/:groupId/:quizId', authenticateJWT, (req, res) => {
     res.json(results);
   });
 });
+
 
 
 

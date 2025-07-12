@@ -8,6 +8,9 @@ import PieChartComponent from "../../components/Stats/PieChart/PieChart";
 import BarChart from '../../components/Stats/BarChart/BarChart';
 import GroupLeaderboard from '../../components/Stats/GroupLeaderboard/GroupLeaderboard';
 import RetakeLineChart from '../../components/Stats/LineChart/LineChart';
+import QuizRadar from "../../components/Stats/CategoryRadar/QuizRadar";
+import SimpleRadar from '../../components/Stats/CategoryRadar/SimpleRadar';
+
 
 const UserStatistics = () => {
   const [userType, setUserType] = useState(null);
@@ -106,7 +109,7 @@ const UserStatistics = () => {
         </button>
         {expandedSections.includes('lineChart') && (
           <div className="accordion-content">
-            <h3>Retake History</h3>
+            <h2 className="header">Retake History</h2>
               <RetakeLineChart studentId={studentId} />
           </div>
         )}
@@ -130,7 +133,7 @@ const UserStatistics = () => {
                 value={selectedCategory}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value);
-                  setSelectedSubcategory('');  // reset subcategory when category changes
+                  setSelectedSubcategory('');  
                 }}
               >
                 <option value="">Select a Category</option>
@@ -203,6 +206,33 @@ const UserStatistics = () => {
         )}
       </div>
 
+       <div className="accordion-item">
+      <button
+        className="accordion-header"
+        onClick={() => toggleSection('categoryRadar')}
+      >
+        Category Radar {expandedSections.includes('categoryRadar') ? '▲' : '▼'}
+      </button>
+      {expandedSections.includes('categoryRadar') && (
+        <div className="accordion-content">
+          <SimpleRadar />
+        </div>
+      )}
+    </div>
+
+     <div className="accordion-item">
+        <button
+          className="accordion-header"
+          onClick={() => toggleSection("dynamicRadar")}
+        >
+          Quiz Radar {expandedSections.includes("dynamicRadar") ? "▲" : "▼"}
+        </button>
+        {expandedSections.includes("dynamicRadar") && (
+          <div className="accordion-content">
+            <QuizRadar />
+          </div>
+        )}
+      </div>
     </div>
   );
 

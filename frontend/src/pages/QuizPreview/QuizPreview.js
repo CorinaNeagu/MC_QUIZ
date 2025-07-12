@@ -122,7 +122,7 @@ const QuizPreview = () => {
     <div className="quiz-preview-container">
                     <Sidebar showBackButton={true} />
 
-      <h2>Quiz Preview</h2>
+      <h2 className = "header">Quiz Preview</h2>
       {quizDetails.length > 0 ? (
         <ul>
           {quizDetails.map((question) => (
@@ -153,58 +153,53 @@ const QuizPreview = () => {
       )}
 
         <div className="assign-deadline-wrapper">
-          <button
-            onClick={() => setShowDeadlineSection((prev) => !prev)}
-            className="toggle-deadline-btn"
-          >
-            {showDeadlineSection ? "Hide Deadline Section" : "Assign Deadline Now"}
-          </button>
+         <div className="deadline-panel floating">
+          <div className="deadline-panel-header">
+            <h3>Assign Deadline</h3>
+          </div>
 
-          {showDeadlineSection && (
-            <div className="deadline-card">
-              <label className="deadline-info">
-                You can assign the quiz now or later.
-              </label>
+          <label className="deadline-info">
+            You can assign the quiz now or later.
+          </label>
 
-              <label className="deadline-label">
-                Select Deadline:{" "}
-                <input
-                  type="datetime-local"
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
-                  min={new Date().toISOString().slice(0, 16)}
-                  className="deadline-input"
-                />
-              </label>
+            <label className="deadline-label">
+              Select Deadline:
+              <input
+                type="datetime-local"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="deadline-input"
+              />
+            </label>
 
-              <div className="group-select-wrapper" style={{ marginBottom: '15px' }}>
-                <label htmlFor="group-select" style={{ marginRight: '10px' }}>Assign to Group:</label>
-                <select
-                  id="group-select"
-                  value={selectedGroupId}
-                  onChange={(e) => setSelectedGroupId(e.target.value)}
-                  style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
-                >
-                  {groups.length > 0 ? (
-                    groups.map((group) => (
-                      <option key={group.id || group.group_id} value={group.id || group.group_id}>
-                        {group.name || group.group_name || `Group ${group.id || group.group_id}`}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Loading groups...</option>
-                  )}
-                </select>
-              </div>
-              <button
-                onClick={assignQuizToGroup}
-                disabled={assigning}
-                className={`assign-btn ${assigning ? "disabled" : ""}`}
+            <div className="group-select-wrapper">
+              <label htmlFor="group-select">Assign to Group:</label>
+              <select
+                id="group-select"
+                value={selectedGroupId}
+                onChange={(e) => setSelectedGroupId(e.target.value)}
               >
-                {assigning ? "Assigning..." : "Assign Quiz to Group"}
-              </button>
+                {groups.length > 0 ? (
+                  groups.map((group) => (
+                    <option key={group.id || group.group_id} value={group.id || group.group_id}>
+                      {group.name || group.group_name || `Group ${group.id || group.group_id}`}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Loading groups...</option>
+                )}
+              </select>
             </div>
-          )}
+
+            <button
+              onClick={assignQuizToGroup}
+              disabled={assigning}
+              className={`assign-btn ${assigning ? "disabled" : ""}`}
+            >
+              {assigning ? "Assigning..." : "Assign Quiz to Group"}
+            </button>
+          </div>
         </div>
     </div>
   );

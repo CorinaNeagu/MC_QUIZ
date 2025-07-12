@@ -14,7 +14,7 @@ const UserProfile = ({ embedded = false }) => {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState(""); 
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  const allowedTypes = ["image/jpeg", "image/png"];
 
   const navigate = useNavigate();
 
@@ -48,22 +48,27 @@ const UserProfile = ({ embedded = false }) => {
     }
   }, [navigate, embedded]);
 
-  const handleFileChange = (e) => {
+const handleFileChange = (e) => {
   const file = e.target.files[0];
-  if (file && !allowedTypes.includes(file.type)) {
+
+  if (!file) return;
+
+  if (!allowedTypes.includes(file.type)) {
     console.error("File rejected due to invalid type:", file.type);
-    alert("Only JPEG, PNG, GIF, and WEBP image files are allowed!");
+    alert("Only JPEG and PNG image files are allowed!");
     setSelectedFile(null);
-    e.target.value = null;
+    e.target.value = null; // reset file input
     return;
   }
-  if (file && file.size > 5 * 1024 * 1024) {
+
+  if (file.size > 5 * 1024 * 1024) {
     console.error("File rejected due to size:", file.size);
     alert("File size must be 5MB or less");
     setSelectedFile(null);
-    e.target.value = null;
+    e.target.value = null; // reset file input
     return;
   }
+
   setSelectedFile(file);
   setUploadStatus("");
 };
@@ -157,7 +162,7 @@ const UserProfile = ({ embedded = false }) => {
   <input
     id="file-upload"
     type="file"
-    accept="image/*"
+    accept="image/jpeg,image/png"
     onChange={handleFileChange}
     className="file-upload-input"
   />

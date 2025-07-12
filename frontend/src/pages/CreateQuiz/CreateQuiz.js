@@ -202,9 +202,9 @@ const CreateQuiz = () => {
             id="retakeAllowed"
             checked={retakeAllowed}
             onChange={() => setRetakeAllowed(!retakeAllowed)}
-            className="checkbox-input"
+            className="checkbox-custom"
           />
-          <label htmlFor="retakeAllowed" className="checkbox-label"> </label>
+          <label htmlFor="retakeAllowed"> </label>
           Allow Retakes
         </div>
 
@@ -214,9 +214,9 @@ const CreateQuiz = () => {
             id="isActive"
             checked={isActive}
             onChange={() => setIsActive(!isActive)}
-            className="checkbox-input"
+            className="checkbox-custom"
           />
-          <label htmlFor="isActive" className="checkbox-label"></label>
+          <label htmlFor="isActive"></label>
           Activate Quiz
         </div>
 
@@ -231,7 +231,6 @@ const CreateQuiz = () => {
           />
         </div>
 
-        {/* Submit Button */}
         <button type="submit" className="submit-button">Next</button>
       </form>
     </div>

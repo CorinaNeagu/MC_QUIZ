@@ -53,40 +53,18 @@ h2 {
   gap: 8rem;
 }
 
-.checkbox-label {
-  font-size: 1rem;
-  color: #444;
-  cursor: pointer;
-  margin: 0; 
-  font-weight: 500;
-  user-select: none; 
-  transition: color 0.3s ease;
-}
-
-.checkbox-label::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  border: 2px solid #666;
+.checkbox-custom {
+  width: 20px !important;
+  height: 20px;
+  border: 2px solid #333;
   border-radius: 4px;
-  background: white;
-  box-sizing: border-box;
-  transition: background-color 0.2s, border-color 0.2s;
+  background-color: white;
+  position: relative;
+  transition: background-color 0.2s ease;
+
 }
 
-/* Checked state */
-.checkbox-input:checked + .checkbox-label::before {
-  background-color: #4a90e2;
-  border-color: #4a90e2;
-}
-
-
-/* Checkmark */
-.checkbox-input:checked + .checkbox-label::after {
+.checkbox-custom:checked + .checkbox-label::after {
   content: "✓";
   position: absolute;
   left: 5px;

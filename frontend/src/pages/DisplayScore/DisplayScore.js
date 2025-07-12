@@ -208,16 +208,11 @@ return (
             </div>
 
             <div className="deduction-message">
-              {deduction > 0 ? (
-                <p>
-                  {/* Deduction Applied: -{deduction.toFixed(2)} points for {wrongAnswers} wrong answer
-                  {wrongAnswers !== 1 ? "s" : ""} */}
-                </p>
+             {deduction > 0 ? (
+                <p>You had a deduction of {deduction} points.</p>
               ) : wrongAnswers > 0 && totals.awarded === 0 ? (
                 <p>You didn’t answer any questions, so no deductions were applied.</p>
-              ) : (
-                <p>No deductions applied!</p>
-              )}
+              ) : null}
             </div>
 
             {updateMessage && (

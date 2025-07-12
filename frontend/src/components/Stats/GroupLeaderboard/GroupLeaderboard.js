@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import './GroupLeaderboard.css';
 
 const GroupLeaderboard = () => {
@@ -25,9 +33,10 @@ const GroupLeaderboard = () => {
 
     const fetchGroups = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/groups/professor-groups', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          'http://localhost:5000/api/groups/professor-groups',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         setGroups(data);
       } catch {
         setGroups([]);
@@ -88,33 +97,42 @@ const GroupLeaderboard = () => {
     fetchLeaderboard();
   }, [token, selectedGroup, selectedQuiz, useSingleQuiz]);
 
-  const formatUsername = (name) => (name.length > 10 ? `${name.slice(0, 10)}…` : name);
+  const formatUsername = (name) =>
+    name.length > 10 ? `${name.slice(0, 10)}…` : name;
 
   const handleGroupChange = (e) => {
-    setSelectedGroup(e.target.value);
+    const groupId = e.target.value;
+    setSelectedGroup(groupId);
     setSelectedQuiz('');
     setUseSingleQuiz(false);
     setLeaderboard([]);
   };
 
+  const handleQuizChange = (e) => setSelectedQuiz(e.target.value);
+
+  const handleToggleSingleQuiz = (e) => {
+    setUseSingleQuiz(e.target.checked);
+    if (!e.target.checked) setSelectedQuiz('');
+  };
+
   return (
     <div className="leaderboard-wrapper">
-      <h3 className="leaderboard-title">Group Leaderboard</h3>
+      <h2 className="header2">Group Leaderboard</h2>
 
       <div className="controls">
         <div className="control-group full-width">
-          <label htmlFor="group-select" className="control-label">Select Group:</label>
+          <label htmlFor="group-select" className="control-label">
+            Select Group:
+          </label>
           <select
             id="group-select"
             className="control-select"
             value={selectedGroup}
-            onChange={e => {
-              setSelectedGroup(e.target.value);
-              setSelectedQuiz('');
-              setLeaderboard([]);
-            }}
+            onChange={handleGroupChange}
           >
-            <option value="" disabled>Choose a group</option>
+            <option value="" disabled>
+              Choose a group
+            </option>
             {groups.map(({ group_id, group_name }) => (
               <option key={group_id} value={group_id}>
                 {group_name}
@@ -131,25 +149,31 @@ const GroupLeaderboard = () => {
                 id="quiz-toggle"
                 className="checkbox-input"
                 checked={useSingleQuiz}
-                onChange={e => setUseSingleQuiz(e.target.checked)}
+                onChange={handleToggleSingleQuiz}
               />
-              <label htmlFor="quiz-toggle">
+              <label htmlFor="quiz-toggle" className="checkbox-label">
                 View leaderboard for a specific quiz
               </label>
             </div>
 
             <div className="control-group quiz-select-inline">
-              <label htmlFor="quiz-select" className="control-label">Select Quiz:</label>
+              <label htmlFor="quiz-select" className="control-label">
+                Select Quiz:
+              </label>
               <select
                 id="quiz-select"
                 className="control-select"
                 value={selectedQuiz}
-                onChange={e => setSelectedQuiz(e.target.value)}
+                onChange={handleQuizChange}
                 disabled={!useSingleQuiz}
               >
-                <option value="" disabled>Choose a quiz</option>
+                <option value="" disabled>
+                  Choose a quiz
+                </option>
                 {quizzes.map(({ quiz_id, title }) => (
-                  <option key={quiz_id} value={quiz_id}>{title}</option>
+                  <option key={quiz_id} value={quiz_id}>
+                    {title}
+                  </option>
                 ))}
               </select>
             </div>
@@ -188,7 +212,7 @@ const GroupLeaderboard = () => {
               />
               <Bar
                 dataKey="average_score"
-                name = "Score"
+                name="Score"
                 fill="#4a90e2"
                 radius={[6, 6, 0, 0]}
                 isAnimationActive

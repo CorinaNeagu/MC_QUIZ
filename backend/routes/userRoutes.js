@@ -427,19 +427,26 @@ router.get('/history', authenticateJWT, (req, res) => {
   }
 
   const query = `
-    SELECT 
-      qa.attempt_id,
-      qa.quiz_id,
-      q.title AS quiz_title,
-      qa.score,
-      qa.start_time AS attempt_time,
-      qa.end_time,
-      qa.time_taken
-    FROM QuizAttempt qa
-    JOIN Quiz q ON qa.quiz_id = q.quiz_id
-    WHERE qa.student_id = ?
-    ORDER BY qa.start_time DESC
-  `;
+SELECT 
+  qa.attempt_id,
+  qa.quiz_id,
+  q.title AS quiz_title,
+  qa.score,
+  qa.start_time AS attempt_time,
+  qa.end_time,
+  qa.time_taken,
+  (
+    SELECT SUM(points_per_question) 
+    FROM Questions 
+    WHERE quiz_id = qa.quiz_id
+  ) AS max_points
+FROM QuizAttempt qa
+JOIN Quiz q ON qa.quiz_id = q.quiz_id
+WHERE qa.student_id = ?
+ORDER BY qa.start_time DESC;
+
+`;
+
 
   db.query(query, [id], (err, results) => {
     if (err) {

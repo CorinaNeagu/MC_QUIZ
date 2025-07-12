@@ -4,6 +4,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from '../../components/Sidebar/Sidebar';
 import './GroupDetails.css';
 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+
 const GroupDetails = () => {
   const { groupId } = useParams();
 
@@ -21,6 +32,8 @@ const GroupDetails = () => {
   const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
   const [deadlineValue, setDeadlineValue] = useState('');
   const [deadlineQuiz, setDeadlineQuiz] = useState(null);
+
+    const [showChart, setShowChart] = useState(false);
 
 
   useEffect(() => {
@@ -47,33 +60,7 @@ const GroupDetails = () => {
     fetchAssignedQuizzes();
   }, [groupId]);
 
-  const handleDeadlineSave = async () => {
-  if (!deadlineQuiz) return;
 
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.put(
-      `http://localhost:5000/api/user/update-deadline/${deadlineQuiz.quiz_id}`,
-      { deadline: deadlineValue },
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-
-    if (response.status === 200) {
-      setQuizzes((prevQuizzes) =>
-        prevQuizzes.map((q) =>
-          q.quiz_id === deadlineQuiz.quiz_id ? { ...q, deadline: deadlineValue } : q
-        )
-      );
-      alert('Deadline updated successfully!');
-      closeDeadlineModal();
-    }
-  } catch (error) {
-    console.error("Failed to update deadline:", error);
-    alert('Failed to update deadline. Please try again.');
-  }
-};
 
 
   const openModal = async (quiz) => {
@@ -82,6 +69,7 @@ const GroupDetails = () => {
     setAttempts([]);
     setAttemptsError(null);
     setAttemptsLoading(true);
+    setShowChart(false);
 
     try {
       const token = localStorage.getItem("token");
@@ -104,19 +92,9 @@ const GroupDetails = () => {
     setSelectedQuiz(null);
     setAttempts([]);
     setAttemptsError(null);
+    setShowChart(false);
   };
 
-  const openDeadlineModal = (quiz) => {
-  setDeadlineQuiz(quiz);
-  setDeadlineValue(quiz.deadline ? new Date(quiz.deadline).toISOString().slice(0,16) : '');
-  setIsDeadlineModalOpen(true);
-};
-
-const closeDeadlineModal = () => {
-  setIsDeadlineModalOpen(false);
-  setDeadlineQuiz(null);
-  setDeadlineValue('');
-};
 
 
   const handleBackToGroups = () => {
@@ -132,8 +110,9 @@ const closeDeadlineModal = () => {
           <div className="modal-header">
             <h2>{title}</h2>
             <button 
-              className = "btn-display-bar">
-                Chart 
+              className = "btn-display-bar"
+              onClick={() => setShowChart(prev => !prev)}>
+                {showChart ? "Hide chart" : "Show chart"}
             </button>
           </div>
           <div className="modal-content">{children}</div>
@@ -146,6 +125,21 @@ const closeDeadlineModal = () => {
   if (error) return <p className="error-text">{error}</p>;
   if (quizzes.length === 0) return <p>No quizzes assigned for this group.</p>;
 
+  const renderCustomLegend = (props) => {
+  const { payload } = props; 
+
+  return (
+    <div style={{ display: 'flex', gap: 20, padding: 10, borderRadius: 6 }}>
+      {payload.map((entry) => (
+        <div key={entry.value} style={{ color: 'black', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ width: 16, height: 16, backgroundColor: entry.color, borderRadius: 3 }}></div>
+          <span>{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
   return (
     <div className="group-details-page">
       <Sidebar showBackButton />
@@ -153,7 +147,7 @@ const closeDeadlineModal = () => {
       <button className="btn-back" onClick={handleBackToGroups}>
         ❮❮ Back to Your Groups
       </button>
-      <h2>Assigned Quizzes</h2>
+      <h2 className = "header">Assigned Quizzes</h2>
 
       <ul className="quiz-list assigned-quizzes">
         {quizzes.map(({ quiz_id, title, category_name, subcategory_name, deadline }) => (
@@ -171,62 +165,62 @@ const closeDeadlineModal = () => {
             <button className="btn-more" onClick={() => openModal({ quiz_id, title })}>
               See more
             </button>
-
-            <button className="btn-more" onClick={() => openDeadlineModal({ quiz_id, title, deadline })}>
-              Update Deadline
-            </button>
-            
-
           </li>
         ))}
       </ul>
 
-      <ModalGroupDetails isOpen={isModalOpen} onClose={closeModal} title={selectedQuiz?.title}>
+      <ModalGroupDetails
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={selectedQuiz?.title}
+      >
         {attemptsLoading && <p>Loading attempts...</p>}
         {attemptsError && <p className="error-text">{attemptsError}</p>}
         {!attemptsLoading && !attemptsError && attempts.length === 0 && <p>No attempts found.</p>}
+
         {!attemptsLoading && attempts.length > 0 && (
-                <table className="attempts-table">
-                  <thead>
-                    <tr>
-                      <th>Student</th>
-                      <th>Score</th>
-                      <th>Attempted At</th>
+          <>
+           {showChart ? (
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={attempts}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="username" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Legend content={renderCustomLegend} />
+                    <Bar dataKey="percentage_score" fill="#007bff" name="Grade (%)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <table className="attempts-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Attempted At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {attempts.map(({ student_id, username, raw_score, percentage_score, attempted_at }) => (
+                    <tr key={student_id}>
+                      <td>{username}</td>
+                      <td>{raw_score}</td>
+                      <td>{percentage_score}%</td>
+                      <td>{new Date(attempted_at).toLocaleString()}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {attempts.map(({ student_id, username, score, attempted_at }) => (
-                      <tr key={student_id}>
-                        <td>{username}</td>
-                        <td>{score}</td>
-                        <td>{new Date(attempted_at).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </>
         )}
       </ModalGroupDetails>
-
-      {isDeadlineModalOpen && (
-        <div className="modal-backdrop" onClick={closeDeadlineModal}>
-          <div className="modal-container" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Update Deadline for: {deadlineQuiz?.title}</h2>
-            </div>
-            <div className="modal-content">
-              <input
-                type="datetime-local"
-                className = "datetime"
-                value={deadlineValue}
-                onChange={e => setDeadlineValue(e.target.value)}
-              />
-              <div style={{ marginTop: '1rem' }}>
-                <button onClick={handleDeadlineSave}>Save Deadline</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -278,11 +278,7 @@ const handleGoToQuiz = (quizId) => {
                               Group: {group ? group.group_name : "Unknown Group"}
                             </div>
 
-                            {deadline.taken && !deadline.allowRetake ? (
-                              <div className="taken-badge-row">
-                                <span className="taken-badge">Cannot be retaken</span>
-                              </div>
-                            ) : null}
+                           
                           </div>
 
                           <div className="menu-container">
@@ -311,6 +307,12 @@ const handleGoToQuiz = (quizId) => {
                         <div className="deadline-date">
                           Due on {new Date(deadline.deadline).toLocaleDateString()}
                         </div>
+
+                         {deadline.taken && !deadline.allowRetake ? (
+                              <div className="taken-badge-row">
+                                <span className="taken-badge">Cannot be retaken</span>
+                              </div>
+                            ) : null}
                       </div>
                     );
                   })}
