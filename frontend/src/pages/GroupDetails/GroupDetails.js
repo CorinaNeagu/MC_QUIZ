@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from '../../components/Sidebar/Sidebar';
@@ -17,39 +19,41 @@ import {
 
 const GroupDetails = () => {
   const { groupId } = useParams();
+  const navigate = useNavigate();
 
+  const exportRefs = useRef({});
+
+  // State
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+
   const [attempts, setAttempts] = useState([]);
   const [attemptsLoading, setAttemptsLoading] = useState(false);
   const [attemptsError, setAttemptsError] = useState(null);
 
-  const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
-  const [deadlineValue, setDeadlineValue] = useState('');
-  const [deadlineQuiz, setDeadlineQuiz] = useState(null);
+  const [showChart, setShowChart] = useState(false);
 
-    const [showChart, setShowChart] = useState(false);
+  const [allAttempts, setAllAttempts] = useState({});
 
-
+  // Fetch quizzes assigned to group
   useEffect(() => {
     if (!groupId) return;
 
-    const fetchAssignedQuizzes = async () => {
+    const fetchQuizzes = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
         const token = localStorage.getItem("token");
-        const response = await axios.get(
+        const { data } = await axios.get(
           `http://localhost:5000/api/group/details/student-assigned-quizzes/${groupId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        setQuizzes(response.data);
+        console.log("Fetched quizzes:", data);  // <-- LOG HERE
+        setQuizzes(data);
       } catch {
         setError("Failed to load assigned quizzes");
       } finally {
@@ -57,35 +61,70 @@ const GroupDetails = () => {
       }
     };
 
-    fetchAssignedQuizzes();
+    fetchQuizzes();
   }, [groupId]);
 
+ useEffect(() => {
+  if (!quizzes.length) return;
 
-
-
-  const openModal = async (quiz) => {
-    setSelectedQuiz(quiz);
-    setIsModalOpen(true);
-    setAttempts([]);
-    setAttemptsError(null);
-    setAttemptsLoading(true);
-    setShowChart(false);
+  const fetchAllAttempts = async () => {
+    const token = localStorage.getItem("token");
+    let attemptsMap = {};
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:5000/api/group/details/quiz-attempts/${groupId}/${quiz.quiz_id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setAttempts(response.data);
-    } catch {
-      setAttemptsError("Failed to load quiz attempts");
-    } finally {
-      setAttemptsLoading(false);
+      for (const quiz of quizzes) {
+        const { data } = await axios.get(
+          `http://localhost:5000/api/group/details/quiz-attempts/${groupId}/${quiz.quiz_id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(`Fetched attempts for quiz ${quiz.quiz_id}:`, data);  // <-- LOG HERE
+        attemptsMap[quiz.quiz_id] = data;
+      }
+      setAllAttempts(attemptsMap);
+    } catch (err) {
+      console.error("Failed to fetch all attempts", err);  // <-- LOG ERROR
     }
   };
+
+  fetchAllAttempts();
+}, [quizzes, groupId]);
+
+
+
+  // Open modal and fetch attempts for selected quiz
+  const openModal = async (quiz) => {
+  console.log("Opening modal for quiz:", quiz);  // <-- LOG selected quiz
+
+  setSelectedQuiz(quiz);
+  setIsModalOpen(true);
+  setAttempts([]);
+  setAttemptsError(null);
+  setAttemptsLoading(true);
+  setShowChart(false);
+
+  try {
+    const token = localStorage.getItem("token");
+    const { data } = await axios.get(
+      `http://localhost:5000/api/group/details/quiz-attempts/${groupId}/${quiz.quiz_id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    console.log("Fetched attempts for selected quiz:", data);  // <-- LOG attempts
+
+    const processedData = data.map(attempt => ({
+      ...attempt,
+      percentage_score: Number(attempt.percentage_score),
+    }));
+
+    setAttempts(processedData);
+  } catch (err) {
+    console.error("Error loading quiz attempts:", err);  // <-- LOG error
+    setAttemptsError("Failed to load quiz attempts");
+  } finally {
+    setAttemptsLoading(false);
+  }
+};
+
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -95,51 +134,130 @@ const GroupDetails = () => {
     setShowChart(false);
   };
 
+  // Navigate back to groups list
+  const handleBackToGroups = () => navigate(`/groups`);
 
-
-  const handleBackToGroups = () => {
-    navigate(`/groups`);
-  };
-
-  const ModalGroupDetails = ({ isOpen, onClose, title, children }) => {
-    if (!isOpen) return null;
-
-    return (
-      <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h2>{title}</h2>
-            <button 
-              className = "btn-display-bar"
-              onClick={() => setShowChart(prev => !prev)}>
-                {showChart ? "Hide chart" : "Show chart"}
-            </button>
-          </div>
-          <div className="modal-content">{children}</div>
-        </div>
-      </div>
-    );
-  };
-
-  if (loading) return <p>Loading assigned quizzes...</p>;
-  if (error) return <p className="error-text">{error}</p>;
-  if (quizzes.length === 0) return <p>No quizzes assigned for this group.</p>;
-
-  const renderCustomLegend = (props) => {
-  const { payload } = props; 
-
-  return (
+  // Custom legend for Recharts
+  const renderCustomLegend = ({ payload }) => (
     <div style={{ display: 'flex', gap: 20, padding: 10, borderRadius: 6 }}>
       {payload.map((entry) => (
-        <div key={entry.value} style={{ color: 'black', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 16, height: 16, backgroundColor: entry.color, borderRadius: 3 }}></div>
+        <div
+          key={entry.value}
+          style={{
+            color: 'black',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <div
+            style={{
+              width: 16,
+              height: 16,
+              backgroundColor: entry.color,
+              borderRadius: 3,
+            }}
+          />
           <span>{entry.value}</span>
         </div>
       ))}
     </div>
   );
+
+  // Export quizzes and attempts to PDF
+  const handleExportPDF = async () => {
+    if (!quizzes.length) return;
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const groupName = quizzes[0]?.group_name || `Group ${groupId}`;
+    const today = new Date().toLocaleDateString();
+
+    for (let i = 0; i < quizzes.length; i++) {
+      const quiz = quizzes[i];
+      const ref = exportRefs.current[quiz.quiz_id];
+
+      if (!ref?.current) {
+        console.warn(`No ref found for quiz ${quiz.quiz_id}`);
+        continue;
+      }
+
+      try {
+        const canvas = await html2canvas(ref.current, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+
+        if (!imgData.startsWith("data:image/png")) {
+          console.error("Invalid image data generated");
+          continue;
+        }
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.setFontSize(14);
+        pdf.text(groupName, 10, 15);
+        pdf.setFontSize(12);
+        pdf.text(`Quiz: ${quiz.title}`, 10, 23);
+        pdf.text(`Date: ${today}`, 10, 30);
+
+        const topMargin = 35;
+        pdf.addImage(imgData, "PNG", 0, topMargin, pdfWidth, imgHeight);
+
+        if (i < quizzes.length - 1) {
+          pdf.addPage();
+        }
+      } catch (e) {
+        console.error("Error generating PDF page for quiz", quiz.quiz_id, e);
+      }
+    }
+
+    pdf.save(`${groupName}_Quiz_Report.pdf`);
+  };
+
+  const handleExportSingleQuizPDF = async ({ quiz_id, title }) => {
+  const pdf = new jsPDF("p", "mm", "a4");
+  const groupName = quizzes[0]?.group_name || `Group ${groupId}`;
+  const today = new Date().toLocaleDateString();
+
+  const ref = exportRefs.current[quiz_id];
+  if (!ref?.current) {
+    console.warn(`No ref found for quiz ${quiz_id}`);
+    return;
+  }
+
+  try {
+    const canvas = await html2canvas(ref.current, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.setFontSize(14);
+    pdf.text(groupName, 10, 15);
+    pdf.setFontSize(12);
+    pdf.text(`Quiz: ${title}`, 10, 23);
+    pdf.text(`Date: ${today}`, 10, 30);
+
+    const topMargin = 35;
+    pdf.addImage(imgData, "PNG", 0, topMargin, pdfWidth, imgHeight);
+
+    pdf.save(`${groupName}_${title}_Quiz_Report.pdf`);
+  } catch (e) {
+    console.error("Error generating PDF for quiz", quiz_id, e);
+  }
 };
 
+  
+
+      if (loading) return <p>Loading assigned quizzes...</p>;
+      if (error) return <p className="error-text">{error}</p>;
+      if (quizzes.length === 0) return <p>No quizzes assigned for this group.</p>;
+
+      const hasValidScore = attempts.some(
+      attempt => typeof attempt.percentage_score === "number" && !isNaN(attempt.percentage_score)
+    );
+
+    console.log("Rendering chart with attempts:", attempts);
+    console.log("hasValidScore:", hasValidScore);
   return (
     <div className="group-details-page">
       <Sidebar showBackButton />
@@ -147,80 +265,156 @@ const GroupDetails = () => {
       <button className="btn-back" onClick={handleBackToGroups}>
         ❮❮ Back to Your Groups
       </button>
-      <h2 className = "header">Assigned Quizzes</h2>
+
+      <button className="btn-export-pdf" onClick={handleExportPDF}>
+        📄 Export Gradebook
+      </button>
+
+      <h2 className="header">Assigned Quizzes</h2>
+
+        <div
+          style={{
+            position: "absolute",
+            left: "-9999px",
+            top: 0,
+            width: "210mm",
+            backgroundColor: "white",
+          }}
+        >
+          {quizzes.map((quiz) => {
+            if (!exportRefs.current[quiz.quiz_id]) {
+              exportRefs.current[quiz.quiz_id] = React.createRef();
+            }
+            const ref = exportRefs.current[quiz.quiz_id];
+            const quizAttempts = allAttempts[quiz.quiz_id] || [];
+
+            return (
+              <div key={quiz.quiz_id} ref={ref}>
+                <h2>{quiz.title}</h2>
+                <p><strong>Group:</strong> {quizzes[0]?.group_name || `Group ${groupId}`}</p>
+
+                {quizAttempts.length === 0 ? (
+                  <p>No attempts found.</p>
+                ) : (
+                  <table className="attempts-table">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Attempted At</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quizAttempts.map(({ student_id, username, raw_score, percentage_score, attempted_at }) => (
+                        <tr key={student_id}>
+                          <td>{username}</td>
+                          <td>{raw_score}</td>
+                          <td>{percentage_score}%</td>
+                          <td>{new Date(attempted_at).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
       <ul className="quiz-list assigned-quizzes">
         {quizzes.map(({ quiz_id, title, category_name, subcategory_name, deadline }) => (
           <li key={quiz_id} className="quiz-item quiz-card">
             <h3>{title}</h3>
-            <p>
-              <strong>Category:</strong> {category_name}
-            </p>
-            <p>
-              <strong>Subcategory:</strong> {subcategory_name || "No subcategory"}
-            </p>
-            <p>
-              <strong>Deadline:</strong> {new Date(deadline).toLocaleDateString()}
-            </p>
+            <p><strong>Category:</strong> {category_name}</p>
+            <p><strong>Subcategory:</strong> {subcategory_name || "No subcategory"}</p>
+            <p><strong>Deadline:</strong> {new Date(deadline).toLocaleDateString()}</p>
+
             <button className="btn-more" onClick={() => openModal({ quiz_id, title })}>
               See more
             </button>
+
+            <button className="btn-export-pdf" onClick={() => handleExportSingleQuizPDF({ quiz_id, title })}>
+              📄 Export PDF
+            </button>
+
           </li>
         ))}
       </ul>
 
-      <ModalGroupDetails
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={selectedQuiz?.title}
-      >
-        {attemptsLoading && <p>Loading attempts...</p>}
-        {attemptsError && <p className="error-text">{attemptsError}</p>}
-        {!attemptsLoading && !attemptsError && attempts.length === 0 && <p>No attempts found.</p>}
+      {/* Modal for attempts & chart */}
+      {isModalOpen && (
+        <div className="modal-backdrop" onClick={closeModal}>
+          <div className="modal-container" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{selectedQuiz?.title}</h2>
+              <button
+                className="btn-display-bar"
+                onClick={() => setShowChart(show => !show)}
+              >
+                {showChart ? "Hide chart" : "Show chart"}
+              </button>
+            </div>
 
-        {!attemptsLoading && attempts.length > 0 && (
-          <>
-           {showChart ? (
-              <div className="chart-container">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={attempts}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="username" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend content={renderCustomLegend} />
-                    <Bar dataKey="percentage_score" fill="#007bff" name="Grade (%)" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <table className="attempts-table">
-                <thead>
-                  <tr>
-                    <th>Student</th>
-                    <th>Score</th>
-                    <th>Grade</th>
-                    <th>Attempted At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {attempts.map(({ student_id, username, raw_score, percentage_score, attempted_at }) => (
-                    <tr key={student_id}>
-                      <td>{username}</td>
-                      <td>{raw_score}</td>
-                      <td>{percentage_score}%</td>
-                      <td>{new Date(attempted_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </>
-        )}
-      </ModalGroupDetails>
+            <div className="modal-content">
+              {attemptsLoading && <p>Loading attempts...</p>}
+              {attemptsError && <p className="error-text">{attemptsError}</p>}
+              {!attemptsLoading && !attemptsError && attempts.length === 0 && (
+                <p>No attempts found.</p>
+              )}
+
+              {!attemptsLoading && attempts.length > 0 && (
+                <>
+                 {showChart && hasValidScore ? (
+                        <div className="chart-container"
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          padding: "20px 0", 
+                        }}>
+                        <BarChart
+                          width={600}
+                          height={300}
+                          data={attempts}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="username" />
+                          <YAxis domain={[0, 100]} />
+                          <Tooltip />
+                          <Legend content={renderCustomLegend} />
+                          <Bar dataKey="percentage_score" fill="#007bff" name="Grade (%)" />
+                        </BarChart>
+                      </div>
+                    ) : (
+                    <table className="attempts-table">
+                      <thead>
+                        <tr>
+                          <th>Student</th>
+                          <th>Score</th>
+                          <th>Grade</th>
+                          <th>Attempted At</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {attempts.map(({ student_id, username, raw_score, percentage_score, attempted_at }) => (
+                          <tr key={student_id}>
+                            <td>{username}</td>
+                            <td>{raw_score}</td>
+                            <td>{percentage_score}%</td>
+                            <td>{new Date(attempted_at).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
