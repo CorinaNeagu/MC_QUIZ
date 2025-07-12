@@ -302,5 +302,27 @@ router.get('/professors-with-groups', authenticateJWT, (req, res) => {
   });
 });
 
+router.get('/group/:groupId', authenticateJWT, (req, res) => {
+  const groupId = req.params.groupId;
+
+  db.query(
+    'SELECT group_id, group_name, group_code, professor_id FROM studyGroup WHERE group_id = ?',
+    [groupId],
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching group:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Group not found' });
+      }
+
+      res.json(results[0]);
+    }
+  );
+});
+
+
 
 module.exports = router;

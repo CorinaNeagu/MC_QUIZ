@@ -30,6 +30,7 @@ const GroupDetails = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [groupName, setGroupName] = useState("");
 
   const [attempts, setAttempts] = useState([]);
   const [attemptsLoading, setAttemptsLoading] = useState(false);
@@ -63,6 +64,26 @@ const GroupDetails = () => {
 
     fetchQuizzes();
   }, [groupId]);
+
+  useEffect(() => {
+  if (!groupId) return;
+
+  const fetchGroupDetails = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await axios.get(`http://localhost:5000/api/groups/group/${groupId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setGroupName(data.group_name || `Group ${groupId}`);
+    } catch (error) {
+      console.error("Failed to fetch group details", error);
+      setGroupName(`Group ${groupId}`); // fallback name
+    }
+  };
+
+  fetchGroupDetails();
+}, [groupId]);
+
 
  useEffect(() => {
   if (!quizzes.length) return;
@@ -169,7 +190,7 @@ const GroupDetails = () => {
     if (!quizzes.length) return;
 
     const pdf = new jsPDF("p", "mm", "a4");
-    const groupName = quizzes[0]?.group_name || `Group ${groupId}`;
+    const groupTitle = groupName || `Group ${groupId}`;
     const today = new Date().toLocaleDateString();
 
     for (let i = 0; i < quizzes.length; i++) {
@@ -190,8 +211,10 @@ const GroupDetails = () => {
           continue;
         }
 
+        const margin = 10; // 10mm margin on each side
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        const usableWidth = pdfWidth - margin * 2; // width inside margins
+        const imgHeightWithMargin = (canvas.height * usableWidth) / canvas.width;
 
         pdf.setFontSize(14);
         pdf.text(groupName, 10, 15);
@@ -200,7 +223,7 @@ const GroupDetails = () => {
         pdf.text(`Date: ${today}`, 10, 30);
 
         const topMargin = 35;
-        pdf.addImage(imgData, "PNG", 0, topMargin, pdfWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", margin, topMargin, usableWidth, imgHeightWithMargin);
 
         if (i < quizzes.length - 1) {
           pdf.addPage();
@@ -215,7 +238,7 @@ const GroupDetails = () => {
 
   const handleExportSingleQuizPDF = async ({ quiz_id, title }) => {
   const pdf = new jsPDF("p", "mm", "a4");
-  const groupName = quizzes[0]?.group_name || `Group ${groupId}`;
+  const groupTitle = groupName || `Group ${groupId}`;
   const today = new Date().toLocaleDateString();
 
   const ref = exportRefs.current[quiz_id];
@@ -228,8 +251,10 @@ const GroupDetails = () => {
     const canvas = await html2canvas(ref.current, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");
 
+    const margin = 10; // 10mm margin on each side
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+    const usableWidth = pdfWidth - margin * 2; // width inside margins
+    const imgHeightWithMargin = (canvas.height * usableWidth) / canvas.width;
 
     pdf.setFontSize(14);
     pdf.text(groupName, 10, 15);
@@ -238,8 +263,7 @@ const GroupDetails = () => {
     pdf.text(`Date: ${today}`, 10, 30);
 
     const topMargin = 35;
-    pdf.addImage(imgData, "PNG", 0, topMargin, pdfWidth, imgHeight);
-
+    pdf.addImage(imgData, "PNG", margin, topMargin, usableWidth, imgHeightWithMargin);
     pdf.save(`${groupName}_${title}_Quiz_Report.pdf`);
   } catch (e) {
     console.error("Error generating PDF for quiz", quiz_id, e);
@@ -291,7 +315,7 @@ const GroupDetails = () => {
             return (
               <div key={quiz.quiz_id} ref={ref}>
                 <h2>{quiz.title}</h2>
-                <p><strong>Group:</strong> {quizzes[0]?.group_name || `Group ${groupId}`}</p>
+                <p><strong>Group:</strong> {groupName}</p>
 
                 {quizAttempts.length === 0 ? (
                   <p>No attempts found.</p>
