@@ -28,7 +28,6 @@ const Register = ({ onSuccess }) => {  // receive onSuccess as a prop
 
       if (response.ok) {
         localStorage.setItem("user_id", data.user_id);
-        // Instead of navigate here, notify parent of success:
         if (onSuccess) {
           onSuccess();
         }
@@ -46,7 +45,7 @@ const Register = ({ onSuccess }) => {  // receive onSuccess as a prop
         <h2>Register</h2>
         <form onSubmit={handleRegister} className="register-form">
           <div className="form-group">
-            <label htmlFor="register-username">Username:</label>
+            <label htmlFor="register-username">Name:</label>
             <input
               id="register-username"
               type="text"

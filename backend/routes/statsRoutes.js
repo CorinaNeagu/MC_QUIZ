@@ -29,18 +29,12 @@ JOIN Quiz q ON qa.quiz_id = q.quiz_id
 JOIN Category c ON q.category_id = c.category_id
 WHERE qa.student_id = ?
 GROUP BY c.category_name, c.category_id
-
   `;
-
   try {
     const results = await queryAsync(query, [studentId]);
 
 
-    if (results.length > 0) {
-      res.status(200).json(results);
-    } else {
-      res.status(404).json({ message: "No data available" });
-    }
+    res.status(200).json(results);
   } catch (err) {
     console.error(" Error fetching quiz stats:", err);
     res.status(500).json({ message: "Error fetching quiz category statistics" });
@@ -394,8 +388,9 @@ router.get('/retake-scores-history/:studentId', authenticateJWT, async (req, res
     const results = await queryAsync(query, [studentId]);
 
     if (!results.length) {
-      return res.status(404).json({ message: 'No retake history found' });
+      return res.status(200).json([]);
     }
+
 
     const quizHistory = {};
 

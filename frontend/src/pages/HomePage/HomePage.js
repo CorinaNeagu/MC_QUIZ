@@ -157,6 +157,14 @@ const handleGoToQuiz = (quizId) => {
     return <div>Loading...</div>;
   }
 
+  const updateProfilePic = (newPicPath) => {
+  setUserProfile(prev => ({
+    ...prev,
+    profilePic: newPicPath,
+  }));
+};
+
+
 
 
  return (
@@ -263,7 +271,6 @@ const handleGoToQuiz = (quizId) => {
                     }
                   })
                   .map((deadline) => {
-                    // Find the group object matching this deadline's group id
                     const group = studentGroups.find(
                       (grp) => grp.group_id === deadline.group_id
                     );
@@ -321,14 +328,18 @@ const handleGoToQuiz = (quizId) => {
           </div>
         )}
 
-    {showProfile && <UserProfile embedded={true} />}
+    {showProfile && <UserProfile embedded={true} onProfilePicChange={updateProfilePic} />}
       </div>
     ) : userType === "professor" ? (
       <div className="professor-content">
         <h2 className="welcome-message">
           {userProfile.profilePic ? (
             <img
-              src={`http://localhost:5000${userProfile.profilePic}`}
+              key={userProfile.profilePic}
+              src={
+              userProfile.profilePic.startsWith("http")
+              ? userProfile.profilePic
+              : `http://localhost:5000${userProfile.profilePic}`}
               alt={`${userProfile.username}'s profile`}
               className="profile-icon-inline"
               onClick={togglePicExpand}

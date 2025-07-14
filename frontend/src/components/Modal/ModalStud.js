@@ -9,7 +9,7 @@ const ModalStudentsList = ({ isOpen, onClose, groupName = '', students = [] }) =
   return (
     <>
       <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-container-stud" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <h2>{groupName ? `Students in ${groupName}` : 'Group Students'}</h2>
           </div>

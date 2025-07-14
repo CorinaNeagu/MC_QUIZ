@@ -6,14 +6,13 @@ const ModalProf = ({ isOpen, onClose, professorGroups = [], token }) => {
   const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
-    // You can add fetchStudentGroups here if you plan to use studentGroupIds later
   }, [isOpen, token]);
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container" onClick={e => e.stopPropagation()}>
+      <div className="modal-container-prof" onClick={e => e.stopPropagation()}>
         <header className="modal-header">
           <h2>Professor Groups</h2>
         </header>

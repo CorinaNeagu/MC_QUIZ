@@ -109,7 +109,7 @@ const UserStatistics = () => {
         </button>
         {expandedSections.includes('lineChart') && (
           <div className="accordion-content">
-            <h2 className="header">Retake History</h2>
+            <h2 className="header3">Retake History</h2>
               <RetakeLineChart studentId={studentId} />
           </div>
         )}

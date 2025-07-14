@@ -7,76 +7,76 @@ const path = require("path");
 const fs = require("fs");
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
+  destination(req, file, cb) {
+    const uploadDir = path.join(__dirname, '..', 'uploads');
+    fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, `${req.user.id}${ext}`);
+
+  filename(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const { id, userType } = req.user || {};
+    const prefix = userType === 'student' ? 'stud' : 'prof';
+    cb(null, `${prefix}_${id}${ext}`);
   },
 });
+
 
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, 
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"));
+  fileFilter(req, file, cb) {
+    const ALLOWED = ['image/jpeg', 'image/png'];
+    if (!ALLOWED.includes(file.mimetype)) {
+      return cb(new Error('Only JPEG and PNG image files are allowed!'));
     }
     cb(null, true);
   },
 });
 
-router.post("/upload-profile-pic", authenticateJWT, upload.single("profilePic"), (req, res) => {
+
+router.post(
+  '/upload-profile-pic',
+  authenticateJWT,
+  upload.single('profilePic'),
+  (req, res) => {
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return res.status(400).json({ error: 'No file uploaded.' });
     }
 
     const { id, userType } = req.user;
-    const table = userType === "student" ? "Student" : "Professor";
-    const userKey = userType === "student" ? "student_id" : "professor_id";
-
+    const table = userType === 'student' ? 'Student' : 'Professor';
+    const userKey = userType === 'student' ? 'student_id' : 'professor_id';
     const profilePicPath = `/uploads/${req.file.filename}`; 
 
-    // First: get old profile pic path so the old one can be deleted
-    const selectQuery = `SELECT profile_picture FROM ${table} WHERE ${userKey} = ?`;
-    db.query(selectQuery, [id], (selectErr, selectResult) => {
-      if (selectErr) {
-        console.error("Error fetching old profile picture:", selectErr);
-        return res.status(500).json({ error: "Database error" });
-      }
+    const sel = `SELECT profile_picture FROM ${table} WHERE ${userKey} = ?`;
+    db.query(sel, [id], (selErr, [row] = []) => {
+      if (selErr) return res.status(500).json({ error: 'Database error.' });
+      if (!row)   return res.status(404).json({ error: 'User not found.' });
 
-      if (selectResult.length === 0) {
-        return res.status(404).json({ error: `${userType.charAt(0).toUpperCase() + userType.slice(1)} not found` });
-      }
+      const upd = `UPDATE ${table} SET profile_picture = ? WHERE ${userKey} = ?`;
+      db.query(upd, [profilePicPath, id], (updErr) => {
+        if (updErr) return res.status(500).json({ error: 'Update failed.' });
 
-      const oldProfilePic = selectResult[0].profile_picture;
-
-      // Update DB to new profile pic path
-      const updateQuery = `UPDATE ${table} SET profile_picture = ? WHERE ${userKey} = ?`;
-      db.query(updateQuery, [profilePicPath, id], (updateErr, updateResult) => {
-        if (updateErr) {
-          console.error("Error updating profile picture path:", updateErr);
-          return res.status(500).json({ error: "Failed to update profile picture" });
-        }
-
-        // Delete old profile pic file if it exists and is not empty
-        if (oldProfilePic) {
-          const oldPicPathOnDisk = path.join(__dirname, "..", oldProfilePic);
-          fs.access(oldPicPathOnDisk, fs.constants.F_OK, (err) => {
-            if (!err) {
-              fs.unlink(oldPicPathOnDisk, (unlinkErr) => {
-                if (unlinkErr) console.error("Failed to delete old profile picture:", unlinkErr);
-              });
-            }
+        if (row.profile_picture) {
+          const oldPath = path.join(
+            __dirname,
+            '..',
+            row.profile_picture.replace(/^\/+/g, '')
+          );
+          fs.rm(oldPath, { force: true }, (rmErr) => {
+            if (rmErr) console.warn('Could not delete old pic:', rmErr.message);
           });
         }
 
-        return res.json({ message: "Profile picture uploaded successfully", profilePicPath });
+        console.log('File saved as:', req.file.path); // absolute file path on disk
+console.log('Profile pic URL:', profilePicPath); // relative URL served by static middleware
+
+
+        return res.json({
+          message: 'Profile picture uploaded successfully.',
+          profilePicPath,
+        });
       });
     });
   }
@@ -84,16 +84,13 @@ router.post("/upload-profile-pic", authenticateJWT, upload.single("profilePic"),
 
 router.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
-    console.error("Multer Error:", err);
+    console.error('Multer:', err.message);
     return res.status(400).json({ error: err.message });
   }
-  if (err.message === "Only JPEG, PNG, and WEBP image files are allowed!") {
-    console.error("File type validation error:", err.message);
-    return res.status(400).json({ error: err.message });
-  }
-  console.error("Unexpected error:", err.stack || err);
-  next(err);
+  console.error('Unexpected error:', err.stack || err);
+  res.status(500).json({ error: 'Server error.' });
 });
+
 
 // User Profile route
 router.get('/profile', authenticateJWT, (req, res) => {

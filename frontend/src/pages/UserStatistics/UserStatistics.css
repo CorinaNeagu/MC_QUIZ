@@ -12,10 +12,13 @@
 }
 
 .accordion-item {
+  position: relative;
   border-radius: 8px;
   margin-bottom: 1rem;
   overflow: hidden;
   justify-content: center;
+  align-items: center;
+  max-width: 1200px;
 }
 
 .accordion-header {
@@ -41,10 +44,10 @@
   animation: slideDown 0.3s ease forwards;
   overflow: visible;
   box-sizing: border-box;
-  max-height: none; /* no max height restriction */
-  height: auto;     /* let it grow naturally */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE 10+ */
+  max-height: none; 
+  height: auto;     
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
   scroll-behavior: smooth;
   overflow-y: auto;
   flex: 1;
@@ -103,8 +106,26 @@
   }
 }
 
-.header  {
+.header3  {
   font-size: 1.5rem;
+  font-weight: 600;
+  width: 1000px;
+  color: #2c3e50;      
+  margin-bottom: 20px;
+  margin-right: 100px;
+  margin-left: 100px;
+  padding: 10px 0;
+  border-bottom: 2px solid #3498db; 
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
+}
+
+.header3:hover {
+  transform: scale(1.05);
+}
+
+.header {
+   font-size: 1.5rem;
   font-weight: 600;
   width: 1000px;
   color: #2c3e50;      
@@ -118,7 +139,6 @@
 .header:hover {
   transform: scale(1.05);
 }
-
 
 select {
   margin-bottom: 20px; 

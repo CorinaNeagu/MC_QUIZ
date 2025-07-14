@@ -255,40 +255,34 @@ const Groups = () => {
     setModalGroupId(null);
   };
 
-  const handleAssignQuiz = async () => {
-  if (!modalGroupId || !selectedQuizId || !deadline) {
+  const handleAssignQuiz = async (groupId, quizId, deadlineValue) => {
+  console.log('groupId:', groupId);
+  console.log('quizId:', quizId);
+  console.log('deadline:', deadlineValue);
+
+  if (!groupId || !quizId || !deadlineValue) {
     alert("Please select a quiz and provide a deadline before assigning.");
     return;
   }
 
-   const isAlreadyAssigned = assignedQuizzes.some(
-    (quiz) => quiz.quiz_id === selectedQuizId
-  );
-
-  if (isAlreadyAssigned) {
-    alert('This quiz has already been assigned to this group.');
-    return;
-  }
-
+  // Your existing code with groupId instead of modalGroupId:
   try {
     const token = localStorage.getItem('token');
 
     await axios.post(
       'http://localhost:5000/api/groups/assign-quiz',
       {
-        quiz_id: selectedQuizId,
-        group_id: modalGroupId,
-        deadline, 
+        quiz_id: quizId,
+        group_id: groupId,
+        deadline: deadlineValue,
       },
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     alert('Quiz assigned successfully.');
-    closeAssignModal(); 
+    closeAssignModal();
   } catch (err) {
     if (
       err.response &&
@@ -301,6 +295,7 @@ const Groups = () => {
     }
   }
 };
+
 
 
   const handleTakeQuiz = (quizId) => {
@@ -496,7 +491,7 @@ const Groups = () => {
       
 
   
-        <div className="group-cards">
+        <div className="group-cards-stud">
           {groups.length === 0 ? (
             <p>You are not a part of any group yet.</p>
           ) : (
@@ -516,57 +511,50 @@ const Groups = () => {
           )}
         </div>
 
-        {activeGroupForQuizzes && (
-          <>
-            <h2>Assigned Quizzes</h2>
-            {assignedQuizzes.length === 0 ? (
-              <p>You have not been assigned any quizzes yet for this group.</p>
-            ) : (
-              <div className="assigned-quizzes">
-                {assignedQuizzes.map((quiz) => (
-                   
+    {activeGroupForQuizzes && (
+  <div className="modal-overlay" onClick={() => setActiveGroupForQuizzes(null)}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <h2 className="header-group">Assigned Quizzes</h2>
 
-                  <div key={quiz.quiz_id} className="quiz-card">
-                    <h3>{quiz.title}</h3>
-                    <p>
-                      <strong>Category:</strong> {quiz.category_name}
-                    </p>
-                    <p>
-                      <strong>Subcategory:</strong>{' '}
-                      {quiz.subcategory_name || 'No Subcategory'}
-                    </p>
-                    <p>
-                      <strong>Deadline:</strong>{' '}
-                      {quiz.deadline
-                        ? new Date(quiz.deadline).toLocaleString()
-                        : 'No Deadline'}
-                    </p>
-                    <button
-                      onClick={() => handleTakeQuiz(quiz.quiz_id)}
-                      disabled={
-                        (quiz.deadline && new Date(quiz.deadline) < new Date()) || 
-                        (quiz.alreadyTaken && !quiz.retake_allowed)
-                      }
-                      className={`btn-take-quiz ${
-                        (quiz.deadline && new Date(quiz.deadline) < new Date()) ||
-                        (quiz.alreadyTaken && !quiz.retake_allowed)
-                          ? 'disabled'
-                          : ''
-                      }`}
-                    >                     
-                  {quiz.deadline && new Date(quiz.deadline) < new Date()
-                    ? 'Deadline Passed'
-                    : quiz.alreadyTaken && !quiz.retake_allowed
-                    ? 'Quiz Already Taken'
-                    : 'Take Quiz'}
-                </button>
+      {assignedQuizzes.length === 0 ? (
+        <div className="center-message">
+          <p>You have not been assigned any quizzes yet for this group.</p>
+        </div>
+      ) : (
+        <div className="assigned-quizzes-stud">
+          {assignedQuizzes.map((quiz) => (
+            <div key={quiz.quiz_id} className="quiz-card">
+              <h3>{quiz.title}</h3>
+              <p><strong>Category:</strong> {quiz.category_name}</p>
+              <p><strong>Subcategory:</strong> {quiz.subcategory_name || 'No Subcategory'}</p>
+              <p><strong>Deadline:</strong> {quiz.deadline ? new Date(quiz.deadline).toLocaleString() : 'No Deadline'}</p>
+              <button
+                onClick={() => handleTakeQuiz(quiz.quiz_id)}
+                disabled={
+                  (quiz.deadline && new Date(quiz.deadline) < new Date()) ||
+                  (quiz.alreadyTaken && !quiz.retake_allowed)
+                }
+                className={`btn-take-quiz ${
+                  (quiz.deadline && new Date(quiz.deadline) < new Date()) ||
+                  (quiz.alreadyTaken && !quiz.retake_allowed)
+                    ? 'disabled'
+                    : ''
+                }`}
+              >
+                {quiz.deadline && new Date(quiz.deadline) < new Date()
+                  ? 'Deadline Passed'
+                  : quiz.alreadyTaken && !quiz.retake_allowed
+                  ? 'Quiz Already Taken'
+                  : 'Take Quiz'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
         
       </>
     )}

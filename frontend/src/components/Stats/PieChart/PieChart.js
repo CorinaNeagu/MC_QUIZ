@@ -99,7 +99,14 @@ const PieChartComponent = () => {
 
   if (loading) return <div>Loading chart data...</div>;
   if (error) return <div className="error-message">{error}</div>;
-  if (pieChartData.length === 0) return <div>No data available for the pie chart.</div>;
+  if (pieChartData.length === 0) {
+  return (
+    <div style={{ textAlign: "center", marginTop: "20px", fontSize: "18px" }}>
+      You haven't taken any quizzes yet.
+    </div>
+  );
+}
+
 
   return (
     <div className="chart-container">

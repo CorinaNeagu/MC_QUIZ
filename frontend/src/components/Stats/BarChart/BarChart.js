@@ -94,7 +94,8 @@ const BarChartComponent = ({ selectedCategory, selectedSubcategory, categories =
 
   if (!userType) return null;
 
-  if (quizData.length === 0) return <div>No data found.</div>;
+if (quizData.length === 0) 
+  return <div style={{ textAlign: "center", marginTop: "20px", color: "#666" }}>No data found.</div>;
 
   return (
   <div className="bar-chart-wrapper">

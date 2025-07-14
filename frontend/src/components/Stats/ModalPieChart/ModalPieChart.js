@@ -13,7 +13,7 @@ const ModalPieChart = ({ isOpen, onClose, position, selectedCategory, quizzesInC
   return ReactDOM.createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-container"
+        className="modal-container-pie"
         style={{ 
           left: `${position.x + 10}px`, 
           top: `${position.y + 10}px`, 

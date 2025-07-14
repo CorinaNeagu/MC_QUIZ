@@ -98,23 +98,20 @@ const GroupDetails = () => {
           `http://localhost:5000/api/group/details/quiz-attempts/${groupId}/${quiz.quiz_id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log(`Fetched attempts for quiz ${quiz.quiz_id}:`, data);  // <-- LOG HERE
+        console.log(`Fetched attempts for quiz ${quiz.quiz_id}:`, data);  
         attemptsMap[quiz.quiz_id] = data;
       }
       setAllAttempts(attemptsMap);
     } catch (err) {
-      console.error("Failed to fetch all attempts", err);  // <-- LOG ERROR
+      console.error("Failed to fetch all attempts", err); 
     }
   };
 
   fetchAllAttempts();
 }, [quizzes, groupId]);
 
-
-
-  // Open modal and fetch attempts for selected quiz
   const openModal = async (quiz) => {
-  console.log("Opening modal for quiz:", quiz);  // <-- LOG selected quiz
+  console.log("Opening modal for quiz:", quiz);  
 
   setSelectedQuiz(quiz);
   setIsModalOpen(true);
@@ -130,7 +127,7 @@ const GroupDetails = () => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    console.log("Fetched attempts for selected quiz:", data);  // <-- LOG attempts
+    console.log("Fetched attempts for selected quiz:", data); 
 
     const processedData = data.map(attempt => ({
       ...attempt,
@@ -139,7 +136,7 @@ const GroupDetails = () => {
 
     setAttempts(processedData);
   } catch (err) {
-    console.error("Error loading quiz attempts:", err);  // <-- LOG error
+    console.error("Error loading quiz attempts:", err);  
     setAttemptsError("Failed to load quiz attempts");
   } finally {
     setAttemptsLoading(false);
@@ -155,10 +152,8 @@ const GroupDetails = () => {
     setShowChart(false);
   };
 
-  // Navigate back to groups list
   const handleBackToGroups = () => navigate(`/groups`);
 
-  // Custom legend for Recharts
   const renderCustomLegend = ({ payload }) => (
     <div style={{ display: 'flex', gap: 20, padding: 10, borderRadius: 6 }}>
       {payload.map((entry) => (
@@ -185,7 +180,6 @@ const GroupDetails = () => {
     </div>
   );
 
-  // Export quizzes and attempts to PDF
   const handleExportPDF = async () => {
     if (!quizzes.length) return;
 
@@ -211,9 +205,9 @@ const GroupDetails = () => {
           continue;
         }
 
-        const margin = 10; // 10mm margin on each side
+        const margin = 10; 
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const usableWidth = pdfWidth - margin * 2; // width inside margins
+        const usableWidth = pdfWidth - margin * 2; 
         const imgHeightWithMargin = (canvas.height * usableWidth) / canvas.width;
 
         pdf.setFontSize(14);
@@ -251,9 +245,9 @@ const GroupDetails = () => {
     const canvas = await html2canvas(ref.current, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");
 
-    const margin = 10; // 10mm margin on each side
+    const margin = 10; 
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const usableWidth = pdfWidth - margin * 2; // width inside margins
+    const usableWidth = pdfWidth - margin * 2;
     const imgHeightWithMargin = (canvas.height * usableWidth) / canvas.width;
 
     pdf.setFontSize(14);
@@ -264,7 +258,7 @@ const GroupDetails = () => {
 
     const topMargin = 35;
     pdf.addImage(imgData, "PNG", margin, topMargin, usableWidth, imgHeightWithMargin);
-    pdf.save(`${groupName}_${title}_Quiz_Report.pdf`);
+    pdf.save(`${groupName}_${title}_Group_Report.pdf`);
   } catch (e) {
     console.error("Error generating PDF for quiz", quiz_id, e);
   }
@@ -286,15 +280,19 @@ const GroupDetails = () => {
     <div className="group-details-page">
       <Sidebar showBackButton />
 
+      <div className = "hehe">
+
       <button className="btn-back" onClick={handleBackToGroups}>
-        ❮❮ Back to Your Groups
+        ❮❮ Your Groups
       </button>
 
-      <button className="btn-export-pdf" onClick={handleExportPDF}>
+      <button className="btn-export-pdf-multiple" onClick={handleExportPDF}>
         📄 Export Gradebook
       </button>
 
-      <h2 className="header">Assigned Quizzes</h2>
+      </div>
+
+      <h2 className="header-details">Assigned Quizzes</h2>
 
         <div
           style={{
@@ -334,7 +332,7 @@ const GroupDetails = () => {
                         <tr key={student_id}>
                           <td>{username}</td>
                           <td>{raw_score}</td>
-                          <td>{percentage_score}%</td>
+                          <td>{percentage_score}</td>
                           <td>{new Date(attempted_at).toLocaleString()}</td>
                         </tr>
                       ))}
@@ -346,7 +344,7 @@ const GroupDetails = () => {
           })}
         </div>
 
-      <ul className="quiz-list assigned-quizzes">
+      <ul className="quiz-list assigned-quizzes-details">
         {quizzes.map(({ quiz_id, title, category_name, subcategory_name, deadline }) => (
           <li key={quiz_id} className="quiz-item quiz-card">
             <h3>{title}</h3>
@@ -366,7 +364,6 @@ const GroupDetails = () => {
         ))}
       </ul>
 
-      {/* Modal for attempts & chart */}
       {isModalOpen && (
         <div className="modal-backdrop" onClick={closeModal}>
           <div className="modal-container" onClick={e => e.stopPropagation()}>
@@ -426,7 +423,7 @@ const GroupDetails = () => {
                           <tr key={student_id}>
                             <td>{username}</td>
                             <td>{raw_score}</td>
-                            <td>{percentage_score}%</td>
+                            <td>{percentage_score}</td>
                             <td>{new Date(attempted_at).toLocaleString()}</td>
                           </tr>
                         ))}

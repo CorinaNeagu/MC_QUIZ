@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './Modal.css';  
+import './Modal.css';
 
 const Modal = ({
   showAssignModal,
@@ -16,41 +15,37 @@ const Modal = ({
   quizzes,
   handleAssignQuiz
 }) => {
-
-  const [tempSearchTerm, setTempSearchTerm] = useState('');
-  const [tempSelectedQuiz, setTempSelectedQuiz] = useState(null);
-
+  const [tempSelectedQuizId, setTempSelectedQuizId] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!showAssignModal) {
-      setTempSearchTerm('');
-      setTempSelectedQuiz(null);
+      setTempSelectedQuizId('');
+      setDeadline('');
     }
-  }, [showAssignModal]);
+  }, [showAssignModal, setDeadline]);
 
-  const handleInputChange = (e) => {
-    const val = e.target.value;
-    setTempSearchTerm(val);
+const handleAssign = () => {
+  if (!tempSelectedQuizId) {
+    alert('Please select a quiz.');
+    return;
+  }
+  if (!deadline) {
+    alert('Please provide a deadline.');
+    return;
+  }
+  setSelectedQuizId(tempSelectedQuizId);
+  handleAssignQuiz(modalGroupId, tempSelectedQuizId, deadline);
+  closeAssignModal();
+};
 
-    const selected = quizzes.find(q => q.title === val);
-    setTempSelectedQuiz(selected || null);
-  };
 
-  const handleAssign = () => {
-    if (tempSelectedQuiz) {
-      setSelectedQuizId(tempSelectedQuiz.quiz_id);  
-    }
-    handleAssignQuiz();
-    closeAssignModal();
-  };
 
   return (
     showAssignModal && (
       <div className="modal-backdrop" onClick={closeAssignModal}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
           <h2>Assign Quiz to Group</h2>
-          <p>Group ID: {modalGroupId}</p>
 
           <div className="modal-tabs">
             <button
@@ -69,41 +64,42 @@ const Modal = ({
 
           {modalMode === 'choose' ? (
             <div className="choose-quiz">
-              <label>Select a quiz</label>
-              <input
-                list="quiz-options"
-                placeholder="Type or select a quiz"
-                value={tempSearchTerm}
-                onChange={handleInputChange}
-              />
-
-              <datalist id="quiz-options">
+              <label htmlFor="quiz-select">Select a quiz</label>
+              <select
+                id="quiz-select"
+                value={tempSelectedQuizId}
+                onChange={(e) => setTempSelectedQuizId(e.target.value)}
+              >
+                <option value="">-- Select a quiz --</option>
                 {quizzes.map((quiz) => (
-                  <option key={quiz.quiz_id} value={quiz.title}>
+                  <option key={quiz.quiz_id} value={quiz.quiz_id}>
                     {quiz.title} - {quiz.category_name} - {quiz.subcategory_name || 'No Subcategory'}
                   </option>
                 ))}
-              </datalist>
+              </select>
 
-              <label>Deadline</label>
+              <label htmlFor="deadline">Deadline</label>
               <input
+                id="deadline"
                 type="datetime-local"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
               />
 
               <button className="btn-modal" onClick={handleAssign}>Assign</button>
-              <button className="btn-modal" onClick={() => navigate('/manage-quizzes')}>Go to Manage Quizzes</button>
+              <button className="btn-modal" onClick={() => navigate('/manage-quizzes')}>
+                Go to Manage Quizzes
+              </button>
             </div>
           ) : (
             <div className="create-quiz">
-              <button onClick={() => navigate('/create-quiz', 
-                { state: { assignToGroupId: modalGroupId } })}>
+              <button
+                onClick={() => navigate('/create-quiz')}
+              >
                 Go to Create Quiz
               </button>
             </div>
           )}
-
         </div>
       </div>
     )

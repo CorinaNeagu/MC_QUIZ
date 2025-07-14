@@ -1,6 +1,7 @@
 .quiz-preview-container {
   display: flex;
-  width: 1500px;
+  width: 100%;
+  max-width: 1500px;
   flex-direction: column;
   align-items: center;
   padding: 2rem 3rem;
@@ -154,13 +155,28 @@
 }
 
 
+@media (max-width: 1200px) {
+  .quiz-preview-container {
+    padding: 1.5rem 2rem;
+  }
+
+  .quiz-preview-container ul {
+    max-width: 100%;
+    padding: 1.5rem 2rem;
+  }
+}
+
 @media (max-width: 800px) {
+  .quiz-preview-container {
+    padding: 1.2rem 1.5rem;
+  }
+
   .quiz-preview-container h2 {
     font-size: 2.2rem;
   }
 
   .quiz-preview-container ul {
-    padding: 1.5rem 2rem;
+    padding: 1.2rem 1.5rem;
   }
 
   .quiz-preview-container li {
@@ -183,7 +199,8 @@
 
 @media (max-width: 600px) {
   .quiz-preview-container {
-    padding: 1.5rem 2rem;
+    padding: 1rem 1rem;
+    max-height: auto; /* allow height to grow on very small screens */
   }
 
   .quiz-preview-container h2 {
@@ -191,7 +208,7 @@
   }
 
   .quiz-preview-container ul {
-    padding: 1rem 1.5rem;
+    padding: 1rem 1rem;
   }
 
   .quiz-preview-container li {
@@ -210,8 +227,31 @@
     font-size: 1rem;
     padding: 0.55rem 1.25rem;
   }
+
+  .deadline-panel.floating {
+    position: static;        /* remove fixed positioning */
+    width: 100%;             /* full width inside container */
+    max-height: none;        /* remove height limit */
+    margin: 20px 0 0 0;     /* spacing from quiz content */
+    border-left: none;       /* remove left border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
 
+@media (max-width: 800px) {
+  .deadline-panel.floating {
+    position: static;
+    width: 100%;
+    max-height: none;
+    margin: 20px 0 0 0;
+    border-left: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .deadline-input {
+    margin-left: 0; /* reset for smaller screens */
+  }
+}
 
 .deadline-info {
   display: block;

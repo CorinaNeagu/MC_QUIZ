@@ -207,14 +207,6 @@ return (
               <strong>Grade:</strong> {calculateGrade()} / 100
             </div>
 
-            <div className="deduction-message">
-             {deduction > 0 ? (
-                <p>You had a deduction of {deduction} points.</p>
-              ) : wrongAnswers > 0 && totals.awarded === 0 ? (
-                <p>You didn’t answer any questions, so no deductions were applied.</p>
-              ) : null}
-            </div>
-
             {updateMessage && (
               <p className={`update-message ${updating ? "updating" : ""}`}>
                 {updateMessage}

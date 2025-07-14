@@ -64,6 +64,23 @@ h2 {
 
 }
 
+.input-with-percent {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.percent-sign {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #555;
+  font-weight: 600;
+}
+
+
 .checkbox-custom:checked + .checkbox-label::after {
   content: "✓";
   position: absolute;

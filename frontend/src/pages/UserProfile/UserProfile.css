@@ -330,6 +330,21 @@ h2 {
   transform: none;
 }
 
+.avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+}
+
+
 @media (max-width: 500px) {
   .file-upload-container {
     flex-direction: column;

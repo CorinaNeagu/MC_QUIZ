@@ -181,6 +181,7 @@ const CreateQuiz = () => {
 
          <div className="form-group">
           <label htmlFor="deductionPercentage">Deduction Percentage</label>
+          <div className="input-with-percent">
           <input
             type="number"
             step="0.01"
@@ -194,6 +195,8 @@ const CreateQuiz = () => {
             }}
             required
           />
+          <span className="percent-sign">%</span>
+          </div>
         </div>
 
         <div className="checkbox-wrapper">
